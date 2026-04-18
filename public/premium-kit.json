@@ -1,0 +1,118 @@
+{
+  "parts": [
+    {
+      "id": "Plinth Pad",
+      "shape": "box",
+      "pos": [0, 0, 0],
+      "exp": [0, -1, 0],
+      "size": [2.5, 0.6, 2.5],
+      "sequence": 1,
+      "wire": false,
+      "variants": [
+        {
+          "label": "Carbon-Fiber Grid Base",
+          "color": "#111111",
+          "meta": "Ultra-dense anchor point for tall structures",
+          "weight_kg": 3200,
+          "unit_cost_usd": 55000,
+          "carbon_kgco2e": 1800
+        }
+      ]
+    },
+    {
+      "id": "Tower Mast",
+      "shape": "box",
+      "pos": [0, 2.3, 0],
+      "exp": [0, 2.3, 0],
+      "size": [1.8, 4.0, 1.8],
+      "sequence": 2,
+      "wire": true,
+      "variants": [
+        {
+          "label": "Titanium Exoskeleton",
+          "color": "#a4b0be",
+          "meta": "High vertical load aerospace frame",
+          "weight_kg": 1200,
+          "unit_cost_usd": 150000,
+          "carbon_kgco2e": 8500
+        }
+      ]
+    },
+    {
+      "id": "Smart Pod",
+      "shape": "box",
+      "pos": [0, 1.2, 0],
+      "exp": [2, 1.2, 2],
+      "size": [1.2, 1.8, 1.2],
+      "sequence": 3,
+      "variants": [
+        {
+          "label": "Suspended Chrome Cabin",
+          "color": "#dfe4ea",
+          "meta": "Air-sealed floating pod",
+          "weight_kg": 1800,
+          "unit_cost_usd": 120000,
+          "carbon_kgco2e": 4500
+        }
+      ]
+    },
+    {
+      "id": "Sleek Façade",
+      "shape": "box",
+      "pos": [-0.95, 2.3, 0],
+      "exp": [-3, 2.3, 0],
+      "size": [0.15, 4.2, 1.8],
+      "sequence": 4,
+      "variants": [
+        {
+          "label": "Obsidian Glass Panel",
+          "color": "#1e272e",
+          "meta": "Nano-tech tinted architectural glass",
+          "weight_kg": 800,
+          "unit_cost_usd": 65000,
+          "carbon_kgco2e": 2200
+        }
+      ]
+    },
+    {
+      "id": "Flight Deck",
+      "shape": "box",
+      "pos": [0, 4.4, 0],
+      "exp": [0, 6, 0],
+      "size": [2.8, 0.15, 2.8],
+      "sequence": 5,
+      "transparent": true,
+      "variants": [
+        {
+          "label": "Drone Landing Pad",
+          "color": "#fbc531",
+          "meta": "Top-tier roof delivery access platform",
+          "weight_kg": 400,
+          "unit_cost_usd": 85000,
+          "carbon_kgco2e": 1200
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "id": "penthouse-tower",
+      "label": "Vertical Penthouse",
+      "description": "Slim tall tower module with top access",
+      "variants": {
+        "Plinth Pad": 0,
+        "Tower Mast": 0,
+        "Smart Pod": 0,
+        "Sleek Façade": 0,
+        "Flight Deck": 0
+      },
+      "visible": {
+        "Plinth Pad": true,
+        "Tower Mast": true,
+        "Smart Pod": true,
+        "Sleek Façade": true,
+        "Flight Deck": true
+      }
+    }
+  ]
+}

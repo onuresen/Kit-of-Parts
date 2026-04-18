@@ -1,0 +1,1053 @@
+#root-container {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ─── Sidebar ─────────────────────────────────────────── */
+.sidebar {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+  width: 220px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.93);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  padding: 16px;
+  font-family: 'Segoe UI', sans-serif;
+  backdrop-filter: blur(10px);
+  scrollbar-width: thin;
+  scrollbar-color: #ddd transparent;
+}
+
+.sidebar-brand {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #aaa;
+  margin-bottom: 12px;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: #ebebeb;
+  margin: 12px 0;
+}
+
+.sidebar-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #bbb;
+  margin-bottom: 7px;
+}
+
+/* ─── Shared button row ───────────────────────────────── */
+.btn-row {
+  display: flex;
+  gap: 6px;
+}
+
+/* ─── View buttons (Explode / Sequence) ───────────────── */
+.view-btn {
+  flex: 1;
+  padding: 9px 6px;
+  background: #ecf0f1;
+  color: #555;
+  border: 1.5px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 700;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.view-btn:hover:not(:disabled) {
+  background: #dfe6e9;
+}
+
+.view-btn--active {
+  background: #2c3e50;
+  color: #fff;
+  border-color: #2c3e50;
+}
+
+.view-btn--active:hover {
+  background: #34495e !important;
+}
+
+.view-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ─── Sequence step controls ──────────────────────────── */
+.sequence-controls {
+  margin-top: 8px;
+}
+
+.seq-label {
+  font-size: 11px;
+  color: #555;
+  font-weight: 600;
+  margin-bottom: 6px;
+  min-height: 16px;
+  line-height: 1.4;
+}
+
+.seq-btn {
+  flex: 1;
+  padding: 7px 4px;
+  background: #ecf0f1;
+  color: #2c3e50;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 700;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 11px;
+  transition: background 0.15s;
+}
+
+.seq-btn:hover:not(:disabled) {
+  background: #dfe6e9;
+}
+
+.seq-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* ─── Preset buttons ─────────────────────────────────── */
+.preset-row {
+  display: flex;
+  gap: 5px;
+}
+
+.preset-btn {
+  flex: 1;
+  padding: 7px 4px;
+  background: #ecf0f1;
+  color: #555;
+  border: 1.5px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 700;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.preset-btn:hover {
+  background: #dfe6e9;
+}
+
+.preset-btn--active {
+  border-color: #3498db;
+  color: #2980b9;
+  background: rgba(52, 152, 219, 0.1);
+}
+
+/* ─── Parts list ──────────────────────────────────────── */
+.parts-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.part-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 5px;
+  transition: background 0.15s;
+}
+
+.part-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.part-item--active {
+  background: rgba(52, 152, 219, 0.1);
+}
+
+.part-item--hidden .part-name {
+  opacity: 0.35;
+}
+
+.part-swatch {
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.part-name {
+  flex: 1;
+  font-size: 12px;
+  color: #2c3e50;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.part-toggle {
+  all: unset;
+  cursor: pointer;
+  color: #bbb;
+  display: flex;
+  align-items: center;
+  padding: 3px;
+  border-radius: 3px;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.part-toggle:hover {
+  color: #2c3e50;
+}
+
+.part-item--hidden .part-toggle {
+  color: #ddd;
+}
+
+/* ─── Tool buttons (2×2 grid) ─────────────────────────── */
+.tools-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+
+.tool-btn {
+  padding: 8px 4px;
+  background: #ecf0f1;
+  color: #555;
+  border: 1.5px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 700;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.tool-btn:hover {
+  background: #dfe6e9;
+}
+
+.tool-btn--active {
+  background: #2c3e50;
+  color: #fff;
+  border-color: #2c3e50;
+}
+
+/* ─── Section cut slider ──────────────────────────────── */
+.section-slider-wrap {
+  margin-top: 10px;
+}
+
+.section-slider-label {
+  font-size: 11px;
+  color: #555;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.section-slider {
+  width: 100%;
+  accent-color: #3498db;
+  cursor: pointer;
+}
+
+.section-slider-ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #bbb;
+  margin-top: 2px;
+}
+
+/* ─── Sidebar hint ────────────────────────────────────── */
+.sidebar-hint {
+  margin-top: 12px;
+  font-size: 10px;
+  color: #ccc;
+  text-align: center;
+}
+
+/* ─── Info panel (bottom-right) ───────────────────────── */
+.info-panel {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 15px 18px;
+  border-radius: 8px;
+  border-left: 5px solid #3498db;
+  width: 280px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: opacity 0.3s ease, border-left-color 0.3s ease;
+  font-family: 'Segoe UI', sans-serif;
+  backdrop-filter: blur(10px);
+  z-index: 10;
+}
+
+.info-title {
+  margin: 0 0 4px 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.info-meta {
+  margin: 0 0 10px 0;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.info-variants-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #bbb;
+  margin-bottom: 6px;
+}
+
+.info-variants {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.variant-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 9px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: #444;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.variant-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.variant-btn--active {
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.variant-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  border: 1px solid rgba(0,0,0,0.12);
+}
+
+.info-stats {
+  display: flex;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid #ebebeb;
+}
+
+.info-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.info-stat-label {
+  font-size: 10px;
+  color: #aaa;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.info-stat-value {
+  font-size: 13px;
+  color: #2c3e50;
+  font-weight: 700;
+}
+
+/* ─── BOM Panel ───────────────────────────────────────── */
+.bom-panel {
+  position: absolute;
+  bottom: 20px;
+  left: 255px;
+  z-index: 10;
+  width: 480px;
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.14);
+  font-family: 'Segoe UI', sans-serif;
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.bom-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #ebebeb;
+}
+
+.bom-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #2c3e50;
+}
+
+.bom-close {
+  all: unset;
+  cursor: pointer;
+  color: #aaa;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: color 0.15s;
+}
+
+.bom-close:hover { color: #2c3e50; }
+
+.bom-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.bom-table thead th {
+  padding: 7px 12px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #aaa;
+  background: #fafafa;
+  border-bottom: 1px solid #ebebeb;
+  white-space: nowrap;
+}
+
+.bom-table tbody td {
+  padding: 7px 12px;
+  border-bottom: 1px solid #f5f5f5;
+  color: #333;
+  vertical-align: middle;
+}
+
+.bom-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.bom-row--hidden td {
+  opacity: 0.38;
+}
+
+.bom-swatch {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  margin-right: 7px;
+  border: 1px solid rgba(0,0,0,0.12);
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.bom-variant {
+  font-size: 11px;
+  color: #777;
+}
+
+.bom-num {
+  text-align: right;
+  font-weight: 600;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.bom-total td {
+  padding: 8px 12px;
+  font-weight: 700;
+  font-size: 12px;
+  color: #2c3e50;
+  background: #f7f9fb;
+  border-top: 2px solid #dde;
+}
+
+.bom-export {
+  margin: 10px 16px 12px;
+  padding: 8px;
+  background: #2c3e50;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 700;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  transition: background 0.2s;
+}
+
+.bom-export:hover { background: #34495e; }
+
+/* ─── Estimator Panel ─────────────────────────────────── */
+.estimator-panel {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+  width: 270px;
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.14);
+  font-family: 'Segoe UI', sans-serif;
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.est-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #ebebeb;
+}
+
+.est-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #2c3e50;
+}
+
+.est-close {
+  all: unset;
+  cursor: pointer;
+  color: #aaa;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: color 0.15s;
+}
+
+.est-close:hover { color: #2c3e50; }
+
+.est-metrics {
+  display: flex;
+  align-items: stretch;
+  padding: 12px 0;
+}
+
+.est-metric {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0 8px;
+}
+
+.est-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2c3e50;
+  line-height: 1;
+}
+
+.est-unit {
+  font-size: 10px;
+  color: #aaa;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.est-divider {
+  width: 1px;
+  background: #ebebeb;
+  align-self: stretch;
+  margin: 4px 0;
+}
+
+.est-breakdown {
+  padding: 10px 14px 14px;
+  border-top: 1px solid #ebebeb;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.est-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.est-bar-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100px;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: #444;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.est-bar-swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  border: 1px solid rgba(0,0,0,0.12);
+}
+
+.est-bar-track {
+  flex: 1;
+  height: 7px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.est-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.est-bar-pct {
+  font-size: 11px;
+  color: #aaa;
+  font-weight: 600;
+  width: 28px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ─── Floating 3D part labels ─────────────────────────── */
+.part-label {
+  background: rgba(20, 30, 40, 0.82);
+  color: #ffffff;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 3px;
+  white-space: nowrap;
+  border-left: 3px solid #3498db;
+  backdrop-filter: blur(4px);
+  user-select: none;
+}
+
+.part-label--correct {
+  border-left-color: #2ecc71;
+  background: rgba(39, 174, 96, 0.85);
+}
+
+.part-label--wrong {
+  border-left-color: #e74c3c;
+  background: rgba(192, 57, 43, 0.85);
+}
+
+/* ─── Site mode controls ──────────────────────────────── */
+.site-controls {
+  margin-top: 4px;
+}
+
+.site-unit-count {
+  margin-top: 7px;
+  font-size: 11px;
+  color: #888;
+  font-weight: 500;
+  text-align: center;
+}
+
+.view-btn--site {
+  background: #27ae60 !important;
+  border-color: #27ae60 !important;
+  color: #fff !important;
+}
+
+/* ─── Game tool button ────────────────────────────────── */
+.tool-btn--game {
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+  color: #fff !important;
+  border-color: transparent !important;
+  letter-spacing: 0.07em;
+}
+
+.tool-btn--game:hover {
+  background: linear-gradient(135deg, #34495e 0%, #2980b9 100%) !important;
+}
+
+/* ─── Game HUD (in sidebar) ───────────────────────────── */
+.game-hud {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.game-hud-phase {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2c3e50;
+  letter-spacing: 0.04em;
+}
+
+.game-progress-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.game-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  border: 2px solid #ccc;
+  transition: background 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.game-dot--done {
+  background: #2ecc71;
+  border-color: #27ae60;
+}
+
+.game-dot--current {
+  background: #3498db;
+  border-color: #2980b9;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+}
+
+.game-hud-stats {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: #f7f9fb;
+  border-radius: 6px;
+  padding: 8px 4px;
+}
+
+.game-hud-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.game-hud-val {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2c3e50;
+  font-family: 'Segoe UI', monospace, sans-serif;
+  line-height: 1;
+}
+
+.game-hud-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #bbb;
+}
+
+.game-hud-divider {
+  width: 1px;
+  height: 28px;
+  background: #e0e0e0;
+  margin: 0 2px;
+}
+
+.game-hud-hint {
+  font-size: 11px;
+  color: #555;
+  background: rgba(52, 152, 219, 0.08);
+  border-left: 3px solid #3498db;
+  padding: 6px 8px;
+  border-radius: 0 4px 4px 0;
+  line-height: 1.4;
+}
+
+.game-exit-btn {
+  padding: 8px;
+  background: #ecf0f1;
+  color: #555;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 700;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  transition: background 0.15s;
+}
+
+.game-exit-btn:hover {
+  background: #e74c3c;
+  color: #fff;
+}
+
+/* ─── Game score overlay ──────────────────────────────── */
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.game-score-panel {
+  background: #fff;
+  border-radius: 12px;
+  padding: 36px 40px;
+  width: 320px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.game-score-title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #2c3e50;
+}
+
+.game-score-stars {
+  display: flex;
+  gap: 6px;
+}
+
+.star {
+  font-size: 32px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.star--filled {
+  color: #f39c12;
+  text-shadow: 0 0 12px rgba(243, 156, 18, 0.5);
+}
+
+.star--empty {
+  color: #e0e0e0;
+}
+
+.game-score-rating {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  letter-spacing: 0.04em;
+}
+
+.game-score-stats {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: #f7f9fb;
+  border-radius: 8px;
+  padding: 12px 8px;
+  width: 100%;
+}
+
+.game-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.game-stat-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: #2c3e50;
+  line-height: 1;
+}
+
+.game-stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #bbb;
+}
+
+.game-stat-divider {
+  width: 1px;
+  height: 36px;
+  background: #e0e0e0;
+  margin: 0 4px;
+}
+
+.game-score-actions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.game-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 700;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  transition: background 0.15s;
+}
+
+.game-btn--primary {
+  background: #2c3e50;
+  color: #fff;
+}
+
+.game-btn--primary:hover {
+  background: #34495e;
+}
+
+.game-btn--secondary {
+  background: #ecf0f1;
+  color: #555;
+}
+
+.game-btn--secondary:hover {
+  background: #dfe6e9;
+}
+
+/* ─── Carbon Panel ────────────────────────────────────── */
+.carbon-panel {
+  right: 300px;
+}
+
+.carbon-budget-wrap {
+  padding: 0 14px 10px;
+  border-top: 1px solid #ebebeb;
+}
+
+.carbon-budget-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #bbb;
+  margin-bottom: 6px;
+  padding-top: 10px;
+}
+
+.carbon-budget-track {
+  position: relative;
+  height: 10px;
+  background: #f0f0f0;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.carbon-budget-fill {
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(to right, #27ae60 0%, #f39c12 65%, #e74c3c 100%);
+  transition: width 0.4s ease;
+}
+
+.carbon-budget-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 2px;
+  background: rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+}
+
+.carbon-footer-note {
+  padding: 6px 14px 10px;
+  font-size: 9px;
+  color: #ccc;
+  font-style: italic;
+  border-top: 1px solid #f5f5f5;
+  text-align: right;
+}
+
+.tool-btn--carbon {
+  border-color: rgba(39, 174, 96, 0.4) !important;
+  color: #27ae60;
+}
+
+.tool-btn--carbon:hover {
+  background: rgba(39, 174, 96, 0.08) !important;
+}
+
+.tool-btn--carbon.tool-btn--active {
+  background: #27ae60 !important;
+  border-color: #27ae60 !important;
+  color: #fff !important;
+}
