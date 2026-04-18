@@ -19,7 +19,8 @@ export function KitProvider({ children }) {
       } catch (err) {}
     }
 
-    fetch('/default-kit.json')
+    const basePath = import.meta.env.BASE_URL;
+    fetch(`${basePath}default-kit.json`)
       .then((res) => res.json())
       .then((data) => {
         setParts(data.parts || []);
