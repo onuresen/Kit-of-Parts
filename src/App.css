@@ -5,6 +5,275 @@
   overflow: hidden;
 }
 
+/* ─── Toolbar ─────────────────────────────────────────────── */
+.toolbar {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  padding: 5px 8px;
+  backdrop-filter: blur(10px);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.toolbar-sep {
+  width: 1px;
+  height: 20px;
+  background: #e0e0e0;
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+.tb-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 1.5px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  color: #555;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.tb-btn:hover:not(:disabled) {
+  background: #f0f0f0;
+  color: #2c3e50;
+}
+
+.tb-btn--active {
+  background: #2c3e50;
+  color: #fff !important;
+  border-color: #2c3e50;
+}
+
+.tb-btn--active:hover:not(:disabled) {
+  background: #34495e !important;
+}
+
+.tb-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.tb-btn--text {
+  width: auto;
+  padding: 0 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.tb-btn--game {
+  width: auto;
+  padding: 0 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+  color: #fff !important;
+  border-color: transparent;
+}
+
+.tb-btn--game:hover:not(:disabled) {
+  background: linear-gradient(135deg, #34495e 0%, #2980b9 100%) !important;
+}
+
+/* ─── Right config panel (InfoPanel) ────────────────────── */
+.info-panel-right {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 272px;
+  height: 100vh;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.95);
+  border-left: 1px solid #ebebeb;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.07);
+  display: flex;
+  flex-direction: column;
+  font-family: 'Segoe UI', sans-serif;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #ddd transparent;
+  backdrop-filter: blur(10px);
+}
+
+.ipr-part-header {
+  padding: 20px 18px 14px;
+  border-left: 4px solid #3498db;
+  border-bottom: 1px solid #ebebeb;
+  flex-shrink: 0;
+}
+
+.ipr-settings-header {
+  padding: 20px 18px 14px;
+  border-bottom: 1px solid #ebebeb;
+  flex-shrink: 0;
+}
+
+.ipr-settings-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #aaa;
+}
+
+.ipr-title {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.ipr-meta {
+  margin: 0;
+  font-size: 11px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.ipr-section {
+  padding: 14px 18px;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+}
+
+.ipr-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #bbb;
+  margin-bottom: 8px;
+}
+
+.ipr-stats {
+  display: flex;
+  gap: 0;
+  padding: 14px 18px;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+}
+
+.ipr-stats .info-stat {
+  flex: 1;
+}
+
+.ipr-env-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ipr-env-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-size: 12px;
+  color: #333;
+  font-weight: 500;
+}
+
+.ipr-env-row--time {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.ipr-env-row--time span {
+  display: flex;
+  justify-content: space-between;
+}
+
+.ipr-time-val {
+  color: #aaa;
+  font-weight: 400;
+}
+
+.ipr-hint {
+  padding: 16px 18px;
+  font-size: 10px;
+  color: #ccc;
+  text-align: center;
+  margin-top: auto;
+}
+
+/* ─── Metrics Panel (tabbed, bottom-left) ────────────────── */
+.metrics-panel {
+  position: fixed;
+  bottom: 20px;
+  left: 255px;
+  z-index: 10;
+  width: 400px;
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.14);
+  font-family: 'Segoe UI', sans-serif;
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.metrics-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px 0;
+  border-bottom: 1px solid #ebebeb;
+  flex-shrink: 0;
+}
+
+.metrics-tabs {
+  display: flex;
+  gap: 2px;
+}
+
+.metrics-tab {
+  padding: 7px 14px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #999;
+  letter-spacing: 0.04em;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.metrics-tab:hover {
+  color: #2c3e50;
+}
+
+.metrics-tab--active {
+  color: #2c3e50;
+  border-bottom-color: #3498db;
+}
+
 /* ─── Sidebar ─────────────────────────────────────────── */
 .sidebar {
   position: absolute;

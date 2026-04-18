@@ -2,17 +2,15 @@ import { useState, useEffect, useRef } from 'react'
 import Scene from './components/Scene'
 import InfoPanel from './components/InfoPanel'
 import Sidebar from './components/Sidebar'
-import BOMPanel from './components/BOMPanel'
-import EstimatorPanel from './components/EstimatorPanel'
+import Toolbar from './components/Toolbar'
+import MetricsPanel from './components/MetricsPanel'
 import GameScorePanel from './components/GameScorePanel'
-import CarbonPanel from './components/CarbonPanel'
-import EnvPanel from './components/EnvPanel'
 import { useKit } from './components/KitContext'
 import './App.css'
 
 export default function App() {
-  const { parts, presets, isLoading } = useKit()
-  // ── Existing state ──────────────────────────────────────
+  const { parts, presets, isLoading, duplicatePart, removePart } = useKit()
+
   const [exploded, setExploded] = useState(false)
   const [selected, setSelected] = useState(null)
   const [visible, setVisible] = useState({})
@@ -21,8 +19,8 @@ export default function App() {
 
   useEffect(() => {
     if (parts && parts.length > 0) {
-      setVisible(Object.fromEntries(parts.map((p) => [p.id, true])))
-      setSelectedVariants(Object.fromEntries(parts.map((p) => [p.id, 0])))
+      setVisible(Object.fromEntries(parts.map(p => [p.id, true])))
+      setSelectedVariants(Object.fromEntries(parts.map(p => [p.id, 0])))
       setSelected(null)
       setActivePreset(null)
     }
@@ -31,29 +29,18 @@ export default function App() {
   const [sequenceMode, setSequenceMode] = useState(false)
   const [sequenceStep, setSequenceStep] = useState(0)
 
-  const [showBOM, setShowBOM] = useState(false)
-  const [showEstimator, setShowEstimator] = useState(false)
-  const [showCarbon, setShowCarbon] = useState(false)
+  const [showMetrics, setShowMetrics] = useState(false)
   const [showDimensions, setShowDimensions] = useState(false)
 
   const [sectionCutActive, setSectionCutActive] = useState(false)
   const [sectionCutY, setSectionCutY] = useState(3.5)
 
-  // ── Environment Settings ─────────────────────────────────
-  const [showEnv, setShowEnv] = useState(false)
-  const [envSettings, setEnvSettings] = useState({
-    grass: true,
-    time: 12,
-    clouds: false,
-    stars: false
-  })
+  const [envSettings, setEnvSettings] = useState({ grass: true, time: 12, clouds: false, stars: false })
 
-  // ── Site mode ───────────────────────────────────────────
   const [siteMode, setSiteMode] = useState(false)
   const [placedUnits, setPlacedUnits] = useState([])
   const [selectedUnitType, setSelectedUnitType] = useState(null)
 
-  // ── Builder mode ─────────────────────────────────────────
   const [builderMode, setBuilderMode] = useState(false)
 
   useEffect(() => {
@@ -64,13 +51,12 @@ export default function App() {
 
   // ── Game mode ───────────────────────────────────────────
   const [gameMode, setGameMode] = useState(false)
-  const [gamePhase, setGamePhase] = useState('idle') // 'idle' | 'playing' | 'complete'
+  const [gamePhase, setGamePhase] = useState('idle')
   const [gameStep, setGameStep] = useState(1)
   const [gameMistakes, setGameMistakes] = useState(0)
   const [gameElapsed, setGameElapsed] = useState(0)
   const gameStartTimeRef = useRef(null)
 
-  // Live timer while playing
   useEffect(() => {
     if (gamePhase !== 'playing') return
     gameStartTimeRef.current = Date.now()
@@ -80,20 +66,20 @@ export default function App() {
     return () => clearInterval(interval)
   }, [gamePhase])
 
-  // ── Existing handlers ────────────────────────────────────
+  // ── Handlers ─────────────────────────────────────────────
   function togglePart(id) {
-    setVisible((v) => ({ ...v, [id]: !v[id] }))
+    setVisible(v => ({ ...v, [id]: !v[id] }))
     setActivePreset(null)
   }
 
   function setVariant(partId, variantIdx) {
-    setSelectedVariants((v) => ({ ...v, [partId]: variantIdx }))
+    setSelectedVariants(v => ({ ...v, [partId]: variantIdx }))
     setActivePreset(null)
   }
 
   function applyPreset(preset) {
-    const defaultVariants = Object.fromEntries(parts.map((p) => [p.id, 0]))
-    const defaultVisible = Object.fromEntries(parts.map((p) => [p.id, true]))
+    const defaultVariants = Object.fromEntries(parts.map(p => [p.id, 0]))
+    const defaultVisible = Object.fromEntries(parts.map(p => [p.id, true]))
     setSelectedVariants({ ...defaultVariants, ...preset.variants })
     setVisible({ ...defaultVisible, ...preset.visible })
     setActivePreset(preset.id)
@@ -113,11 +99,9 @@ export default function App() {
   }
 
   const maxStep = parts ? parts.length : 0
+  function stepForward() { setSequenceStep(s => Math.min(s + 1, maxStep)) }
+  function stepBack() { setSequenceStep(s => Math.max(s - 1, 0)) }
 
-  function stepForward() { setSequenceStep((s) => Math.min(s + 1, maxStep)) }
-  function stepBack() { setSequenceStep((s) => Math.max(s - 1, 0)) }
-
-  // ── Site mode handlers ───────────────────────────────────
   function toggleSiteMode() {
     if (!siteMode) {
       setExploded(false)
@@ -129,7 +113,6 @@ export default function App() {
     setSiteMode(v => !v)
   }
 
-  // ── Builder mode handlers ────────────────────────────────
   function toggleBuilderMode() {
     if (!builderMode) {
       setExploded(false)
@@ -151,7 +134,17 @@ export default function App() {
     setPlacedUnits(prev => prev.filter(u => !(u.col === col && u.row === row)))
   }
 
-  // ── Game mode handlers ───────────────────────────────────
+  function handleDuplicate() {
+    if (selected) duplicatePart(selected.id)
+  }
+
+  function handleDelete() {
+    if (selected) {
+      removePart(selected.id)
+      setSelected(null)
+    }
+  }
+
   function startGame() {
     setGameMode(true)
     setGamePhase('playing')
@@ -162,9 +155,7 @@ export default function App() {
     setSequenceMode(false)
     setSequenceStep(0)
     setSiteMode(false)
-    setShowBOM(false)
-    setShowEstimator(false)
-    setShowCarbon(false)
+    setShowMetrics(false)
     setSelected(null)
   }
 
@@ -183,7 +174,6 @@ export default function App() {
     }
     const nextStep = gameStep + 1
     if (nextStep > parts.length) {
-      // Capture exact final time before interval stops
       setGameElapsed(Date.now() - gameStartTimeRef.current)
       setGamePhase('complete')
       setGameStep(nextStep)
@@ -193,40 +183,46 @@ export default function App() {
   }
 
   if (isLoading || !parts || parts.length === 0) {
-    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'white', background: '#2c3e50' }}>Loading Kit...</div>
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'white', background: '#2c3e50' }}>
+        Loading Kit...
+      </div>
+    )
   }
 
   return (
     <div id="root-container">
-      <Sidebar
+
+      <Toolbar
         exploded={exploded}
-        onToggleExplode={() => { setExploded((v) => !v); setSequenceMode(false) }}
+        onToggleExplode={() => { setExploded(v => !v); setSequenceMode(false) }}
+        builderMode={builderMode}
+        onToggleBuilderMode={toggleBuilderMode}
+        sectionCutActive={sectionCutActive}
+        onToggleSectionCut={() => setSectionCutActive(v => !v)}
+        showDimensions={showDimensions}
+        onToggleDimensions={() => setShowDimensions(v => !v)}
+        showMetrics={showMetrics}
+        onToggleMetrics={() => setShowMetrics(v => !v)}
+        siteMode={siteMode}
+        onToggleSiteMode={toggleSiteMode}
+        sequenceMode={sequenceMode}
+        onToggleSequence={toggleSequenceMode}
+        gameMode={gameMode}
+        onStartGame={startGame}
+        selected={selected}
+        onDuplicate={handleDuplicate}
+        onDelete={handleDelete}
+      />
+
+      <Sidebar
         visible={visible}
         onToggle={togglePart}
         selected={selected}
         selectedVariants={selectedVariants}
         activePreset={activePreset}
         onApplyPreset={applyPreset}
-        sequenceMode={sequenceMode}
-        onToggleSequence={toggleSequenceMode}
-        sequenceStep={sequenceStep}
-        maxStep={maxStep}
-        onStepForward={stepForward}
-        onStepBack={stepBack}
-        showBOM={showBOM}
-        onToggleBOM={() => setShowBOM((v) => !v)}
-        showEstimator={showEstimator}
-        onToggleEstimator={() => setShowEstimator((v) => !v)}
-        showCarbon={showCarbon}
-        onToggleCarbon={() => setShowCarbon((v) => !v)}
-        showDimensions={showDimensions}
-        onToggleDimensions={() => setShowDimensions((v) => !v)}
-        sectionCutActive={sectionCutActive}
-        onToggleSectionCut={() => setSectionCutActive((v) => !v)}
-        sectionCutY={sectionCutY}
-        onSectionCutY={setSectionCutY}
         siteMode={siteMode}
-        onToggleSiteMode={toggleSiteMode}
         placedUnits={placedUnits}
         selectedUnitType={selectedUnitType}
         onSelectUnitType={setSelectedUnitType}
@@ -235,12 +231,9 @@ export default function App() {
         gameStep={gameStep}
         gameMistakes={gameMistakes}
         gameElapsed={gameElapsed}
-        onStartGame={startGame}
+        maxStep={maxStep}
         onExitGame={exitGame}
         builderMode={builderMode}
-        onToggleBuilderMode={toggleBuilderMode}
-        showEnv={showEnv}
-        onToggleEnv={() => setShowEnv(v => !v)}
       />
 
       <Scene
@@ -267,43 +260,28 @@ export default function App() {
         envSettings={envSettings}
       />
 
-      {!siteMode && !gameMode && !builderMode && (
-        <InfoPanel
-          selected={selected}
-          selectedVariants={selectedVariants}
-          onVariantChange={setVariant}
-        />
-      )}
+      <InfoPanel
+        selected={selected}
+        selectedVariants={selectedVariants}
+        onVariantChange={setVariant}
+        sequenceMode={sequenceMode}
+        sequenceStep={sequenceStep}
+        maxStep={maxStep}
+        onStepForward={stepForward}
+        onStepBack={stepBack}
+        sectionCutActive={sectionCutActive}
+        sectionCutY={sectionCutY}
+        onSectionCutY={setSectionCutY}
+        envSettings={envSettings}
+        setEnvSettings={setEnvSettings}
+        gameMode={gameMode}
+      />
 
-      {showBOM && (
-        <BOMPanel
-          selectedVariants={selectedVariants}
-          visible={visible}
-          onClose={() => setShowBOM(false)}
-        />
-      )}
-
-      {showEstimator && (
-        <EstimatorPanel
-          selectedVariants={selectedVariants}
-          visible={visible}
-          onClose={() => setShowEstimator(false)}
-        />
-      )}
-
-      {showCarbon && (
-        <CarbonPanel
+      {showMetrics && (
+        <MetricsPanel
           selectedVariants={selectedVariants}
           visible={visible}
-          onClose={() => setShowCarbon(false)}
-        />
-      )}
-
-      {showEnv && (
-        <EnvPanel
-          envSettings={envSettings}
-          setEnvSettings={setEnvSettings}
-          onClose={() => setShowEnv(false)}
+          onClose={() => setShowMetrics(false)}
         />
       )}
 
@@ -315,6 +293,7 @@ export default function App() {
           onExit={exitGame}
         />
       )}
+
     </div>
   )
 }
