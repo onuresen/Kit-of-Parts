@@ -1,0 +1,153 @@
+{
+  "parts": [
+    {
+      "id": "Foundation Base",
+      "shape": "cylinder",
+      "cylinderArgs": [3, 3, 0.5, 32],
+      "pos": [0, 0, 0],
+      "exp": [0, -1, 0],
+      "size": [6, 0.5, 6],
+      "sequence": 1,
+      "wire": false,
+      "variants": [
+        {
+          "label": "Rammed Earth Round",
+          "color": "#8c715c",
+          "meta": "Low-carbon compacted earth circular footprint",
+          "weight_kg": 5200,
+          "unit_cost_usd": 6800,
+          "carbon_kgco2e": 140
+        },
+        {
+          "label": "Recycled Stone Ring",
+          "color": "#9ca1a3",
+          "meta": "Cobblestone and recycled concrete mixture",
+          "weight_kg": 4600,
+          "unit_cost_usd": 8100,
+          "carbon_kgco2e": 320
+        }
+      ]
+    },
+    {
+      "id": "Central Pillar",
+      "shape": "cylinder",
+      "cylinderArgs": [0.8, 0.8, 2.8, 16],
+      "pos": [0, 1.65, 0],
+      "exp": [0, 1.65, 0],
+      "size": [1.6, 2.8, 1.6],
+      "sequence": 2,
+      "wire": true,
+      "variants": [
+        {
+          "label": "Heavy Timber Heartwood",
+          "color": "#c49a6c",
+          "meta": "Central load-bearing timber element",
+          "weight_kg": 1800,
+          "unit_cost_usd": 15000,
+          "carbon_kgco2e": -600
+        },
+        {
+          "label": "Bamboo Core",
+          "color": "#d9c48b",
+          "meta": "Hollow high-strength bamboo cluster",
+          "weight_kg": 900,
+          "unit_cost_usd": 11000,
+          "carbon_kgco2e": -900
+        }
+      ]
+    },
+    {
+      "id": "Eco Pod",
+      "shape": "box",
+      "pos": [-1.2, 1.25, 1],
+      "exp": [-3, 1.25, 3],
+      "size": [1.5, 2, 1.5],
+      "sequence": 3,
+      "variants": [
+        {
+          "label": "Greywater Station",
+          "color": "#6ab04c",
+          "meta": "Prefab pod with greywater filtration",
+          "weight_kg": 1600,
+          "unit_cost_usd": 18500,
+          "carbon_kgco2e": 650
+        },
+        {
+          "label": "Compost Unit",
+          "color": "#30336b",
+          "meta": "Off-grid compost utility node",
+          "weight_kg": 1200,
+          "unit_cost_usd": 13000,
+          "carbon_kgco2e": 300
+        }
+      ]
+    },
+    {
+      "id": "Wrap Shield",
+      "shape": "box",
+      "pos": [0, 1.65, -2],
+      "exp": [0, 1.65, -4],
+      "size": [4, 2.5, 0.4],
+      "sequence": 4,
+      "variants": [
+        {
+          "label": "Cork Bark Screen",
+          "color": "#b8860b",
+          "meta": "Wind & acoustic shield",
+          "weight_kg": 350,
+          "unit_cost_usd": 6500,
+          "carbon_kgco2e": -300
+        },
+        {
+          "label": "Mycelium Block",
+          "color": "#dcdde1",
+          "meta": "Mushroom-grown solid bio wall",
+          "weight_kg": 280,
+          "unit_cost_usd": 4200,
+          "carbon_kgco2e": -100
+        }
+      ]
+    },
+    {
+      "id": "Yurt Roof",
+      "shape": "cylinder",
+      "cylinderArgs": [3.2, 3.2, 0.4, 32],
+      "pos": [0, 3.25, 0],
+      "exp": [0, 5, 0],
+      "size": [6.4, 0.4, 6.4],
+      "sequence": 5,
+      "transparent": true,
+      "variants": [
+        {
+          "label": "Canvas Canopy",
+          "color": "#f1f2f6",
+          "meta": "Tensile fabric covering with water collection",
+          "weight_kg": 150,
+          "unit_cost_usd": 4500,
+          "carbon_kgco2e": 50
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "id": "round-eco",
+      "label": "Eco Yurt Pavilion",
+      "description": "Cylindrical off-grid structure",
+      "variants": {
+        "Foundation Base": 0,
+        "Central Pillar": 1,
+        "Eco Pod": 0,
+        "Wrap Shield": 0,
+        "Yurt Roof": 0
+      },
+      "visible": {
+        "Foundation Base": true,
+        "Central Pillar": true,
+        "Eco Pod": true,
+        "Wrap Shield": true,
+        "Yurt Roof": true
+      }
+    }
+  ]
+}

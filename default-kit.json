@@ -1,0 +1,291 @@
+{
+  "parts": [
+    {
+      "id": "Foundation",
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "exp": [
+        0,
+        -1,
+        0
+      ],
+      "size": [
+        4,
+        0.5,
+        4
+      ],
+      "sequence": 1,
+      "wire": false,
+      "variants": [
+        {
+          "label": "Type A – Pre-cast Concrete",
+          "color": "#95a5a6",
+          "meta": "Pre-cast Concrete Slab (Type A)",
+          "weight_kg": 4200,
+          "unit_cost_usd": 8500,
+          "carbon_kgco2e": 525
+        },
+        {
+          "label": "Type B – Post-tensioned Slab",
+          "color": "#7f8c8d",
+          "meta": "Post-tensioned Concrete Slab – High Load",
+          "weight_kg": 5100,
+          "unit_cost_usd": 11200,
+          "carbon_kgco2e": 740
+        },
+        {
+          "label": "Type C – Hollow-core Plank",
+          "color": "#bdc3c7",
+          "meta": "Hollow-core Pre-stressed Plank – Lightweight",
+          "weight_kg": 2800,
+          "unit_cost_usd": 6400,
+          "carbon_kgco2e": 294
+        }
+      ]
+    },
+    {
+      "id": "Structure",
+      "pos": [
+        0,
+        1.25,
+        0
+      ],
+      "exp": [
+        0,
+        1.25,
+        0
+      ],
+      "size": [
+        3.8,
+        2,
+        3.8
+      ],
+      "sequence": 2,
+      "wire": true,
+      "variants": [
+        {
+          "label": "Steel Frame – Smart BIM",
+          "color": "#34495e",
+          "meta": "Steel Frame – Smart BIM Standard",
+          "weight_kg": 3600,
+          "unit_cost_usd": 22000,
+          "carbon_kgco2e": 9036
+        },
+        {
+          "label": "Heavy Steel Frame",
+          "color": "#1c2833",
+          "meta": "Heavy Structural Steel – Column & Beam",
+          "weight_kg": 5200,
+          "unit_cost_usd": 31000,
+          "carbon_kgco2e": 14092
+        },
+        {
+          "label": "Timber Frame (CLT)",
+          "color": "#a0522d",
+          "meta": "Cross-laminated Timber Frame – Low Carbon",
+          "weight_kg": 1800,
+          "unit_cost_usd": 18500,
+          "carbon_kgco2e": 558
+        }
+      ]
+    },
+    {
+      "id": "Bathroom Pod",
+      "pos": [
+        0.8,
+        1.25,
+        0.8
+      ],
+      "exp": [
+        2.5,
+        1.25,
+        2.5
+      ],
+      "size": [
+        1.5,
+        1.8,
+        1.5
+      ],
+      "sequence": 3,
+      "variants": [
+        {
+          "label": "Pod Type 01 – Standard",
+          "color": "#e67e22",
+          "meta": "Off-site Fabricated Unit 01 – Standard",
+          "weight_kg": 2100,
+          "unit_cost_usd": 14000,
+          "carbon_kgco2e": 1785
+        },
+        {
+          "label": "Pod Type 02 – Accessible",
+          "color": "#d35400",
+          "meta": "Off-site Fabricated Unit 02 – ADA Accessible",
+          "weight_kg": 2400,
+          "unit_cost_usd": 17500,
+          "carbon_kgco2e": 2040
+        },
+        {
+          "label": "Pod Type 03 – Compact",
+          "color": "#f39c12",
+          "meta": "Off-site Fabricated Unit 03 – Compact Module",
+          "weight_kg": 1600,
+          "unit_cost_usd": 10800,
+          "carbon_kgco2e": 1360
+        }
+      ]
+    },
+    {
+      "id": "Cladding",
+      "pos": [
+        -1.9,
+        1.25,
+        0
+      ],
+      "exp": [
+        -3.5,
+        1.25,
+        0
+      ],
+      "size": [
+        0.1,
+        2.2,
+        3.8
+      ],
+      "sequence": 4,
+      "variants": [
+        {
+          "label": "Insulated Glass Panel",
+          "color": "#27ae60",
+          "meta": "Insulated Glass Panel – High Performance",
+          "weight_kg": 420,
+          "unit_cost_usd": 9200,
+          "carbon_kgco2e": 647
+        },
+        {
+          "label": "Aluminum Composite Panel",
+          "color": "#16a085",
+          "meta": "Aluminum Composite Rainscreen Panel",
+          "weight_kg": 310,
+          "unit_cost_usd": 6800,
+          "carbon_kgco2e": 2554
+        },
+        {
+          "label": "Brick Slip Façade",
+          "color": "#c0392b",
+          "meta": "Pre-fabricated Brick Slip Cladding System",
+          "weight_kg": 680,
+          "unit_cost_usd": 11400,
+          "carbon_kgco2e": 163
+        }
+      ]
+    },
+    {
+      "id": "Interface Layer",
+      "pos": [
+        0,
+        2.5,
+        0
+      ],
+      "exp": [
+        0,
+        4,
+        0
+      ],
+      "size": [
+        4,
+        0.1,
+        4
+      ],
+      "sequence": 5,
+      "transparent": true,
+      "variants": [
+        {
+          "label": "Data & Utilities Slab",
+          "color": "#3498db",
+          "meta": "Data & Utilities Distribution Layer",
+          "weight_kg": 180,
+          "unit_cost_usd": 4500,
+          "carbon_kgco2e": 27
+        },
+        {
+          "label": "MEP Coordinated Slab",
+          "color": "#2980b9",
+          "meta": "MEP Pre-coordinated Flat Slab Layer",
+          "weight_kg": 220,
+          "unit_cost_usd": 6200,
+          "carbon_kgco2e": 33
+        },
+        {
+          "label": "Smart Services Layer",
+          "color": "#8e44ad",
+          "meta": "Smart Building Services Integration Layer",
+          "weight_kg": 160,
+          "unit_cost_usd": 8900,
+          "carbon_kgco2e": 24
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "id": "studio",
+      "label": "Studio",
+      "description": "Compact single-room module with lightweight materials",
+      "variants": {
+        "Foundation": 2,
+        "Structure": 0,
+        "Bathroom Pod": 2,
+        "Cladding": 1,
+        "Interface Layer": 0
+      },
+      "visible": {
+        "Foundation": true,
+        "Structure": true,
+        "Bathroom Pod": true,
+        "Cladding": true,
+        "Interface Layer": true
+      }
+    },
+    {
+      "id": "1bed",
+      "label": "1-Bed",
+      "description": "Standard one-bedroom module — glass façade, MEP slab",
+      "variants": {
+        "Foundation": 0,
+        "Structure": 0,
+        "Bathroom Pod": 0,
+        "Cladding": 0,
+        "Interface Layer": 1
+      },
+      "visible": {
+        "Foundation": true,
+        "Structure": true,
+        "Bathroom Pod": true,
+        "Cladding": true,
+        "Interface Layer": true
+      }
+    },
+    {
+      "id": "corner",
+      "label": "Corner",
+      "description": "Corner unit — heavy steel, accessible pod, brick façade",
+      "variants": {
+        "Foundation": 1,
+        "Structure": 1,
+        "Bathroom Pod": 1,
+        "Cladding": 2,
+        "Interface Layer": 2
+      },
+      "visible": {
+        "Foundation": true,
+        "Structure": true,
+        "Bathroom Pod": true,
+        "Cladding": true,
+        "Interface Layer": true
+      }
+    }
+  ]
+}
