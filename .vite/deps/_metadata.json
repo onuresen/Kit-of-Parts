@@ -1,0 +1,80 @@
+{
+  "hash": "b67c5f27",
+  "configHash": "98988a11",
+  "lockfileHash": "9d314d89",
+  "browserHash": "30f04f34",
+  "optimized": {
+    "@react-three/drei": {
+      "src": "../../node_modules/@react-three/drei/index.js",
+      "file": "@react-three_drei.js",
+      "fileHash": "6fcd26b0",
+      "needsInterop": false
+    },
+    "@react-three/fiber": {
+      "src": "../../node_modules/@react-three/fiber/dist/react-three-fiber.esm.js",
+      "file": "@react-three_fiber.js",
+      "fileHash": "12e659db",
+      "needsInterop": false
+    },
+    "gsap": {
+      "src": "../../node_modules/gsap/index.js",
+      "file": "gsap.js",
+      "fileHash": "6251e3c7",
+      "needsInterop": false
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "6f336cd9",
+      "needsInterop": true
+    },
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "133bb558",
+      "needsInterop": true
+    },
+    "react/jsx-dev-runtime": {
+      "src": "../../node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "44b797a5",
+      "needsInterop": true
+    },
+    "three": {
+      "src": "../../node_modules/three/build/three.module.js",
+      "file": "three.js",
+      "fileHash": "f766a5e6",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-BoAXSpZd": {
+      "file": "chunk-BoAXSpZd.js",
+      "isDynamicEntry": false
+    },
+    "client-D6vvF4Sn": {
+      "file": "client-D6vvF4Sn.js",
+      "isDynamicEntry": false
+    },
+    "hls-1JXs0Vws": {
+      "file": "hls-1JXs0Vws.js",
+      "isDynamicEntry": false
+    },
+    "react-three-fiber.esm-E0pmNJlm": {
+      "file": "react-three-fiber.esm-E0pmNJlm.js",
+      "isDynamicEntry": false
+    },
+    "scheduler-Dos1ZBxL": {
+      "file": "scheduler-Dos1ZBxL.js",
+      "isDynamicEntry": false
+    },
+    "three.module-BhQJB7s2": {
+      "file": "three.module-BhQJB7s2.js",
+      "isDynamicEntry": false
+    },
+    "vision_bundle-Dn83QYTE": {
+      "file": "vision_bundle-Dn83QYTE.js",
+      "isDynamicEntry": true
+    }
+  }
+}
