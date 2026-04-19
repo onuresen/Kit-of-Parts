@@ -5,6 +5,7 @@ import { gsap } from 'gsap'
 import * as THREE from 'three'
 import Part from './Part'
 import DimensionLines from './DimensionLines'
+import Connection from './Connection'
 import SiteGrid from './SiteGrid'
 import { useKit } from './KitContext'
 // Animates camera + orbit target when switching modes
@@ -139,7 +140,22 @@ export default function Scene({
         )
       })}
 
-      {!siteMode && showDimensions && <DimensionLines selectedVariants={selectedVariants} />}
+      {/* ── Connection indicators (deduplicated) ────────── */}
+      {!siteMode && !gameMode && parts && (() => {
+        const rendered = new Set()
+        return parts.flatMap(partA =>
+          (partA.connections ?? []).flatMap(conn => {
+            const partB = parts.find(p => p.id === conn.to)
+            if (!partB || !visible[partA.id] || !visible[partB.id]) return []
+            const key = [partA.id, partB.id].sort().join('|')
+            if (rendered.has(key)) return []
+            rendered.add(key)
+            return [<Connection key={key} partA={partA} partB={partB} connection={conn} isExploded={isExploded} />]
+          })
+        )
+      })()}
+
+      {!siteMode && showDimensions && <DimensionLines parts={parts} visible={visible} />}
 
       {/* Grass / Background plane */}
       {!siteMode && envSettings?.grass && (
@@ -147,6 +163,11 @@ export default function Scene({
           <planeGeometry args={[100, 100]} />
           <meshStandardMaterial color="#557a2b" roughness={0.9} />
         </mesh>
+      )}
+
+      {/* Ken Grid — 910mm modular grid (Japan standard) */}
+      {!siteMode && envSettings?.kenGrid && (
+        <gridHelper args={[18.2, 20, '#8b7355', '#c4b49a']} position={[0, -0.265, 0]} />
       )}
 
       {/* Invisible click plane when grass is off */}

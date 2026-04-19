@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useKit } from './KitContext'
 import BuilderPanel from './BuilderPanel'
 
@@ -35,7 +36,17 @@ export default function Sidebar({
   gameMode, gamePhase, gameStep, gameMistakes, gameElapsed, maxStep, onExitGame,
   builderMode,
 }) {
-  const { parts, presets, loadKitFromFile } = useKit()
+  const { parts, presets, loadKitFromFile, savePreset, removePreset } = useKit()
+  const [savingPreset, setSavingPreset] = useState(false)
+  const [presetName, setPresetName] = useState('')
+
+  function handleSavePreset() {
+    const name = presetName.trim()
+    if (!name) return
+    savePreset(name, selectedVariants, visible)
+    setPresetName('')
+    setSavingPreset(false)
+  }
 
   /* ── Game HUD ── */
   if (gameMode) {
@@ -111,17 +122,61 @@ export default function Sidebar({
       {/* ── Presets ── */}
       {!siteMode && !builderMode && (
         <>
-          <div className="sidebar-section-label">Presets</div>
+          <div className="sidebar-section-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span>Presets</span>
+            <button
+              className="preset-save-toggle"
+              onClick={() => { setSavingPreset(s => !s); setPresetName('') }}
+              title="Save current configuration as a new preset"
+            >
+              {savingPreset ? '✕' : '+'}
+            </button>
+          </div>
+
+          {savingPreset && (
+            <div className="preset-save-row">
+              <input
+                className="preset-save-input"
+                type="text"
+                placeholder="Preset name…"
+                value={presetName}
+                autoFocus
+                onChange={e => setPresetName(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') handleSavePreset()
+                  if (e.key === 'Escape') { setSavingPreset(false); setPresetName('') }
+                }}
+              />
+              <button
+                className="preset-save-confirm"
+                onClick={handleSavePreset}
+                disabled={!presetName.trim()}
+              >
+                Save
+              </button>
+            </div>
+          )}
+
           <div className="preset-row">
             {presets.map(preset => (
-              <button
-                key={preset.id}
-                className={`preset-btn ${activePreset === preset.id ? 'preset-btn--active' : ''}`}
-                onClick={() => onApplyPreset(preset)}
-                title={preset.description}
-              >
-                {preset.label}
-              </button>
+              <div key={preset.id} className="preset-btn-wrap">
+                <button
+                  className={`preset-btn ${activePreset === preset.id ? 'preset-btn--active' : ''}`}
+                  onClick={() => onApplyPreset(preset)}
+                  title={preset.description}
+                >
+                  {preset.label}
+                </button>
+                {preset.custom && (
+                  <button
+                    className="preset-delete-btn"
+                    onClick={() => removePreset(preset.id)}
+                    title="Delete preset"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
             ))}
           </div>
           <div className="sidebar-divider" />

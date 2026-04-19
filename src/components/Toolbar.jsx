@@ -1,6 +1,7 @@
 import {
   MousePointer2, Pencil, Scissors, Copy, Trash2,
-  Ruler, BarChart3, Map, Undo2, Redo2, Layers, Play, Zap
+  Ruler, BarChart3, Map, Undo2, Redo2, Layers, Play, Zap,
+  Moon, Sun, Keyboard
 } from 'lucide-react'
 
 export default function Toolbar({
@@ -14,6 +15,7 @@ export default function Toolbar({
   gameMode, onStartGame,
   selected,
   onDuplicate, onDelete,
+  darkMode, onToggleDark, onToggleShortcuts,
 }) {
   const isSelectMode = !builderMode && !siteMode && !sequenceMode && !gameMode
 
@@ -146,6 +148,25 @@ export default function Toolbar({
         >
           <Play size={13} />
           GAME
+        </button>
+      </div>
+
+      <div className="toolbar-sep" />
+
+      <div className="toolbar-group">
+        <button
+          className="tb-btn"
+          title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+          onClick={onToggleDark}
+        >
+          {darkMode ? <Sun size={15} /> : <Moon size={15} />}
+        </button>
+        <button
+          className="tb-btn"
+          title="Keyboard shortcuts (?)"
+          onClick={onToggleShortcuts}
+        >
+          <Keyboard size={15} />
         </button>
       </div>
 

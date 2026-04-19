@@ -43,9 +43,11 @@ export default function Part({
   useEffect(() => {
     if (sequenceMode || gameMode) return
     const target = isExploded ? data.exp : data.pos
+    const hasConnections = (data.connections ?? []).length > 0
     gsap.to(meshRef.current.position, {
       x: target[0], y: target[1], z: target[2],
-      duration: 1, ease: 'expo.out',
+      duration: hasConnections ? 1.4 : 1,
+      ease: hasConnections ? 'elastic.out(1, 0.5)' : 'expo.out',
     })
   }, [isExploded, sequenceMode, gameMode])
 

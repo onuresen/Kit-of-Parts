@@ -9,6 +9,8 @@
       "size": [6, 0.5, 6],
       "sequence": 1,
       "wire": false,
+      "factory_work": false,
+      "connections": [],
       "variants": [
         {
           "label": "Rammed Earth Round",
@@ -16,7 +18,13 @@
           "meta": "Low-carbon compacted earth circular footprint",
           "weight_kg": 5200,
           "unit_cost_usd": 6800,
-          "carbon_kgco2e": 140
+          "labor_cost_usd": 3200,
+          "carbon_kgco2e": 140,
+          "assembly_time_min": 480,
+          "lead_time_days": 7,
+          "supplier": "Local Earthworks",
+          "sku": "ECO-FND-A",
+          "dfma_notes": "On-site compaction. Weather-dependent. Requires formwork."
         },
         {
           "label": "Recycled Stone Ring",
@@ -24,7 +32,13 @@
           "meta": "Cobblestone and recycled concrete mixture",
           "weight_kg": 4600,
           "unit_cost_usd": 8100,
-          "carbon_kgco2e": 320
+          "labor_cost_usd": 2800,
+          "carbon_kgco2e": 320,
+          "assembly_time_min": 360,
+          "lead_time_days": 14,
+          "supplier": "Local Quarry",
+          "sku": "ECO-FND-B",
+          "dfma_notes": "Manual placement. No crane needed. Allow 2 days curing."
         }
       ]
     },
@@ -37,6 +51,10 @@
       "size": [1.6, 2.8, 1.6],
       "sequence": 2,
       "wire": true,
+      "factory_work": true,
+      "connections": [
+        { "to": "Foundation Base", "type": "dry-fit", "hardware": "Steel shoe + M16 bolt ×4" }
+      ],
       "variants": [
         {
           "label": "Heavy Timber Heartwood",
@@ -44,7 +62,13 @@
           "meta": "Central load-bearing timber element",
           "weight_kg": 1800,
           "unit_cost_usd": 15000,
-          "carbon_kgco2e": -600
+          "labor_cost_usd": 2800,
+          "carbon_kgco2e": -600,
+          "assembly_time_min": 90,
+          "lead_time_days": 21,
+          "supplier": "Vastern Timber",
+          "sku": "VAS-PIL-A",
+          "dfma_notes": "Crane lift required. Pre-drill bolt holes on delivery."
         },
         {
           "label": "Bamboo Core",
@@ -52,7 +76,13 @@
           "meta": "Hollow high-strength bamboo cluster",
           "weight_kg": 900,
           "unit_cost_usd": 11000,
-          "carbon_kgco2e": -900
+          "labor_cost_usd": 1800,
+          "carbon_kgco2e": -900,
+          "assembly_time_min": 60,
+          "lead_time_days": 28,
+          "supplier": "MOSO International",
+          "sku": "MOS-PIL-B",
+          "dfma_notes": "Lightweight. 2-person install. Treat cut ends on-site."
         }
       ]
     },
@@ -63,6 +93,10 @@
       "exp": [-3, 1.25, 3],
       "size": [1.5, 2, 1.5],
       "sequence": 3,
+      "factory_work": true,
+      "connections": [
+        { "to": "Central Pillar", "type": "bolted", "hardware": "Cantilever bracket M16 ×6" }
+      ],
       "variants": [
         {
           "label": "Greywater Station",
@@ -70,7 +104,13 @@
           "meta": "Prefab pod with greywater filtration",
           "weight_kg": 1600,
           "unit_cost_usd": 18500,
-          "carbon_kgco2e": 650
+          "labor_cost_usd": 4200,
+          "carbon_kgco2e": 650,
+          "assembly_time_min": 120,
+          "lead_time_days": 35,
+          "supplier": "ReAqua Systems",
+          "sku": "REA-POD-A",
+          "dfma_notes": "Plumbing connections at rear face. Pressure test before sealing."
         },
         {
           "label": "Compost Unit",
@@ -78,7 +118,13 @@
           "meta": "Off-grid compost utility node",
           "weight_kg": 1200,
           "unit_cost_usd": 13000,
-          "carbon_kgco2e": 300
+          "labor_cost_usd": 3000,
+          "carbon_kgco2e": 300,
+          "assembly_time_min": 90,
+          "lead_time_days": 28,
+          "supplier": "BioLet Eco",
+          "sku": "BIO-POD-B",
+          "dfma_notes": "Gravity-fed. Level within ±2 mm. Vent stack required."
         }
       ]
     },
@@ -89,6 +135,10 @@
       "exp": [0, 1.65, -4],
       "size": [4, 2.5, 0.4],
       "sequence": 4,
+      "factory_work": true,
+      "connections": [
+        { "to": "Foundation Base", "type": "dry-fit", "hardware": "Ground spike ×4 + tension cable" }
+      ],
       "variants": [
         {
           "label": "Cork Bark Screen",
@@ -96,7 +146,13 @@
           "meta": "Wind & acoustic shield",
           "weight_kg": 350,
           "unit_cost_usd": 6500,
-          "carbon_kgco2e": -300
+          "labor_cost_usd": 1500,
+          "carbon_kgco2e": -300,
+          "assembly_time_min": 60,
+          "lead_time_days": 14,
+          "supplier": "Amorim Cork",
+          "sku": "AMO-WRP-A",
+          "dfma_notes": "Lightweight panels. Manual install. Natural variation in thickness ±5 mm."
         },
         {
           "label": "Mycelium Block",
@@ -104,7 +160,13 @@
           "meta": "Mushroom-grown solid bio wall",
           "weight_kg": 280,
           "unit_cost_usd": 4200,
-          "carbon_kgco2e": -100
+          "labor_cost_usd": 1200,
+          "carbon_kgco2e": -100,
+          "assembly_time_min": 45,
+          "lead_time_days": 21,
+          "supplier": "Mogu Biobased",
+          "sku": "MOG-WRP-B",
+          "dfma_notes": "Fragile at edges. Handle with care. Seal within 48 hrs of install."
         }
       ]
     },
@@ -117,6 +179,10 @@
       "size": [6.4, 0.4, 6.4],
       "sequence": 5,
       "transparent": true,
+      "factory_work": true,
+      "connections": [
+        { "to": "Central Pillar", "type": "dry-fit", "hardware": "Tension ring + 8 lacing points" }
+      ],
       "variants": [
         {
           "label": "Canvas Canopy",
@@ -124,7 +190,13 @@
           "meta": "Tensile fabric covering with water collection",
           "weight_kg": 150,
           "unit_cost_usd": 4500,
-          "carbon_kgco2e": 50
+          "labor_cost_usd": 2800,
+          "carbon_kgco2e": 50,
+          "assembly_time_min": 180,
+          "lead_time_days": 21,
+          "supplier": "Mehler Texnologies",
+          "sku": "MEH-ROF-A",
+          "dfma_notes": "Requires 4-person team. Tension in sequence from centre. Rain check before sealing."
         }
       ]
     }

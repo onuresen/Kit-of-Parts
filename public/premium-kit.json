@@ -8,6 +8,8 @@
       "size": [2.5, 0.6, 2.5],
       "sequence": 1,
       "wire": false,
+      "factory_work": false,
+      "connections": [],
       "variants": [
         {
           "label": "Carbon-Fiber Grid Base",
@@ -15,7 +17,13 @@
           "meta": "Ultra-dense anchor point for tall structures",
           "weight_kg": 3200,
           "unit_cost_usd": 55000,
-          "carbon_kgco2e": 1800
+          "labor_cost_usd": 18000,
+          "carbon_kgco2e": 1800,
+          "assembly_time_min": 240,
+          "lead_time_days": 56,
+          "supplier": "Toray Composites",
+          "sku": "TOR-PLT-A",
+          "dfma_notes": "Specialist installation only. Epoxy anchor to ground. 72-hr cure."
         }
       ]
     },
@@ -27,6 +35,10 @@
       "size": [1.8, 4.0, 1.8],
       "sequence": 2,
       "wire": true,
+      "factory_work": true,
+      "connections": [
+        { "to": "Plinth Pad", "type": "bolted", "hardware": "Grade 10.9 M30 bolt ×12" }
+      ],
       "variants": [
         {
           "label": "Titanium Exoskeleton",
@@ -34,7 +46,13 @@
           "meta": "High vertical load aerospace frame",
           "weight_kg": 1200,
           "unit_cost_usd": 150000,
-          "carbon_kgco2e": 8500
+          "labor_cost_usd": 45000,
+          "carbon_kgco2e": 8500,
+          "assembly_time_min": 480,
+          "lead_time_days": 84,
+          "supplier": "VSMPO-AVISMA",
+          "sku": "VSM-MST-A",
+          "dfma_notes": "Heavy crane 50 t required. Specialist welder certification needed."
         }
       ]
     },
@@ -45,6 +63,10 @@
       "exp": [2, 1.2, 2],
       "size": [1.2, 1.8, 1.2],
       "sequence": 3,
+      "factory_work": true,
+      "connections": [
+        { "to": "Tower Mast", "type": "bolted", "hardware": "Suspension bracket M24 ×8" }
+      ],
       "variants": [
         {
           "label": "Suspended Chrome Cabin",
@@ -52,7 +74,13 @@
           "meta": "Air-sealed floating pod",
           "weight_kg": 1800,
           "unit_cost_usd": 120000,
-          "carbon_kgco2e": 4500
+          "labor_cost_usd": 38000,
+          "carbon_kgco2e": 4500,
+          "assembly_time_min": 360,
+          "lead_time_days": 70,
+          "supplier": "Snøhetta Modular",
+          "sku": "SNO-POD-A",
+          "dfma_notes": "Precision alignment ±1 mm. Laser level required. Pre-test MEP before hoisting."
         }
       ]
     },
@@ -63,6 +91,10 @@
       "exp": [-3, 2.3, 0],
       "size": [0.15, 4.2, 1.8],
       "sequence": 4,
+      "factory_work": true,
+      "connections": [
+        { "to": "Tower Mast", "type": "bolted", "hardware": "Clamping profile ×8 per panel" }
+      ],
       "variants": [
         {
           "label": "Obsidian Glass Panel",
@@ -70,7 +102,13 @@
           "meta": "Nano-tech tinted architectural glass",
           "weight_kg": 800,
           "unit_cost_usd": 65000,
-          "carbon_kgco2e": 2200
+          "labor_cost_usd": 22000,
+          "carbon_kgco2e": 2200,
+          "assembly_time_min": 150,
+          "lead_time_days": 63,
+          "supplier": "AGC Glass Europe",
+          "sku": "AGC-FAC-A",
+          "dfma_notes": "Vacuum lifter mandatory. Handle at marked zones. Shatter risk if dropped."
         }
       ]
     },
@@ -82,6 +120,10 @@
       "size": [2.8, 0.15, 2.8],
       "sequence": 5,
       "transparent": true,
+      "factory_work": true,
+      "connections": [
+        { "to": "Tower Mast", "type": "bolted", "hardware": "Structural bolts M20 ×16 + seismic damper" }
+      ],
       "variants": [
         {
           "label": "Drone Landing Pad",
@@ -89,7 +131,13 @@
           "meta": "Top-tier roof delivery access platform",
           "weight_kg": 400,
           "unit_cost_usd": 85000,
-          "carbon_kgco2e": 1200
+          "labor_cost_usd": 15000,
+          "carbon_kgco2e": 1200,
+          "assembly_time_min": 120,
+          "lead_time_days": 42,
+          "supplier": "Skyports Infrastructure",
+          "sku": "SKY-DCK-A",
+          "dfma_notes": "Aviation lighting wiring pre-run. Requires CAA sign-off before commissioning."
         }
       ]
     }

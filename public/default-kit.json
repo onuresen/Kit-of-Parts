@@ -2,23 +2,13 @@
   "parts": [
     {
       "id": "Foundation",
-      "pos": [
-        0,
-        0,
-        0
-      ],
-      "exp": [
-        0,
-        -1,
-        0
-      ],
-      "size": [
-        4,
-        0.5,
-        4
-      ],
+      "pos": [0, 0, 0],
+      "exp": [0, -1, 0],
+      "size": [4, 0.5, 4],
       "sequence": 1,
       "wire": false,
+      "factory_work": false,
+      "connections": [],
       "variants": [
         {
           "label": "Type A – Pre-cast Concrete",
@@ -26,7 +16,13 @@
           "meta": "Pre-cast Concrete Slab (Type A)",
           "weight_kg": 4200,
           "unit_cost_usd": 8500,
-          "carbon_kgco2e": 525
+          "labor_cost_usd": 2500,
+          "carbon_kgco2e": 525,
+          "assembly_time_min": 120,
+          "lead_time_days": 21,
+          "supplier": "Tarmac Precast",
+          "sku": "TAR-FOUND-A",
+          "dfma_notes": "Crane lift required. 4 hook points at corners."
         },
         {
           "label": "Type B – Post-tensioned Slab",
@@ -34,7 +30,13 @@
           "meta": "Post-tensioned Concrete Slab – High Load",
           "weight_kg": 5100,
           "unit_cost_usd": 11200,
-          "carbon_kgco2e": 740
+          "labor_cost_usd": 3800,
+          "carbon_kgco2e": 740,
+          "assembly_time_min": 180,
+          "lead_time_days": 28,
+          "supplier": "Tarmac Precast",
+          "sku": "TAR-FOUND-B",
+          "dfma_notes": "Crane lift required. Stress tendons on-site post-placement."
         },
         {
           "label": "Type C – Hollow-core Plank",
@@ -42,29 +44,27 @@
           "meta": "Hollow-core Pre-stressed Plank – Lightweight",
           "weight_kg": 2800,
           "unit_cost_usd": 6400,
-          "carbon_kgco2e": 294
+          "labor_cost_usd": 1800,
+          "carbon_kgco2e": 294,
+          "assembly_time_min": 90,
+          "lead_time_days": 14,
+          "supplier": "Bison Manufacturing",
+          "sku": "BIS-FOUND-C",
+          "dfma_notes": "Individual planks max 1.2 t. No crane needed."
         }
       ]
     },
     {
       "id": "Structure",
-      "pos": [
-        0,
-        1.25,
-        0
-      ],
-      "exp": [
-        0,
-        1.25,
-        0
-      ],
-      "size": [
-        3.8,
-        2,
-        3.8
-      ],
+      "pos": [0, 1.25, 0],
+      "exp": [0, 1.25, 0],
+      "size": [3.8, 2, 3.8],
       "sequence": 2,
       "wire": true,
+      "factory_work": true,
+      "connections": [
+        { "to": "Foundation", "type": "bolted", "hardware": "M20 anchor bolt ×8" }
+      ],
       "variants": [
         {
           "label": "Steel Frame – Smart BIM",
@@ -72,7 +72,13 @@
           "meta": "Steel Frame – Smart BIM Standard",
           "weight_kg": 3600,
           "unit_cost_usd": 22000,
-          "carbon_kgco2e": 9036
+          "labor_cost_usd": 8500,
+          "carbon_kgco2e": 9036,
+          "assembly_time_min": 240,
+          "lead_time_days": 35,
+          "supplier": "Severfield",
+          "sku": "SEV-STR-A",
+          "dfma_notes": "Bolted moment connections. Crane required. Tolerance ±3 mm."
         },
         {
           "label": "Heavy Steel Frame",
@@ -80,7 +86,13 @@
           "meta": "Heavy Structural Steel – Column & Beam",
           "weight_kg": 5200,
           "unit_cost_usd": 31000,
-          "carbon_kgco2e": 14092
+          "labor_cost_usd": 12000,
+          "carbon_kgco2e": 14092,
+          "assembly_time_min": 360,
+          "lead_time_days": 42,
+          "supplier": "Severfield",
+          "sku": "SEV-STR-B",
+          "dfma_notes": "Welded site connections. Hot work permit required."
         },
         {
           "label": "Timber Frame (CLT)",
@@ -88,28 +100,26 @@
           "meta": "Cross-laminated Timber Frame – Low Carbon",
           "weight_kg": 1800,
           "unit_cost_usd": 18500,
-          "carbon_kgco2e": 558
+          "labor_cost_usd": 6500,
+          "carbon_kgco2e": 558,
+          "assembly_time_min": 180,
+          "lead_time_days": 28,
+          "supplier": "Stora Enso",
+          "sku": "STO-CLT-A",
+          "dfma_notes": "Dry-fit dowel connection. No crane needed for panels <500 kg."
         }
       ]
     },
     {
       "id": "Bathroom Pod",
-      "pos": [
-        0.8,
-        1.25,
-        0.8
-      ],
-      "exp": [
-        2.5,
-        1.25,
-        2.5
-      ],
-      "size": [
-        1.5,
-        1.8,
-        1.5
-      ],
+      "pos": [0.8, 1.25, 0.8],
+      "exp": [2.5, 1.25, 2.5],
+      "size": [1.5, 1.8, 1.5],
       "sequence": 3,
+      "factory_work": true,
+      "connections": [
+        { "to": "Structure", "type": "dry-fit", "hardware": "Levelling plate + M12 bolt ×4" }
+      ],
       "variants": [
         {
           "label": "Pod Type 01 – Standard",
@@ -117,7 +127,13 @@
           "meta": "Off-site Fabricated Unit 01 – Standard",
           "weight_kg": 2100,
           "unit_cost_usd": 14000,
-          "carbon_kgco2e": 1785
+          "labor_cost_usd": 2200,
+          "carbon_kgco2e": 1785,
+          "assembly_time_min": 60,
+          "lead_time_days": 42,
+          "supplier": "Offsite Solutions",
+          "sku": "OSS-POD-01",
+          "dfma_notes": "Plug-and-play MEP connections. 2-person install."
         },
         {
           "label": "Pod Type 02 – Accessible",
@@ -125,7 +141,13 @@
           "meta": "Off-site Fabricated Unit 02 – ADA Accessible",
           "weight_kg": 2400,
           "unit_cost_usd": 17500,
-          "carbon_kgco2e": 2040
+          "labor_cost_usd": 2800,
+          "carbon_kgco2e": 2040,
+          "assembly_time_min": 75,
+          "lead_time_days": 42,
+          "supplier": "Offsite Solutions",
+          "sku": "OSS-POD-02",
+          "dfma_notes": "Wider entry clearance. Check structure opening ≥900 mm."
         },
         {
           "label": "Pod Type 03 – Compact",
@@ -133,28 +155,26 @@
           "meta": "Off-site Fabricated Unit 03 – Compact Module",
           "weight_kg": 1600,
           "unit_cost_usd": 10800,
-          "carbon_kgco2e": 1360
+          "labor_cost_usd": 1600,
+          "carbon_kgco2e": 1360,
+          "assembly_time_min": 45,
+          "lead_time_days": 35,
+          "supplier": "Offsite Solutions",
+          "sku": "OSS-POD-03",
+          "dfma_notes": "Lightest option. Manual handling possible ≤2 persons."
         }
       ]
     },
     {
       "id": "Cladding",
-      "pos": [
-        -1.9,
-        1.25,
-        0
-      ],
-      "exp": [
-        -3.5,
-        1.25,
-        0
-      ],
-      "size": [
-        0.1,
-        2.2,
-        3.8
-      ],
+      "pos": [-1.9, 1.25, 0],
+      "exp": [-3.5, 1.25, 0],
+      "size": [0.1, 2.2, 3.8],
       "sequence": 4,
+      "factory_work": true,
+      "connections": [
+        { "to": "Structure", "type": "bolted", "hardware": "Stainless bracket ×6 per panel" }
+      ],
       "variants": [
         {
           "label": "Insulated Glass Panel",
@@ -162,7 +182,13 @@
           "meta": "Insulated Glass Panel – High Performance",
           "weight_kg": 420,
           "unit_cost_usd": 9200,
-          "carbon_kgco2e": 647
+          "labor_cost_usd": 3200,
+          "carbon_kgco2e": 647,
+          "assembly_time_min": 90,
+          "lead_time_days": 56,
+          "supplier": "Schüco",
+          "sku": "SCH-CLD-A",
+          "dfma_notes": "Suction cup lifter required. Handle at marked zones only."
         },
         {
           "label": "Aluminum Composite Panel",
@@ -170,7 +196,13 @@
           "meta": "Aluminum Composite Rainscreen Panel",
           "weight_kg": 310,
           "unit_cost_usd": 6800,
-          "carbon_kgco2e": 2554
+          "labor_cost_usd": 2100,
+          "carbon_kgco2e": 2554,
+          "assembly_time_min": 60,
+          "lead_time_days": 35,
+          "supplier": "Aluprof",
+          "sku": "ALU-CLD-B",
+          "dfma_notes": "Click-lock installation. No special tools required."
         },
         {
           "label": "Brick Slip Façade",
@@ -178,29 +210,27 @@
           "meta": "Pre-fabricated Brick Slip Cladding System",
           "weight_kg": 680,
           "unit_cost_usd": 11400,
-          "carbon_kgco2e": 163
+          "labor_cost_usd": 4800,
+          "carbon_kgco2e": 163,
+          "assembly_time_min": 150,
+          "lead_time_days": 28,
+          "supplier": "Eurobrick",
+          "sku": "EUR-CLD-C",
+          "dfma_notes": "Heaviest panel. Crane required. Scaffold access needed."
         }
       ]
     },
     {
       "id": "Interface Layer",
-      "pos": [
-        0,
-        2.5,
-        0
-      ],
-      "exp": [
-        0,
-        4,
-        0
-      ],
-      "size": [
-        4,
-        0.1,
-        4
-      ],
+      "pos": [0, 2.5, 0],
+      "exp": [0, 4, 0],
+      "size": [4, 0.1, 4],
       "sequence": 5,
       "transparent": true,
+      "factory_work": true,
+      "connections": [
+        { "to": "Structure", "type": "dry-fit", "hardware": "Clip rail system" }
+      ],
       "variants": [
         {
           "label": "Data & Utilities Slab",
@@ -208,7 +238,13 @@
           "meta": "Data & Utilities Distribution Layer",
           "weight_kg": 180,
           "unit_cost_usd": 4500,
-          "carbon_kgco2e": 27
+          "labor_cost_usd": 3500,
+          "carbon_kgco2e": 27,
+          "assembly_time_min": 120,
+          "lead_time_days": 21,
+          "supplier": "Modular Building Institute",
+          "sku": "MBI-INT-A",
+          "dfma_notes": "Pre-routed conduit. Connect MEP at plug points marked RED."
         },
         {
           "label": "MEP Coordinated Slab",
@@ -216,7 +252,13 @@
           "meta": "MEP Pre-coordinated Flat Slab Layer",
           "weight_kg": 220,
           "unit_cost_usd": 6200,
-          "carbon_kgco2e": 33
+          "labor_cost_usd": 4800,
+          "carbon_kgco2e": 33,
+          "assembly_time_min": 150,
+          "lead_time_days": 28,
+          "supplier": "Skanska MEP",
+          "sku": "SKA-INT-B",
+          "dfma_notes": "Coordinated with BIM model. Verify slab orientation before install."
         },
         {
           "label": "Smart Services Layer",
@@ -224,7 +266,13 @@
           "meta": "Smart Building Services Integration Layer",
           "weight_kg": 160,
           "unit_cost_usd": 8900,
-          "carbon_kgco2e": 24
+          "labor_cost_usd": 6200,
+          "carbon_kgco2e": 24,
+          "assembly_time_min": 180,
+          "lead_time_days": 35,
+          "supplier": "Siemens Building Tech",
+          "sku": "SIE-INT-C",
+          "dfma_notes": "Requires commissioning engineer on-site. 48-hr activation lead time."
         }
       ]
     }

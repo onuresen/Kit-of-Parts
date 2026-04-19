@@ -82,6 +82,29 @@ export function KitProvider({ children }) {
     setParts(parts.map(p => p.id === id ? { ...p, ...newProps } : p));
   };
 
+  const addConnection = (fromId, conn) => {
+    setParts(prev => prev.map(p => {
+      if (p.id === fromId) {
+        if ((p.connections ?? []).some(c => c.to === conn.to && c.type === conn.type)) return p
+        return { ...p, connections: [...(p.connections ?? []), conn] }
+      }
+      if (p.id === conn.to) {
+        const reverse = { to: fromId, type: conn.type, hardware: conn.hardware }
+        if ((p.connections ?? []).some(c => c.to === fromId && c.type === conn.type)) return p
+        return { ...p, connections: [...(p.connections ?? []), reverse] }
+      }
+      return p
+    }))
+  };
+
+  const removeConnection = (fromId, connTo) => {
+    setParts(prev => prev.map(p => {
+      if (p.id === fromId) return { ...p, connections: (p.connections ?? []).filter(c => c.to !== connTo) }
+      if (p.id === connTo)  return { ...p, connections: (p.connections ?? []).filter(c => c.to !== fromId) }
+      return p
+    }))
+  };
+
   const removePart = (id) => {
     setParts(parts.filter(p => p.id !== id));
   };
@@ -109,16 +132,34 @@ export function KitProvider({ children }) {
     URL.revokeObjectURL(url);
   };
 
+  const savePreset = (label, selectedVariants, visible) => {
+    const id = label.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now().toString().slice(-4);
+    const newPreset = {
+      id,
+      label,
+      description: `Custom preset – ${label}`,
+      custom: true,
+      variants: { ...selectedVariants },
+      visible: { ...visible },
+    };
+    setPresets([...presets, newPreset]);
+  };
+
+  const removePreset = (id) => {
+    setPresets(presets.filter(p => p.id !== id));
+  };
+
   const clearAutoSave = () => {
     localStorage.removeItem('ic-kit-save');
     window.location.reload();
   };
 
   return (
-    <KitContext.Provider value={{ 
-      parts, setParts, presets, setPresets, 
-      loadKitFromFile, isLoading, 
-      addPart, duplicatePart, updatePart, removePart, exportKit, clearAutoSave
+    <KitContext.Provider value={{
+      parts, setParts, presets, setPresets,
+      loadKitFromFile, isLoading,
+      addPart, duplicatePart, updatePart, removePart, exportKit, clearAutoSave,
+      savePreset, removePreset, addConnection, removeConnection,
     }}>
       {children}
     </KitContext.Provider>

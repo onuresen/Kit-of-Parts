@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar'
 import Toolbar from './components/Toolbar'
 import MetricsPanel from './components/MetricsPanel'
 import GameScorePanel from './components/GameScorePanel'
+import ShortcutsModal from './components/ShortcutsModal'
 import { useKit } from './components/KitContext'
 import './App.css'
 
@@ -35,13 +36,20 @@ export default function App() {
   const [sectionCutActive, setSectionCutActive] = useState(false)
   const [sectionCutY, setSectionCutY] = useState(3.5)
 
-  const [envSettings, setEnvSettings] = useState({ grass: true, time: 12, clouds: false, stars: false })
+  const [envSettings, setEnvSettings] = useState({ grass: true, time: 12, clouds: false, stars: false, kenGrid: false })
 
   const [siteMode, setSiteMode] = useState(false)
   const [placedUnits, setPlacedUnits] = useState([])
   const [selectedUnitType, setSelectedUnitType] = useState(null)
 
   const [builderMode, setBuilderMode] = useState(false)
+
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('ic-dark') === 'true')
+  const [showShortcuts, setShowShortcuts] = useState(false)
+
+  useEffect(() => {
+    localStorage.setItem('ic-dark', darkMode)
+  }, [darkMode])
 
   useEffect(() => {
     if (presets && presets.length > 0 && !selectedUnitType) {
@@ -65,6 +73,28 @@ export default function App() {
     }, 100)
     return () => clearInterval(interval)
   }, [gamePhase])
+
+  // ── Global keyboard shortcuts ─────────────────────────────
+  useEffect(() => {
+    function onKey(e) {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+      if (e.key === '?') { setShowShortcuts(s => !s); return }
+      if (e.key === 'Escape') { setShowShortcuts(false); setSelected(null); return }
+      if (e.key === 'e' || e.key === 'E') { setExploded(v => !v); setSequenceMode(false) }
+      if (e.key === 'd' || e.key === 'D') setShowDimensions(v => !v)
+      if (e.key === 'm' || e.key === 'M') setShowMetrics(v => !v)
+      if (e.key === 'x' || e.key === 'X') setSectionCutActive(v => !v)
+      if (e.key === 'b' || e.key === 'B') toggleBuilderMode()
+      if (e.key === 's' || e.key === 'S') {
+        if (builderMode) setBuilderMode(false)
+        if (siteMode) setSiteMode(false)
+        if (sequenceMode) { setSequenceMode(false); setSequenceStep(0) }
+        setSelected(null)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [builderMode, siteMode, sequenceMode])
 
   // ── Handlers ─────────────────────────────────────────────
   function togglePart(id) {
@@ -191,7 +221,7 @@ export default function App() {
   }
 
   return (
-    <div id="root-container">
+    <div id="root-container" data-theme={darkMode ? 'dark' : 'light'}>
 
       <Toolbar
         exploded={exploded}
@@ -213,6 +243,9 @@ export default function App() {
         selected={selected}
         onDuplicate={handleDuplicate}
         onDelete={handleDelete}
+        darkMode={darkMode}
+        onToggleDark={() => setDarkMode(v => !v)}
+        onToggleShortcuts={() => setShowShortcuts(v => !v)}
       />
 
       <Sidebar
@@ -293,6 +326,8 @@ export default function App() {
           onExit={exitGame}
         />
       )}
+
+      {showShortcuts && <ShortcutsModal onClose={() => setShowShortcuts(false)} />}
 
     </div>
   )
