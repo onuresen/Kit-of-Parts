@@ -4,6 +4,11 @@ import { TYPE_COLOR } from './Connection'
 
 const CONN_TYPES = ['bolted', 'dry-fit', 'welded', 'adhesive', 'damper', 'base-isolation']
 
+const SEISMIC_COLOR = { 1: '#f39c12', 2: '#3498db', 3: '#27ae60' }
+const SEISMIC_LABEL = { 1: '耐震等級1', 2: '耐震等級2', 3: '耐震等級3' }
+const FIRE_COLOR = { '1hr': '#e67e22', '2hr': '#e74c3c', 'non-rated': '#95a5a6' }
+const FIRE_LABEL = { '1hr': '耐火1時間', '2hr': '耐火2時間', 'non-rated': '非耐火' }
+
 export default function InfoPanel({
   selected, selectedVariants, onVariantChange,
   sequenceMode, sequenceStep, maxStep, onStepForward, onStepBack,
@@ -11,7 +16,7 @@ export default function InfoPanel({
   envSettings, setEnvSettings,
   gameMode,
 }) {
-  const { parts, addConnection, removeConnection: removeConn } = useKit()
+  const { parts, addConnection, removeConnection: removeConn, formatCurrency } = useKit()
   const [addingConn, setAddingConn] = useState(false)
   const [newConn, setNewConn] = useState({ to: '', type: 'bolted', hardware: '' })
 
@@ -42,16 +47,50 @@ export default function InfoPanel({
         /* ── Part selected ── */
         <>
           <div className="ipr-part-header" style={{ borderLeftColor: activeVariant.color }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
               <h3 className="ipr-title">{selected.id}</h3>
               {part.factory_work != null && (
                 <span className={`ipr-badge ${part.factory_work ? 'ipr-badge--factory' : 'ipr-badge--site'}`}>
                   {part.factory_work ? 'Factory' : 'Site'}
                 </span>
               )}
+              {part.structural_role === 'primary' && (
+                <span className="ipr-badge ipr-badge--structural">主構造</span>
+              )}
+              {part.structural_role === 'secondary' && (
+                <span className="ipr-badge ipr-badge--secondary">二次</span>
+              )}
             </div>
             <p className="ipr-meta">{activeVariant.meta}</p>
           </div>
+
+          {/* Seismic / fire compliance badges */}
+          {(activeVariant.seismic_grade || activeVariant.fire_resistance_grade) && (
+            <div className="ipr-compliance-row">
+              {activeVariant.seismic_grade && (
+                <span
+                  className="ipr-compliance-badge"
+                  style={{ background: SEISMIC_COLOR[activeVariant.seismic_grade] + '22', color: SEISMIC_COLOR[activeVariant.seismic_grade], borderColor: SEISMIC_COLOR[activeVariant.seismic_grade] }}
+                  title={activeVariant.bsl_notes ?? ''}
+                >
+                  {SEISMIC_LABEL[activeVariant.seismic_grade]}
+                </span>
+              )}
+              {activeVariant.fire_resistance_grade && activeVariant.fire_resistance_grade !== 'non-rated' && (
+                <span
+                  className="ipr-compliance-badge"
+                  style={{ background: FIRE_COLOR[activeVariant.fire_resistance_grade] + '22', color: FIRE_COLOR[activeVariant.fire_resistance_grade], borderColor: FIRE_COLOR[activeVariant.fire_resistance_grade] }}
+                >
+                  {FIRE_LABEL[activeVariant.fire_resistance_grade]}
+                </span>
+              )}
+              {activeVariant.bsl_compliant && (
+                <span className="ipr-compliance-badge ipr-compliance-badge--bsl" title={activeVariant.bsl_notes ?? ''}>
+                  建基法適合
+                </span>
+              )}
+            </div>
+          )}
 
           {part.variants.length > 1 && (
             <div className="ipr-section">
@@ -83,18 +122,24 @@ export default function InfoPanel({
             </div>
             <div className="info-stat">
               <span className="info-stat-label">Material Cost</span>
-              <span className="info-stat-value">${activeVariant.unit_cost_usd.toLocaleString()}</span>
+              <span className="info-stat-value">{formatCurrency(activeVariant.unit_cost_usd)}</span>
             </div>
             {activeVariant.labor_cost_usd != null && (
               <div className="info-stat">
                 <span className="info-stat-label">Labour Cost</span>
-                <span className="info-stat-value">${activeVariant.labor_cost_usd.toLocaleString()}</span>
+                <span className="info-stat-value">{formatCurrency(activeVariant.labor_cost_usd)}</span>
               </div>
             )}
             <div className="info-stat">
               <span className="info-stat-label">CO₂e</span>
               <span className="info-stat-value">{activeVariant.carbon_kgco2e.toLocaleString()} kg</span>
             </div>
+            {activeVariant.load_bearing_kn != null && (
+              <div className="info-stat">
+                <span className="info-stat-label">耐荷重</span>
+                <span className="info-stat-value">{activeVariant.load_bearing_kn.toLocaleString()} kN</span>
+              </div>
+            )}
             {activeVariant.assembly_time_min != null && (
               <div className="info-stat">
                 <span className="info-stat-label">Install Time</span>
@@ -117,9 +162,21 @@ export default function InfoPanel({
             </div>
           </div>
 
+          {/* JIS Standards */}
+          {activeVariant.jis_standards && activeVariant.jis_standards.length > 0 && (
+            <div className="ipr-section">
+              <div className="ipr-section-label">JIS規格</div>
+              <div className="ipr-jis-row">
+                {activeVariant.jis_standards.map(std => (
+                  <span key={std} className="ipr-jis-badge">{std}</span>
+                ))}
+              </div>
+            </div>
+          )}
+
           {activeVariant.dfma_notes && (
             <div className="ipr-section">
-              <div className="ipr-section-label">Install Notes</div>
+              <div className="ipr-section-label">施工要領 / Install Notes</div>
               <div className="ipr-dfma-notes">{activeVariant.dfma_notes}</div>
             </div>
           )}

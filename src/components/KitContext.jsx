@@ -2,18 +2,81 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const KitContext = createContext();
 
+const DEFAULT_PROJECT = {
+  name: 'IC Kit',
+  currency: 'USD',
+  jpyRate: 155,
+  standard: 'UK',
+  casbee_building_type: 'residential',
+  casbee_target_rank: 'A',
+};
+
 export function KitProvider({ children }) {
-  const [parts, setParts] = useState([]);
+  const [parts, setPartsInternal] = useState([]);
   const [presets, setPresets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [projectSettings, setProjectSettings] = useState(DEFAULT_PROJECT);
+
+  // Undo/redo history
+  const [undoStack, setUndoStack] = useState([]);
+  const [redoStack, setRedoStack] = useState([]);
+  const canUndo = undoStack.length > 0;
+  const canRedo = redoStack.length > 0;
+
+  // setParts with history tracking
+  function setParts(fnOrParts) {
+    setPartsInternal(prev => {
+      const next = typeof fnOrParts === 'function' ? fnOrParts(prev) : fnOrParts;
+      setUndoStack(stack => [...stack.slice(-29), prev]);
+      setRedoStack([]);
+      return next;
+    });
+  }
+
+  // setParts without history (used for load/reset)
+  function setPartsNoHistory(fnOrParts) {
+    setPartsInternal(fnOrParts);
+    setUndoStack([]);
+    setRedoStack([]);
+  }
+
+  function undo() {
+    if (undoStack.length === 0) return;
+    const prev = undoStack[undoStack.length - 1];
+    setUndoStack(s => s.slice(0, -1));
+    setPartsInternal(current => {
+      setRedoStack(s => [...s.slice(-9), current]);
+      return prev;
+    });
+  }
+
+  function redo() {
+    if (redoStack.length === 0) return;
+    const next = redoStack[redoStack.length - 1];
+    setRedoStack(s => s.slice(0, -1));
+    setPartsInternal(current => {
+      setUndoStack(s => [...s.slice(-29), current]);
+      return next;
+    });
+  }
+
+  // Currency formatter
+  function formatCurrency(usd) {
+    if (projectSettings.currency === 'JPY') {
+      const jpy = Math.round(usd * projectSettings.jpyRate);
+      return `¥${jpy.toLocaleString()}`;
+    }
+    return `$${usd.toLocaleString()}`;
+  }
 
   useEffect(() => {
     const saved = localStorage.getItem('ic-kit-save');
     if (saved) {
       try {
         const data = JSON.parse(saved);
-        setParts(data.parts || []);
+        setPartsInternal(data.parts || []);
         setPresets(data.presets || []);
+        if (data.projectSettings) setProjectSettings({ ...DEFAULT_PROJECT, ...data.projectSettings });
         setIsLoading(false);
         return;
       } catch (err) {}
@@ -23,8 +86,9 @@ export function KitProvider({ children }) {
     fetch(`${basePath}default-kit.json`)
       .then((res) => res.json())
       .then((data) => {
-        setParts(data.parts || []);
+        setPartsInternal(data.parts || []);
         setPresets(data.presets || []);
+        if (data.projectSettings) setProjectSettings({ ...DEFAULT_PROJECT, ...data.projectSettings });
         setIsLoading(false);
       })
       .catch((err) => {
@@ -35,9 +99,9 @@ export function KitProvider({ children }) {
 
   useEffect(() => {
     if (!isLoading && parts.length > 0) {
-      localStorage.setItem('ic-kit-save', JSON.stringify({ parts, presets }));
+      localStorage.setItem('ic-kit-save', JSON.stringify({ parts, presets, projectSettings }));
     }
-  }, [parts, presets, isLoading]);
+  }, [parts, presets, projectSettings, isLoading]);
 
   const loadKitFromFile = (file) => {
     const reader = new FileReader();
@@ -45,8 +109,9 @@ export function KitProvider({ children }) {
       try {
         const data = JSON.parse(e.target.result);
         if (data.parts && data.presets) {
-          setParts(data.parts);
+          setPartsNoHistory(data.parts);
           setPresets(data.presets);
+          if (data.projectSettings) setProjectSettings({ ...DEFAULT_PROJECT, ...data.projectSettings });
         } else {
           alert('Invalid kit format. Missing parts or presets array.');
         }
@@ -58,71 +123,84 @@ export function KitProvider({ children }) {
   };
 
   const addPart = () => {
-    setParts([...parts, {
-      id: `Custom Part ${parts.length + 1}`,
+    setParts(prev => [...prev, {
+      id: `Custom Part ${prev.length + 1}`,
       shape: 'box',
       pos: [0, 0, 0],
       exp: [0, 5, 0],
       size: [2, 2, 2],
-      sequence: parts.length + 1,
+      sequence: prev.length + 1,
       wire: false,
       transparent: false,
+      structural_role: null,
       variants: [{
         label: 'Default Variant',
         color: '#aaaaaa',
         meta: 'Custom added part',
         weight_kg: 1000,
         unit_cost_usd: 5000,
-        carbon_kgco2e: 500
+        carbon_kgco2e: 500,
+        seismic_grade: null,
+        fire_resistance_grade: null,
+        load_bearing_kn: null,
+        bsl_compliant: null,
+        bsl_notes: null,
+        unit_cost_jpy: null,
+        labor_cost_jpy: null,
+        jis_standards: null,
+        ifc_entity: 'IfcBuildingElementProxy',
+        ifc_property_set: null,
       }]
     }]);
   };
 
   const updatePart = (id, newProps) => {
-    setParts(parts.map(p => p.id === id ? { ...p, ...newProps } : p));
+    setParts(prev => prev.map(p => p.id === id ? { ...p, ...newProps } : p));
   };
 
   const addConnection = (fromId, conn) => {
     setParts(prev => prev.map(p => {
       if (p.id === fromId) {
-        if ((p.connections ?? []).some(c => c.to === conn.to && c.type === conn.type)) return p
-        return { ...p, connections: [...(p.connections ?? []), conn] }
+        if ((p.connections ?? []).some(c => c.to === conn.to && c.type === conn.type)) return p;
+        return { ...p, connections: [...(p.connections ?? []), conn] };
       }
       if (p.id === conn.to) {
-        const reverse = { to: fromId, type: conn.type, hardware: conn.hardware }
-        if ((p.connections ?? []).some(c => c.to === fromId && c.type === conn.type)) return p
-        return { ...p, connections: [...(p.connections ?? []), reverse] }
+        const reverse = { to: fromId, type: conn.type, hardware: conn.hardware };
+        if ((p.connections ?? []).some(c => c.to === fromId && c.type === conn.type)) return p;
+        return { ...p, connections: [...(p.connections ?? []), reverse] };
       }
-      return p
-    }))
+      return p;
+    }));
   };
 
   const removeConnection = (fromId, connTo) => {
     setParts(prev => prev.map(p => {
-      if (p.id === fromId) return { ...p, connections: (p.connections ?? []).filter(c => c.to !== connTo) }
-      if (p.id === connTo)  return { ...p, connections: (p.connections ?? []).filter(c => c.to !== fromId) }
-      return p
-    }))
+      if (p.id === fromId) return { ...p, connections: (p.connections ?? []).filter(c => c.to !== connTo) };
+      if (p.id === connTo)  return { ...p, connections: (p.connections ?? []).filter(c => c.to !== fromId) };
+      return p;
+    }));
   };
 
   const removePart = (id) => {
-    setParts(parts.filter(p => p.id !== id));
+    setParts(prev => prev.filter(p => p.id !== id));
   };
 
   const duplicatePart = (id) => {
-    const partToDup = parts.find(p => p.id === id);
-    if (!partToDup) return;
-    const newPart = {
-      ...partToDup,
-      id: `${partToDup.id} (Copy ${Date.now().toString().slice(-4)})`,
-      sequence: parts.length + 1,
-      pos: [partToDup.pos[0] + 1, partToDup.pos[1], partToDup.pos[2]]
-    };
-    setParts([...parts, newPart]);
+    setParts(prev => {
+      const partToDup = prev.find(p => p.id === id);
+      if (!partToDup) return prev;
+      const newPart = {
+        ...partToDup,
+        id: `${partToDup.id} (Copy ${Date.now().toString().slice(-4)})`,
+        sequence: prev.length + 1,
+        pos: [partToDup.pos[0] + 1, partToDup.pos[1], partToDup.pos[2]]
+      };
+      return [...prev, newPart];
+    });
   };
 
   const exportKit = () => {
-    const dataObj = { parts, presets };
+    const dataObj = { parts, presets, projectSettings };
     const blob = new Blob([JSON.stringify(dataObj, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -156,10 +234,12 @@ export function KitProvider({ children }) {
 
   return (
     <KitContext.Provider value={{
-      parts, setParts, presets, setPresets,
+      parts, presets, setPresets,
+      projectSettings, setProjectSettings, formatCurrency,
       loadKitFromFile, isLoading,
       addPart, duplicatePart, updatePart, removePart, exportKit, clearAutoSave,
       savePreset, removePreset, addConnection, removeConnection,
+      undo, redo, canUndo, canRedo,
     }}>
       {children}
     </KitContext.Provider>

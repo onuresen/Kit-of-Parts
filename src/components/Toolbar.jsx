@@ -16,6 +16,7 @@ export default function Toolbar({
   selected,
   onDuplicate, onDelete,
   darkMode, onToggleDark, onToggleShortcuts,
+  onUndo, onRedo, canUndo, canRedo,
 }) {
   const isSelectMode = !builderMode && !siteMode && !sequenceMode && !gameMode
 
@@ -115,10 +116,10 @@ export default function Toolbar({
       <div className="toolbar-sep" />
 
       <div className="toolbar-group">
-        <button className="tb-btn" title="Undo (coming soon)" disabled>
+        <button className="tb-btn" title="Undo (Ctrl+Z)" onClick={onUndo} disabled={!canUndo}>
           <Undo2 size={15} />
         </button>
-        <button className="tb-btn" title="Redo (coming soon)" disabled>
+        <button className="tb-btn" title="Redo (Ctrl+Y)" onClick={onRedo} disabled={!canRedo}>
           <Redo2 size={15} />
         </button>
       </div>

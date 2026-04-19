@@ -36,7 +36,7 @@ export default function Sidebar({
   gameMode, gamePhase, gameStep, gameMistakes, gameElapsed, maxStep, onExitGame,
   builderMode,
 }) {
-  const { parts, presets, loadKitFromFile, savePreset, removePreset } = useKit()
+  const { parts, presets, loadKitFromFile, savePreset, removePreset, projectSettings, setProjectSettings } = useKit()
   const [savingPreset, setSavingPreset] = useState(false)
   const [presetName, setPresetName] = useState('')
 
@@ -94,7 +94,16 @@ export default function Sidebar({
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-brand">IC Configurator</div>
+      <div className="sidebar-brand">
+        IC Configurator
+        <button
+          className={`currency-toggle ${projectSettings.currency === 'JPY' ? 'currency-toggle--active' : ''}`}
+          title={projectSettings.currency === 'JPY' ? 'Switch to USD' : 'Switch to JPY (¥)'}
+          onClick={() => setProjectSettings(s => ({ ...s, currency: s.currency === 'USD' ? 'JPY' : 'USD' }))}
+        >
+          {projectSettings.currency === 'JPY' ? '¥' : '$'}
+        </button>
+      </div>
 
       {/* ── Site unit picker ── */}
       {siteMode && (

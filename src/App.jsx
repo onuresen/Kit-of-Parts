@@ -10,7 +10,7 @@ import { useKit } from './components/KitContext'
 import './App.css'
 
 export default function App() {
-  const { parts, presets, isLoading, duplicatePart, removePart } = useKit()
+  const { parts, presets, isLoading, duplicatePart, removePart, undo, redo, canUndo, canRedo } = useKit()
 
   const [exploded, setExploded] = useState(false)
   const [selected, setSelected] = useState(null)
@@ -80,6 +80,8 @@ export default function App() {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
       if (e.key === '?') { setShowShortcuts(s => !s); return }
       if (e.key === 'Escape') { setShowShortcuts(false); setSelected(null); return }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); return }
       if (e.key === 'e' || e.key === 'E') { setExploded(v => !v); setSequenceMode(false) }
       if (e.key === 'd' || e.key === 'D') setShowDimensions(v => !v)
       if (e.key === 'm' || e.key === 'M') setShowMetrics(v => !v)
@@ -246,6 +248,10 @@ export default function App() {
         darkMode={darkMode}
         onToggleDark={() => setDarkMode(v => !v)}
         onToggleShortcuts={() => setShowShortcuts(v => !v)}
+        onUndo={undo}
+        onRedo={redo}
+        canUndo={canUndo}
+        canRedo={canRedo}
       />
 
       <Sidebar
