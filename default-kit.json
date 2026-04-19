@@ -1,24 +1,23 @@
 {
+  "projectSettings": {
+    "name": "IC Modular Housing Unit",
+    "currency": "USD",
+    "jpyRate": 155,
+    "standard": "UK",
+    "casbee_building_type": "residential",
+    "casbee_target_rank": "A"
+  },
   "parts": [
     {
       "id": "Foundation",
-      "pos": [
-        0,
-        0,
-        0
-      ],
-      "exp": [
-        0,
-        -1,
-        0
-      ],
-      "size": [
-        4,
-        0.5,
-        4
-      ],
+      "pos": [0, 0, 0],
+      "exp": [0, -1, 0],
+      "size": [4, 0.5, 4],
       "sequence": 1,
       "wire": false,
+      "factory_work": false,
+      "structural_role": "primary",
+      "connections": [],
       "variants": [
         {
           "label": "Type A – Pre-cast Concrete",
@@ -26,7 +25,23 @@
           "meta": "Pre-cast Concrete Slab (Type A)",
           "weight_kg": 4200,
           "unit_cost_usd": 8500,
-          "carbon_kgco2e": 525
+          "unit_cost_jpy": 1317500,
+          "labor_cost_usd": 2500,
+          "labor_cost_jpy": 387500,
+          "carbon_kgco2e": 525,
+          "assembly_time_min": 120,
+          "lead_time_days": 21,
+          "supplier": "大成建設プレコン (Taisei Precon)",
+          "sku": "TAI-FOUND-A",
+          "dfma_notes": "クレーン揚重が必要。コーナー4点吊り。建築基準法第38条適合品。",
+          "seismic_grade": 2,
+          "fire_resistance_grade": "2hr",
+          "load_bearing_kn": 3500,
+          "bsl_compliant": true,
+          "bsl_notes": "建築基準法施行令第3章準拠。耐震等級2相当の設計荷重。",
+          "jis_standards": ["JIS A 5372", "JIS A 5361"],
+          "ifc_entity": "IfcSlab",
+          "ifc_property_set": { "PredefinedType": "BASESLAB" }
         },
         {
           "label": "Type B – Post-tensioned Slab",
@@ -34,7 +49,23 @@
           "meta": "Post-tensioned Concrete Slab – High Load",
           "weight_kg": 5100,
           "unit_cost_usd": 11200,
-          "carbon_kgco2e": 740
+          "unit_cost_jpy": 1736000,
+          "labor_cost_usd": 3800,
+          "labor_cost_jpy": 589000,
+          "carbon_kgco2e": 740,
+          "assembly_time_min": 180,
+          "lead_time_days": 28,
+          "supplier": "PC橋梁株式会社",
+          "sku": "PCK-FOUND-B",
+          "dfma_notes": "クレーン揚重必須。現場緊張作業が必要。PC鋼材は溶接禁止。",
+          "seismic_grade": 3,
+          "fire_resistance_grade": "2hr",
+          "load_bearing_kn": 5200,
+          "bsl_compliant": true,
+          "bsl_notes": "建築基準法施行令第80条の2準拠。耐震等級3相当。",
+          "jis_standards": ["JIS A 5373"],
+          "ifc_entity": "IfcSlab",
+          "ifc_property_set": { "PredefinedType": "BASESLAB" }
         },
         {
           "label": "Type C – Hollow-core Plank",
@@ -42,29 +73,38 @@
           "meta": "Hollow-core Pre-stressed Plank – Lightweight",
           "weight_kg": 2800,
           "unit_cost_usd": 6400,
-          "carbon_kgco2e": 294
+          "unit_cost_jpy": 992000,
+          "labor_cost_usd": 1800,
+          "labor_cost_jpy": 279000,
+          "carbon_kgco2e": 294,
+          "assembly_time_min": 90,
+          "lead_time_days": 14,
+          "supplier": "旭コンクリート工業",
+          "sku": "ASA-FOUND-C",
+          "dfma_notes": "1枚最大1.2t。クレーン不要。レベル調整プレート使用。",
+          "seismic_grade": 1,
+          "fire_resistance_grade": "1hr",
+          "load_bearing_kn": 1800,
+          "bsl_compliant": true,
+          "bsl_notes": "建築基準法施行令第78条準拠。耐震等級1相当。",
+          "jis_standards": ["JIS A 5372"],
+          "ifc_entity": "IfcSlab",
+          "ifc_property_set": { "PredefinedType": "BASESLAB" }
         }
       ]
     },
     {
       "id": "Structure",
-      "pos": [
-        0,
-        1.25,
-        0
-      ],
-      "exp": [
-        0,
-        1.25,
-        0
-      ],
-      "size": [
-        3.8,
-        2,
-        3.8
-      ],
+      "pos": [0, 1.25, 0],
+      "exp": [0, 1.25, 0],
+      "size": [3.8, 2, 3.8],
       "sequence": 2,
       "wire": true,
+      "factory_work": true,
+      "structural_role": "primary",
+      "connections": [
+        { "to": "Foundation", "type": "bolted", "hardware": "M20アンカーボルト×8 (JIS B 1180)" }
+      ],
       "variants": [
         {
           "label": "Steel Frame – Smart BIM",
@@ -72,7 +112,23 @@
           "meta": "Steel Frame – Smart BIM Standard",
           "weight_kg": 3600,
           "unit_cost_usd": 22000,
-          "carbon_kgco2e": 9036
+          "unit_cost_jpy": 3410000,
+          "labor_cost_usd": 8500,
+          "labor_cost_jpy": 1317500,
+          "carbon_kgco2e": 9036,
+          "assembly_time_min": 240,
+          "lead_time_days": 35,
+          "supplier": "日本製鉄 (Nippon Steel)",
+          "sku": "NSC-STR-A",
+          "dfma_notes": "高力ボルト摩擦接合。クレーン必須。施工精度±3mm。ミルシート要。",
+          "seismic_grade": 2,
+          "fire_resistance_grade": "2hr",
+          "load_bearing_kn": 4800,
+          "bsl_compliant": true,
+          "bsl_notes": "建築基準法施行令第92条準拠。国土交通大臣認定品。耐震等級2。",
+          "jis_standards": ["JIS G 3136", "JIS B 1186"],
+          "ifc_entity": "IfcBuildingElementProxy",
+          "ifc_property_set": { "StructuralType": "SteelFrame" }
         },
         {
           "label": "Heavy Steel Frame",
@@ -80,7 +136,23 @@
           "meta": "Heavy Structural Steel – Column & Beam",
           "weight_kg": 5200,
           "unit_cost_usd": 31000,
-          "carbon_kgco2e": 14092
+          "unit_cost_jpy": 4805000,
+          "labor_cost_usd": 12000,
+          "labor_cost_jpy": 1860000,
+          "carbon_kgco2e": 14092,
+          "assembly_time_min": 360,
+          "lead_time_days": 42,
+          "supplier": "JFEスチール (JFE Steel)",
+          "sku": "JFE-STR-B",
+          "dfma_notes": "現場溶接接合。溶接作業許可証要。火気使用許可必須。",
+          "seismic_grade": 3,
+          "fire_resistance_grade": "2hr",
+          "load_bearing_kn": 8000,
+          "bsl_compliant": true,
+          "bsl_notes": "建築基準法施行令第3章第2節準拠。耐震等級3。",
+          "jis_standards": ["JIS G 3101", "JIS G 3136"],
+          "ifc_entity": "IfcBuildingElementProxy",
+          "ifc_property_set": { "StructuralType": "HeavySteelFrame" }
         },
         {
           "label": "Timber Frame (CLT)",
@@ -88,28 +160,37 @@
           "meta": "Cross-laminated Timber Frame – Low Carbon",
           "weight_kg": 1800,
           "unit_cost_usd": 18500,
-          "carbon_kgco2e": 558
+          "unit_cost_jpy": 2867500,
+          "labor_cost_usd": 6500,
+          "labor_cost_jpy": 1007500,
+          "carbon_kgco2e": 558,
+          "assembly_time_min": 180,
+          "lead_time_days": 28,
+          "supplier": "住友林業 (Sumitomo Forestry)",
+          "sku": "SUM-CLT-A",
+          "dfma_notes": "ドライ嵌合ダボ接合。500kg以下パネルはクレーン不要。防火被覆確認要。",
+          "seismic_grade": 2,
+          "fire_resistance_grade": "1hr",
+          "load_bearing_kn": 2200,
+          "bsl_compliant": true,
+          "bsl_notes": "建築基準法施行令第46条木造準拠。国土交通大臣認定CLT工法。",
+          "jis_standards": ["JIS A 5908", "JAS CLT"],
+          "ifc_entity": "IfcBuildingElementProxy",
+          "ifc_property_set": { "StructuralType": "CLT" }
         }
       ]
     },
     {
       "id": "Bathroom Pod",
-      "pos": [
-        0.8,
-        1.25,
-        0.8
-      ],
-      "exp": [
-        2.5,
-        1.25,
-        2.5
-      ],
-      "size": [
-        1.5,
-        1.8,
-        1.5
-      ],
+      "pos": [0.8, 1.25, 0.8],
+      "exp": [2.5, 1.25, 2.5],
+      "size": [1.5, 1.8, 1.5],
       "sequence": 3,
+      "factory_work": true,
+      "structural_role": "non-structural",
+      "connections": [
+        { "to": "Structure", "type": "dry-fit", "hardware": "レベリングプレート + M12ボルト×4" }
+      ],
       "variants": [
         {
           "label": "Pod Type 01 – Standard",
@@ -117,15 +198,47 @@
           "meta": "Off-site Fabricated Unit 01 – Standard",
           "weight_kg": 2100,
           "unit_cost_usd": 14000,
-          "carbon_kgco2e": 1785
+          "unit_cost_jpy": 2170000,
+          "labor_cost_usd": 2200,
+          "labor_cost_jpy": 341000,
+          "carbon_kgco2e": 1785,
+          "assembly_time_min": 60,
+          "lead_time_days": 42,
+          "supplier": "TOTO ユニットバス事業部",
+          "sku": "TOTO-POD-01",
+          "dfma_notes": "プラグアンドプレイMEP接続。2名作業。TOTO社認定施工業者要。",
+          "seismic_grade": null,
+          "fire_resistance_grade": "non-rated",
+          "load_bearing_kn": null,
+          "bsl_compliant": true,
+          "bsl_notes": null,
+          "jis_standards": ["JIS A 4416"],
+          "ifc_entity": "IfcSanitaryTerminal",
+          "ifc_property_set": { "PredefinedType": "SHOWER" }
         },
         {
-          "label": "Pod Type 02 – Accessible",
+          "label": "Pod Type 02 – Accessible (バリアフリー)",
           "color": "#d35400",
-          "meta": "Off-site Fabricated Unit 02 – ADA Accessible",
+          "meta": "Off-site Fabricated Unit 02 – Barrier-free",
           "weight_kg": 2400,
           "unit_cost_usd": 17500,
-          "carbon_kgco2e": 2040
+          "unit_cost_jpy": 2712500,
+          "labor_cost_usd": 2800,
+          "labor_cost_jpy": 434000,
+          "carbon_kgco2e": 2040,
+          "assembly_time_min": 75,
+          "lead_time_days": 42,
+          "supplier": "LIXIL ユニットバス",
+          "sku": "LIX-POD-02",
+          "dfma_notes": "バリアフリー法準拠。開口部900mm以上確認要。手すり設置含む。",
+          "seismic_grade": null,
+          "fire_resistance_grade": "non-rated",
+          "load_bearing_kn": null,
+          "bsl_compliant": true,
+          "bsl_notes": "高齢者等配慮対策等級5相当",
+          "jis_standards": ["JIS A 4416"],
+          "ifc_entity": "IfcSanitaryTerminal",
+          "ifc_property_set": { "PredefinedType": "SHOWER", "AccessibilityRating": "BarrierFree" }
         },
         {
           "label": "Pod Type 03 – Compact",
@@ -133,28 +246,37 @@
           "meta": "Off-site Fabricated Unit 03 – Compact Module",
           "weight_kg": 1600,
           "unit_cost_usd": 10800,
-          "carbon_kgco2e": 1360
+          "unit_cost_jpy": 1674000,
+          "labor_cost_usd": 1600,
+          "labor_cost_jpy": 248000,
+          "carbon_kgco2e": 1360,
+          "assembly_time_min": 45,
+          "lead_time_days": 35,
+          "supplier": "TOTO ユニットバス事業部",
+          "sku": "TOTO-POD-03",
+          "dfma_notes": "最軽量。2名手運び可能。ユニットサイズ確認要（階段通過幅）。",
+          "seismic_grade": null,
+          "fire_resistance_grade": "non-rated",
+          "load_bearing_kn": null,
+          "bsl_compliant": true,
+          "bsl_notes": null,
+          "jis_standards": ["JIS A 4416"],
+          "ifc_entity": "IfcSanitaryTerminal",
+          "ifc_property_set": { "PredefinedType": "SHOWER" }
         }
       ]
     },
     {
       "id": "Cladding",
-      "pos": [
-        -1.9,
-        1.25,
-        0
-      ],
-      "exp": [
-        -3.5,
-        1.25,
-        0
-      ],
-      "size": [
-        0.1,
-        2.2,
-        3.8
-      ],
+      "pos": [-1.9, 1.25, 0],
+      "exp": [-3.5, 1.25, 0],
+      "size": [0.1, 2.2, 3.8],
       "sequence": 4,
+      "factory_work": true,
+      "structural_role": "non-structural",
+      "connections": [
+        { "to": "Structure", "type": "bolted", "hardware": "ステンレスブラケット×6枚/パネル (SUS304)" }
+      ],
       "variants": [
         {
           "label": "Insulated Glass Panel",
@@ -162,7 +284,23 @@
           "meta": "Insulated Glass Panel – High Performance",
           "weight_kg": 420,
           "unit_cost_usd": 9200,
-          "carbon_kgco2e": 647
+          "unit_cost_jpy": 1426000,
+          "labor_cost_usd": 3200,
+          "labor_cost_jpy": 496000,
+          "carbon_kgco2e": 647,
+          "assembly_time_min": 90,
+          "lead_time_days": 56,
+          "supplier": "AGC旭硝子 (AGC Inc.)",
+          "sku": "AGC-CLD-A",
+          "dfma_notes": "吸盤リフター必須。指定箇所のみ掴み。Low-E複層ガラス。Uw=1.4W/m²K。",
+          "seismic_grade": null,
+          "fire_resistance_grade": "non-rated",
+          "load_bearing_kn": null,
+          "bsl_compliant": true,
+          "bsl_notes": null,
+          "jis_standards": ["JIS R 3202", "JIS R 3209"],
+          "ifc_entity": "IfcCurtainWall",
+          "ifc_property_set": { "ThermalTransmittance": 1.4 }
         },
         {
           "label": "Aluminum Composite Panel",
@@ -170,7 +308,23 @@
           "meta": "Aluminum Composite Rainscreen Panel",
           "weight_kg": 310,
           "unit_cost_usd": 6800,
-          "carbon_kgco2e": 2554
+          "unit_cost_jpy": 1054000,
+          "labor_cost_usd": 2100,
+          "labor_cost_jpy": 325500,
+          "carbon_kgco2e": 2554,
+          "assembly_time_min": 60,
+          "lead_time_days": 35,
+          "supplier": "KMEW株式会社",
+          "sku": "KME-CLD-B",
+          "dfma_notes": "クリック嵌合施工。特殊工具不要。KMEW認定施工店に限る。",
+          "seismic_grade": null,
+          "fire_resistance_grade": "non-rated",
+          "load_bearing_kn": null,
+          "bsl_compliant": true,
+          "bsl_notes": null,
+          "jis_standards": ["JIS A 6711"],
+          "ifc_entity": "IfcCurtainWall",
+          "ifc_property_set": {}
         },
         {
           "label": "Brick Slip Façade",
@@ -178,29 +332,38 @@
           "meta": "Pre-fabricated Brick Slip Cladding System",
           "weight_kg": 680,
           "unit_cost_usd": 11400,
-          "carbon_kgco2e": 163
+          "unit_cost_jpy": 1767000,
+          "labor_cost_usd": 4800,
+          "labor_cost_jpy": 744000,
+          "carbon_kgco2e": 163,
+          "assembly_time_min": 150,
+          "lead_time_days": 28,
+          "supplier": "ニチハ株式会社 (Nichiha)",
+          "sku": "NCH-CLD-C",
+          "dfma_notes": "最重量パネル。クレーン揚重必須。足場設置要。積算重量確認要。",
+          "seismic_grade": null,
+          "fire_resistance_grade": "1hr",
+          "load_bearing_kn": null,
+          "bsl_compliant": true,
+          "bsl_notes": "国土交通大臣認定準耐火構造",
+          "jis_standards": ["JIS A 5422"],
+          "ifc_entity": "IfcCurtainWall",
+          "ifc_property_set": {}
         }
       ]
     },
     {
       "id": "Interface Layer",
-      "pos": [
-        0,
-        2.5,
-        0
-      ],
-      "exp": [
-        0,
-        4,
-        0
-      ],
-      "size": [
-        4,
-        0.1,
-        4
-      ],
+      "pos": [0, 2.5, 0],
+      "exp": [0, 4, 0],
+      "size": [4, 0.1, 4],
       "sequence": 5,
       "transparent": true,
+      "factory_work": true,
+      "structural_role": "secondary",
+      "connections": [
+        { "to": "Structure", "type": "dry-fit", "hardware": "クリップレールシステム" }
+      ],
       "variants": [
         {
           "label": "Data & Utilities Slab",
@@ -208,7 +371,23 @@
           "meta": "Data & Utilities Distribution Layer",
           "weight_kg": 180,
           "unit_cost_usd": 4500,
-          "carbon_kgco2e": 27
+          "unit_cost_jpy": 697500,
+          "labor_cost_usd": 3500,
+          "labor_cost_jpy": 542500,
+          "carbon_kgco2e": 27,
+          "assembly_time_min": 120,
+          "lead_time_days": 21,
+          "supplier": "三菱電機 (Mitsubishi Electric)",
+          "sku": "MIT-INT-A",
+          "dfma_notes": "プリルーティング済みコンジット。MEP接続はRED印部で実施。BAS連携要。",
+          "seismic_grade": null,
+          "fire_resistance_grade": "non-rated",
+          "load_bearing_kn": null,
+          "bsl_compliant": true,
+          "bsl_notes": null,
+          "jis_standards": ["JIS C 8305"],
+          "ifc_entity": "IfcBuildingElementProxy",
+          "ifc_property_set": { "LayerFunction": "MEP" }
         },
         {
           "label": "MEP Coordinated Slab",
@@ -216,7 +395,23 @@
           "meta": "MEP Pre-coordinated Flat Slab Layer",
           "weight_kg": 220,
           "unit_cost_usd": 6200,
-          "carbon_kgco2e": 33
+          "unit_cost_jpy": 961000,
+          "labor_cost_usd": 4800,
+          "labor_cost_jpy": 744000,
+          "carbon_kgco2e": 33,
+          "assembly_time_min": 150,
+          "lead_time_days": 28,
+          "supplier": "竹中工務店MEP事業部 (Takenaka MEP)",
+          "sku": "TAK-INT-B",
+          "dfma_notes": "BIMモデルと座標照合済み。設置前にスラブ向きを確認。ミリ単位精度要。",
+          "seismic_grade": null,
+          "fire_resistance_grade": "non-rated",
+          "load_bearing_kn": null,
+          "bsl_compliant": true,
+          "bsl_notes": null,
+          "jis_standards": ["JIS C 8305", "JIS A 4201"],
+          "ifc_entity": "IfcBuildingElementProxy",
+          "ifc_property_set": { "LayerFunction": "MEP_Coordinated" }
         },
         {
           "label": "Smart Services Layer",
@@ -224,7 +419,23 @@
           "meta": "Smart Building Services Integration Layer",
           "weight_kg": 160,
           "unit_cost_usd": 8900,
-          "carbon_kgco2e": 24
+          "unit_cost_jpy": 1379500,
+          "labor_cost_usd": 6200,
+          "labor_cost_jpy": 961000,
+          "carbon_kgco2e": 24,
+          "assembly_time_min": 180,
+          "lead_time_days": 35,
+          "supplier": "シーメンス・ビルテクノロジー (Siemens BT)",
+          "sku": "SIE-INT-C",
+          "dfma_notes": "コミッショニングエンジニア常駐必須。有効化まで48時間リードタイム。",
+          "seismic_grade": null,
+          "fire_resistance_grade": "non-rated",
+          "load_bearing_kn": null,
+          "bsl_compliant": true,
+          "bsl_notes": null,
+          "jis_standards": ["JIS C 8305"],
+          "ifc_entity": "IfcBuildingElementProxy",
+          "ifc_property_set": { "LayerFunction": "SmartServices" }
         }
       ]
     }
