@@ -1,14 +1,51 @@
-import { useRef, useEffect, useState, useMemo } from 'react'
-import { Edges, Html, TransformControls } from '@react-three/drei'
+import { useRef, useEffect, useState, useMemo, Suspense } from 'react'
+import { Edges, Html, TransformControls, useGLTF } from '@react-three/drei'
 import { useKit } from './KitContext'
 import { gsap } from 'gsap'
 import * as THREE from 'three'
+
+function GlbMesh({ url, opacity, transparent, depthWrite, clippingPlanes, isWire, isGhost, emissiveIntensity }) {
+  const { scene } = useGLTF(url)
+
+  const cloned = useMemo(() => {
+    const c = scene.clone(true)
+    c.traverse(obj => {
+      if (obj.isMesh) {
+        obj.material = Array.isArray(obj.material)
+          ? obj.material.map(m => m.clone())
+          : obj.material.clone()
+      }
+    })
+    return c
+  }, [scene])
+
+  useEffect(() => {
+    cloned.traverse(obj => {
+      if (!obj.isMesh) return
+      obj.castShadow = !isWire && !isGhost
+      obj.receiveShadow = true
+      const mats = Array.isArray(obj.material) ? obj.material : [obj.material]
+      mats.forEach(m => {
+        m.transparent = transparent
+        m.opacity = opacity
+        m.depthWrite = depthWrite
+        m.clippingPlanes = clippingPlanes
+        m.clipShadows = true
+        m.emissiveIntensity = emissiveIntensity
+        m.needsUpdate = true
+      })
+    })
+  }, [cloned, opacity, transparent, depthWrite, clippingPlanes, emissiveIntensity, isWire, isGhost])
+
+  return <primitive object={cloned} />
+}
 
 export default function Part({
   data,
   isExploded,
   isVisible,
   onSelect,
+  onFrame,
   activeVariant,
   sequenceMode,
   sequenceStep,
@@ -123,6 +160,11 @@ export default function Part({
     setTimeout(() => setFlashState(null), 600)
   }
 
+  function handleDoubleClick(e) {
+    e.stopPropagation()
+    onFrame?.({ pos: data.pos, size: data.size })
+  }
+
   function handleClick(e) {
     e.stopPropagation()
 
@@ -182,12 +224,117 @@ export default function Part({
     updatePart(data.id, { pos: [p.x, p.y, p.z], exp: [p.x, p.y + 2, p.z] })
   }
 
-  const content = (
+  const [W, H, D] = data.size
+  const t = Math.max(0.05, Math.min(W, H) * 0.08)
+  const isComposite = data.shape === 'window' || data.shape === 'door'
+
+  const frameMat = {
+    color, transparent, opacity, depthWrite,
+    emissive, emissiveIntensity,
+    clippingPlanes, clipShadows: true,
+  }
+
+  const content = data.glb ? (
+    <group
+      ref={meshRef}
+      position={data.pos}
+      visible={finalVisible}
+      onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
+      onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
+      onPointerOut={() => setHovered(false)}
+    >
+      <Suspense fallback={null}>
+        <GlbMesh
+          url={data.glb}
+          opacity={opacity}
+          transparent={transparent}
+          depthWrite={depthWrite}
+          clippingPlanes={clippingPlanes}
+          isWire={isWire}
+          isGhost={isGhost}
+          emissiveIntensity={emissiveIntensity}
+        />
+      </Suspense>
+      {showLabel && (
+        <Html position={[0, labelY, 0]} center distanceFactor={9} style={{ pointerEvents: 'none' }}>
+          <div className={`part-label ${flashState === 'correct' ? 'part-label--correct' : flashState === 'wrong' ? 'part-label--wrong' : ''}`}>
+            {labelText}
+          </div>
+        </Html>
+      )}
+    </group>
+  ) : isComposite ? (
+    <group
+      ref={meshRef}
+      position={data.pos}
+      visible={finalVisible}
+      onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
+      onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
+      onPointerOut={() => setHovered(false)}
+    >
+      {/* top bar */}
+      <mesh position={[0, H / 2 - t / 2, 0]} castShadow={!isWire && !isGhost} receiveShadow>
+        <boxGeometry args={[W, t, D]} />
+        <meshStandardMaterial {...frameMat} />
+        <Edges threshold={15} color={edgesColor} />
+      </mesh>
+      {/* bottom bar */}
+      <mesh position={[0, -H / 2 + t / 2, 0]} castShadow={!isWire && !isGhost} receiveShadow>
+        <boxGeometry args={[W, t, D]} />
+        <meshStandardMaterial {...frameMat} />
+        <Edges threshold={15} color={edgesColor} />
+      </mesh>
+      {/* left bar */}
+      <mesh position={[-W / 2 + t / 2, 0, 0]} castShadow={!isWire && !isGhost} receiveShadow>
+        <boxGeometry args={[t, H - 2 * t, D]} />
+        <meshStandardMaterial {...frameMat} />
+        <Edges threshold={15} color={edgesColor} />
+      </mesh>
+      {/* right bar */}
+      <mesh position={[W / 2 - t / 2, 0, 0]} castShadow={!isWire && !isGhost} receiveShadow>
+        <boxGeometry args={[t, H - 2 * t, D]} />
+        <meshStandardMaterial {...frameMat} />
+        <Edges threshold={15} color={edgesColor} />
+      </mesh>
+      {/* glass or inner panel */}
+      {data.shape === 'window' ? (
+        <mesh receiveShadow>
+          <boxGeometry args={[W - 2 * t, H - 2 * t, D * 0.25]} />
+          <meshStandardMaterial
+            color="#a8d8ea"
+            transparent
+            opacity={isGhost ? 0.1 : 0.35}
+            depthWrite={false}
+            emissive="#a8d8ea"
+            emissiveIntensity={hovered ? 0.15 : 0}
+            clippingPlanes={clippingPlanes}
+            clipShadows
+          />
+        </mesh>
+      ) : (
+        <mesh castShadow={!isWire && !isGhost} receiveShadow>
+          <boxGeometry args={[W - 2 * t, H - 2 * t, D]} />
+          <meshStandardMaterial {...frameMat} />
+          <Edges threshold={15} color={edgesColor} />
+        </mesh>
+      )}
+      {showLabel && (
+        <Html position={[0, labelY, 0]} center distanceFactor={9} style={{ pointerEvents: 'none' }}>
+          <div className={`part-label ${flashState === 'correct' ? 'part-label--correct' : flashState === 'wrong' ? 'part-label--wrong' : ''}`}>
+            {labelText}
+          </div>
+        </Html>
+      )}
+    </group>
+  ) : (
     <mesh
       ref={meshRef}
       position={data.pos}
       visible={finalVisible}
       onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
       onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
       onPointerOut={() => setHovered(false)}
       castShadow={!isWire && !isGhost}

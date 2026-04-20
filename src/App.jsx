@@ -6,6 +6,7 @@ import Toolbar from './components/Toolbar'
 import MetricsPanel from './components/MetricsPanel'
 import GameScorePanel from './components/GameScorePanel'
 import ShortcutsModal from './components/ShortcutsModal'
+import ViewCube from './components/ViewCube'
 import { useKit } from './components/KitContext'
 import './App.css'
 
@@ -43,6 +44,7 @@ export default function App() {
   const [selectedUnitType, setSelectedUnitType] = useState(null)
 
   const [builderMode, setBuilderMode] = useState(false)
+  const [cameraCmd, setCameraCmd] = useState(null)
 
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('ic-dark') === 'true')
   const [showShortcuts, setShowShortcuts] = useState(false)
@@ -87,6 +89,10 @@ export default function App() {
       if (e.key === 'm' || e.key === 'M') setShowMetrics(v => !v)
       if (e.key === 'x' || e.key === 'X') setSectionCutActive(v => !v)
       if (e.key === 'b' || e.key === 'B') toggleBuilderMode()
+      if (e.key === '1') handleCameraPreset('front')
+      if (e.key === '2') handleCameraPreset('top')
+      if (e.key === '3') handleCameraPreset('right')
+      if (e.key === '0') handleCameraPreset('home')
       if (e.key === 's' || e.key === 'S') {
         if (builderMode) setBuilderMode(false)
         if (siteMode) setSiteMode(false)
@@ -164,6 +170,14 @@ export default function App() {
 
   function removeUnit(col, row) {
     setPlacedUnits(prev => prev.filter(u => !(u.col === col && u.row === row)))
+  }
+
+  function handleCameraPreset(preset) {
+    setCameraCmd({ type: 'preset', preset, ts: Date.now() })
+  }
+
+  function handleFramePart({ pos, size }) {
+    setCameraCmd({ type: 'frame', pos, size, ts: Date.now() })
   }
 
   function handleDuplicate() {
@@ -297,6 +311,8 @@ export default function App() {
         gameStep={gameStep}
         onGameClick={handleGameClick}
         envSettings={envSettings}
+        cameraCmd={cameraCmd}
+        onFramePart={handleFramePart}
       />
 
       <InfoPanel
@@ -334,6 +350,8 @@ export default function App() {
       )}
 
       {showShortcuts && <ShortcutsModal onClose={() => setShowShortcuts(false)} />}
+
+      <ViewCube onPreset={handleCameraPreset} darkMode={darkMode} />
 
     </div>
   )

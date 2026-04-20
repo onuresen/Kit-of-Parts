@@ -8,14 +8,12 @@ import DimensionLines from './DimensionLines'
 import Connection from './Connection'
 import SiteGrid from './SiteGrid'
 import { useKit } from './KitContext'
-// Animates camera + orbit target when switching modes
-function CameraController({ siteMode, controlsRef }) {
+function CameraController({ siteMode, controlsRef, cameraCmd }) {
   const { camera } = useThree()
 
   useEffect(() => {
     const pos = siteMode ? { x: 2, y: 20, z: 10 } : { x: 8, y: 8, z: 8 }
     gsap.to(camera.position, { ...pos, duration: 1.2, ease: 'expo.inOut' })
-
     if (controlsRef.current) {
       const targetY = siteMode ? 0.5 : 0
       gsap.to(controlsRef.current.target, {
@@ -25,6 +23,38 @@ function CameraController({ siteMode, controlsRef }) {
       })
     }
   }, [siteMode, camera, controlsRef])
+
+  useEffect(() => {
+    if (!cameraCmd || !controlsRef.current) return
+    let pos, target
+
+    if (cameraCmd.type === 'preset') {
+      const presets = {
+        front:  { pos: [0, 2, 14],   target: [0, 1.5, 0] },
+        back:   { pos: [0, 2, -14],  target: [0, 1.5, 0] },
+        top:    { pos: [0.001, 16, 0], target: [0, 0, 0] },
+        bottom: { pos: [0.001, -14, 0], target: [0, 0, 0] },
+        right:  { pos: [14, 2, 0],   target: [0, 1.5, 0] },
+        left:   { pos: [-14, 2, 0],  target: [0, 1.5, 0] },
+        home:   { pos: [8, 8, 8],    target: [0, 0, 0] },
+      }
+      const p = presets[cameraCmd.preset]
+      if (!p) return
+      pos = p.pos; target = p.target
+    } else if (cameraCmd.type === 'frame') {
+      const [px, py, pz] = cameraCmd.pos
+      const dist = Math.max(...cameraCmd.size) * 2 + 3
+      pos = [px + dist * 0.6, py + dist * 0.5, pz + dist * 0.6]
+      target = [px, py, pz]
+    }
+
+    gsap.to(camera.position, { x: pos[0], y: pos[1], z: pos[2], duration: 1, ease: 'expo.inOut' })
+    gsap.to(controlsRef.current.target, {
+      x: target[0], y: target[1], z: target[2],
+      duration: 1, ease: 'expo.inOut',
+      onUpdate: () => controlsRef.current?.update(),
+    })
+  }, [cameraCmd?.ts])
 
   return null
 }
@@ -51,6 +81,8 @@ export default function Scene({
   builderMode,
   selectedPartId,
   envSettings,
+  cameraCmd,
+  onFramePart,
 }) {
   const controlsRef = useRef()
   const { parts } = useKit()
@@ -59,11 +91,11 @@ export default function Scene({
     <Canvas
       shadows
       style={{ position: 'absolute', inset: 0, background: siteMode ? '#eef2f7' : '#f4f4f4' }}
-      gl={{ localClippingEnabled: true }}
+      gl={{ localClippingEnabled: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1 }}
     >
       <PerspectiveCamera makeDefault position={[8, 8, 8]} fov={45} />
       <OrbitControls ref={controlsRef} makeDefault enableDamping />
-      <CameraController siteMode={siteMode} controlsRef={controlsRef} />
+      <CameraController siteMode={siteMode} controlsRef={controlsRef} cameraCmd={cameraCmd} />
 
       <ambientLight intensity={!siteMode && envSettings && (envSettings.time < 6 || envSettings.time > 18) ? 0.2 : 0.8} />
       
@@ -126,6 +158,7 @@ export default function Scene({
             isExploded={isExploded}
             isVisible={visible[part.id]}
             onSelect={onSelect}
+            onFrame={onFramePart}
             activeVariant={activeVariant}
             sequenceMode={sequenceMode}
             sequenceStep={sequenceStep}

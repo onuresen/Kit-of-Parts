@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { useKit } from './KitContext'
 
 export default function BuilderPanel({ selected }) {
   const { parts, updatePart, addPart, duplicatePart, removePart, exportKit, clearAutoSave } = useKit()
 
   const part = selected ? parts.find(p => p.id === selected.id) : null
+  const glbInputRef = useRef()
 
   function handleSize(axis, value) {
     if (!part) return
@@ -26,6 +27,15 @@ export default function BuilderPanel({ selected }) {
     v[field] = isNumber ? Number(value) : value
     const newVariants = [v, ...part.variants.slice(1)]
     updatePart(part.id, { variants: newVariants })
+  }
+
+  function handleGlbImport(e) {
+    const file = e.target.files[0]
+    if (!file || !part) return
+    const reader = new FileReader()
+    reader.onload = (ev) => updatePart(part.id, { glb: ev.target.result })
+    reader.readAsDataURL(file)
+    e.target.value = ''
   }
 
   function handleDelete() {
@@ -63,6 +73,8 @@ export default function BuilderPanel({ selected }) {
             >
               <option value="box">Box</option>
               <option value="cylinder">Cylinder</option>
+              <option value="window">Window</option>
+              <option value="door">Door</option>
             </select>
           </label>
 
@@ -120,6 +132,29 @@ export default function BuilderPanel({ selected }) {
             <input type="checkbox" checked={!!part.transparent} onChange={e => updatePart(part.id, { transparent: e.target.checked })} style={{ marginRight: '6px' }} />
             Transparent
           </label>
+
+          <div style={{ margin: '8px 0 4px', borderTop: '1px solid #ccc' }} />
+
+          <input ref={glbInputRef} type="file" accept=".glb,.gltf" style={{ display: 'none' }} onChange={handleGlbImport} />
+          <div style={{ display: 'flex', gap: '4px' }}>
+            <button
+              onClick={() => glbInputRef.current.click()}
+              style={{ flex: 1, background: '#8e44ad', color: 'white', border: 'none', padding: '6px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px' }}
+            >
+              {part.glb ? 'Replace GLB' : 'Import GLB'}
+            </button>
+            {part.glb && (
+              <button
+                onClick={() => updatePart(part.id, { glb: null })}
+                style={{ background: '#7f8c8d', color: 'white', border: 'none', padding: '6px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px' }}
+              >
+                Remove
+              </button>
+            )}
+          </div>
+          {part.glb && (
+            <div style={{ fontSize: '10px', color: '#27ae60', marginTop: '2px' }}>GLB loaded</div>
+          )}
 
           <div style={{ display: 'flex', gap: '4px', marginTop: '8px' }}>
             <button onClick={handleDuplicate} style={{ flex: 1, background: '#f39c12', color: 'white', border: 'none', padding: '6px', borderRadius: '4px', cursor: 'pointer' }}>
