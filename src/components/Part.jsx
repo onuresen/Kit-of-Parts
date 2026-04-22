@@ -56,6 +56,9 @@ export default function Part({
   onGameClick,
   builderMode,
   isSelected,
+  isShaking,
+  earthquakeMagnitude,
+  highlightedWeek,
 }) {
   const meshRef = useRef()
   const { updatePart } = useKit()
@@ -149,6 +152,32 @@ export default function Part({
     }
   }, [gameMode, gameStep])
 
+  // ── Earthquake shake ─────────────────────────────────────
+  useEffect(() => {
+    if (!isShaking || !meshRef.current) return
+    const mesh = meshRef.current
+    const baseX = mesh.position.x
+    const baseZ = mesh.position.z
+    const seismicGrade = activeVariant?.seismic_grade ?? 1
+    const hasBaseIso = (data.connections ?? []).some(c => c.type === 'base-isolation')
+    const isoFactor = hasBaseIso ? 0.15 : 1
+    const amplitude = (earthquakeMagnitude ?? 5) * 0.045 * (1 / seismicGrade) * isoFactor
+    const cycles = Math.round((earthquakeMagnitude ?? 5) * 4)
+    const tl = gsap.timeline({
+      onComplete: () => gsap.to(mesh.position, { x: baseX, z: baseZ, duration: 0.4, ease: 'expo.out' }),
+    })
+    for (let i = 0; i < cycles; i++) {
+      const a = (i / cycles) * Math.PI * 4 + Math.random() * 0.5
+      tl.to(mesh.position, {
+        x: baseX + Math.cos(a) * amplitude * (1 - i / cycles * 0.5),
+        z: baseZ + Math.sin(a) * amplitude * (1 - i / cycles * 0.5),
+        duration: 0.07, ease: 'none',
+      })
+    }
+    tl.to(mesh.position, { x: baseX, z: baseZ, duration: 0.4, ease: 'expo.out' })
+    return () => { tl.kill(); gsap.to(mesh.position, { x: baseX, z: baseZ, duration: 0.2 }) }
+  }, [isShaking])
+
   // ── Pointer cursor ───────────────────────────────────────
   useEffect(() => {
     document.body.style.cursor = hovered ? 'pointer' : 'auto'
@@ -190,12 +219,19 @@ export default function Part({
   const finalVisible = isVisible && seqVisible
 
   // ── Material properties ──────────────────────────────────
+  const seismicGrade = activeVariant?.seismic_grade ?? 1
+  const shakeAtRisk = isShaking && earthquakeMagnitude != null && earthquakeMagnitude > seismicGrade * 2.2
+  const partWeek = data.week ?? Math.ceil((data.sequence ?? 1) / 2)
+  const isWeekHighlighted = highlightedWeek != null && partWeek === highlightedWeek
+  const isWeekDimmed = highlightedWeek != null && partWeek !== highlightedWeek
   const emissive = flashState === 'correct' ? '#2ecc71'
     : flashState === 'wrong' ? '#e74c3c'
+    : shakeAtRisk ? '#e74c3c'
+    : isWeekHighlighted ? '#3498db'
     : color
-  const emissiveIntensity = flashState ? 1.5 : (hovered && !isGhost ? 0.25 : 0)
-  const opacity = isGhost ? 0.13 : (isWire ? 0.06 : isTrans ? 0.6 : 1)
-  const transparent = isGhost || isWire || isTrans
+  const emissiveIntensity = flashState ? 1.5 : shakeAtRisk ? 0.8 : isWeekHighlighted ? 0.5 : (hovered && !isGhost ? 0.25 : 0)
+  const opacity = isGhost ? 0.13 : isWeekDimmed ? 0.25 : (isWire ? 0.06 : isTrans ? 0.6 : 1)
+  const transparent = isGhost || isWire || isTrans || isWeekDimmed
   const depthWrite = !isGhost && !isWire
 
   // ── Edges color ──────────────────────────────────────────

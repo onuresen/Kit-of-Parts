@@ -1,8 +1,9 @@
 import {
   MousePointer2, Pencil, Scissors, Copy, Trash2,
   Ruler, BarChart3, Map, Undo2, Redo2, Layers, Play, Zap,
-  Moon, Sun, Keyboard
+  Moon, Sun, Keyboard, HardHat, Clapperboard, Camera, Activity
 } from 'lucide-react'
+import ShareButton from './ShareButton'
 
 export default function Toolbar({
   exploded, onToggleExplode,
@@ -17,6 +18,10 @@ export default function Toolbar({
   onDuplicate, onDelete,
   darkMode, onToggleDark, onToggleShortcuts,
   onUndo, onRedo, canUndo, canRedo,
+  showCrane, onToggleCrane,
+  onShare, shareMetrics,
+  cinematicMode, onToggleCinematic,
+  showEarthquake, onToggleEarthquake,
 }) {
   const isSelectMode = !builderMode && !siteMode && !sequenceMode && !gameMode
 
@@ -111,6 +116,22 @@ export default function Toolbar({
         >
           <Layers size={15} />
         </button>
+        <button
+          className={`tb-btn ${showCrane ? 'tb-btn--active' : ''}`}
+          title="Tower Crane"
+          onClick={onToggleCrane}
+          disabled={siteMode || gameMode}
+        >
+          <HardHat size={15} />
+        </button>
+        <button
+          className={`tb-btn ${showEarthquake ? 'tb-btn--active' : ''}`}
+          title="Earthquake Simulation"
+          onClick={onToggleEarthquake}
+          disabled={gameMode}
+        >
+          <Activity size={15} />
+        </button>
       </div>
 
       <div className="toolbar-sep" />
@@ -150,6 +171,26 @@ export default function Toolbar({
           <Play size={13} />
           GAME
         </button>
+      </div>
+
+      <div className="toolbar-sep" />
+
+      <div className="toolbar-group">
+        <button
+          className={`tb-btn tb-btn--text ${cinematicMode ? 'tb-btn--active' : ''}`}
+          title="Cinematic demo tour"
+          onClick={onToggleCinematic}
+          disabled={gameMode || builderMode}
+        >
+          <Clapperboard size={13} />
+          DEMO
+        </button>
+      </div>
+
+      <div className="toolbar-sep" />
+
+      <div className="toolbar-group">
+        <ShareButton shareMetrics={shareMetrics} onShare={onShare} disabled={gameMode} />
       </div>
 
       <div className="toolbar-sep" />

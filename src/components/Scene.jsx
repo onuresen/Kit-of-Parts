@@ -7,6 +7,8 @@ import Part from './Part'
 import DimensionLines from './DimensionLines'
 import Connection from './Connection'
 import SiteGrid from './SiteGrid'
+import Crane from './Crane'
+import CinematicMode from './CinematicMode'
 import { useKit } from './KitContext'
 function CameraController({ siteMode, controlsRef, cameraCmd }) {
   const { camera } = useThree()
@@ -83,6 +85,20 @@ export default function Scene({
   envSettings,
   cameraCmd,
   onFramePart,
+  showCrane,
+  showCraneRadius,
+  currentPartWeight,
+  onRendererReady,
+  cinematicMode,
+  onCinematicEnd,
+  onSetExploded,
+  onSetSequenceMode,
+  onSetSequenceStep,
+  onSetShowMetrics,
+  maxStep,
+  isShaking,
+  earthquakeMagnitude,
+  highlightedWeek,
 }) {
   const controlsRef = useRef()
   const { parts } = useKit()
@@ -91,7 +107,8 @@ export default function Scene({
     <Canvas
       shadows
       style={{ position: 'absolute', inset: 0, background: siteMode ? '#eef2f7' : '#f4f4f4' }}
-      gl={{ localClippingEnabled: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1 }}
+      gl={{ localClippingEnabled: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1, preserveDrawingBuffer: true }}
+      onCreated={({ gl }) => onRendererReady?.(gl)}
     >
       <PerspectiveCamera makeDefault position={[8, 8, 8]} fov={45} />
       <OrbitControls ref={controlsRef} makeDefault enableDamping />
@@ -169,6 +186,9 @@ export default function Scene({
             onGameClick={onGameClick}
             builderMode={builderMode}
             isSelected={selectedPartId === part.id}
+            isShaking={isShaking}
+            earthquakeMagnitude={earthquakeMagnitude}
+            highlightedWeek={highlightedWeek}
           />
         )
       })}
@@ -211,7 +231,27 @@ export default function Scene({
         </mesh>
       )}
 
+      {!siteMode && showCrane && (
+        <Crane
+          sequenceMode={sequenceMode}
+          sequenceStep={sequenceStep}
+          showRadius={showCraneRadius}
+          currentPartWeight={currentPartWeight}
+        />
+      )}
+
       <ContactShadows position={[0, -0.26, 0]} opacity={0.4} scale={siteMode ? 40 : 12} blur={2} />
+
+      <CinematicMode
+        active={cinematicMode}
+        controlsRef={controlsRef}
+        onEnd={onCinematicEnd}
+        onSetExploded={onSetExploded}
+        onSetSequenceMode={onSetSequenceMode}
+        onSetSequenceStep={onSetSequenceStep}
+        onSetShowMetrics={onSetShowMetrics}
+        maxStep={maxStep}
+      />
     </Canvas>
   )
 }

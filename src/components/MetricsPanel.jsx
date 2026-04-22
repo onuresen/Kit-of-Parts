@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useKit } from './KitContext'
 import { generatePDF } from '../utils/pdfGenerator'
 import { exportIFC } from '../utils/ifcExporter'
+import AIOptimiserPanel from './AIOptimiserPanel'
+import GanttPanel from './GanttPanel'
 
 const FOOTPRINT_M2 = 16
 const RIBA_BUDGET = 300
@@ -26,7 +28,7 @@ function getCasbeeRank(carbonPerM2) {
 const SEISMIC_COLOR = { 1: '#f39c12', 2: '#3498db', 3: '#27ae60' }
 const SEISMIC_LABEL = { 1: '耐震等級1', 2: '耐震等級2', 3: '耐震等級3' }
 
-export default function MetricsPanel({ selectedVariants, visible, onClose }) {
+export default function MetricsPanel({ selectedVariants, visible, onClose, onVariantChange, highlightedWeek, onHighlightWeek }) {
   const { parts, projectSettings, formatCurrency } = useKit()
   const [activeTab, setActiveTab] = useState('cost')
 
@@ -122,7 +124,7 @@ export default function MetricsPanel({ selectedVariants, visible, onClose }) {
     exportIFC(parts, selectedVariants)
   }
 
-  const tabs = ['cost', 'carbon', 'bom', 'prefab', 'structural']
+  const tabs = ['cost', 'carbon', 'bom', 'prefab', 'structural', 'ai', 'schedule']
 
   return (
     <div className="metrics-panel">
@@ -138,7 +140,9 @@ export default function MetricsPanel({ selectedVariants, visible, onClose }) {
                tab === 'carbon' ? 'Carbon' :
                tab === 'bom' ? 'BOM' :
                tab === 'prefab' ? 'Prefab' :
-               '構造'}
+               tab === 'structural' ? '構造' :
+               tab === 'ai' ? '✦ AI' :
+               '📅 Schedule'}
             </button>
           ))}
         </div>
@@ -525,6 +529,25 @@ export default function MetricsPanel({ selectedVariants, visible, onClose }) {
 
           <div className="carbon-footer-note">建築基準法 = Building Standards Act Japan · JIS = 日本工業規格</div>
         </>
+      )}
+
+      {/* ── AI Optimiser tab ── */}
+      {activeTab === 'ai' && (
+        <AIOptimiserPanel
+          parts={parts}
+          selectedVariants={selectedVariants}
+          onVariantChange={onVariantChange}
+        />
+      )}
+
+      {/* ── Schedule / Gantt tab ── */}
+      {activeTab === 'schedule' && (
+        <GanttPanel
+          selectedVariants={selectedVariants}
+          visible={visible}
+          highlightedWeek={highlightedWeek}
+          onHighlightWeek={onHighlightWeek}
+        />
       )}
     </div>
   )

@@ -7,6 +7,8 @@ import MetricsPanel from './components/MetricsPanel'
 import GameScorePanel from './components/GameScorePanel'
 import ShortcutsModal from './components/ShortcutsModal'
 import ViewCube from './components/ViewCube'
+import CranePanel from './components/CranePanel'
+import EarthquakePanel from './components/EarthquakePanel'
 import { useKit } from './components/KitContext'
 import './App.css'
 
@@ -48,6 +50,28 @@ export default function App() {
 
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('ic-dark') === 'true')
   const [showShortcuts, setShowShortcuts] = useState(false)
+  const [showCrane, setShowCrane] = useState(false)
+  const [showCraneRadius, setShowCraneRadius] = useState(false)
+  const [cinematicMode, setCinematicMode] = useState(false)
+  const rendererRef = useRef(null)
+
+  // ── Gantt / schedule ─────────────────────────────────────
+  const [highlightedWeek, setHighlightedWeek] = useState(null)
+
+  // ── Earthquake ───────────────────────────────────────────
+  const [showEarthquake, setShowEarthquake] = useState(false)
+  const [earthquakeMagnitude, setEarthquakeMagnitude] = useState(6.0)
+  const [isShaking, setIsShaking] = useState(false)
+  const [hasShaken, setHasShaken] = useState(false)
+
+  const currentPartWeight = (() => {
+    if (!sequenceMode || !parts || sequenceStep <= 0) return 0
+    const sorted = [...parts].sort((a, b) => (a.sequence ?? 99) - (b.sequence ?? 99))
+    const part = sorted[sequenceStep - 1]
+    if (!part) return 0
+    const variantIdx = selectedVariants[part.id] ?? 0
+    return part.variants[variantIdx]?.weight_kg ?? 0
+  })()
 
   useEffect(() => {
     localStorage.setItem('ic-dark', darkMode)
@@ -228,6 +252,109 @@ export default function App() {
     }
   }
 
+  // ── Earthquake ───────────────────────────────────────────
+  function handleShake() {
+    if (isShaking) return
+    setIsShaking(true)
+    setHasShaken(false)
+    const duration = (earthquakeMagnitude * 0.35 + 1) * 1000
+    setTimeout(() => {
+      setIsShaking(false)
+      setHasShaken(true)
+    }, duration)
+  }
+
+  // ── Share / screenshot ───────────────────────────────────
+  const shareMetrics = (() => {
+    if (!parts) return { carbon: 0, casbee: 'A', cost: '$0', parts: 0 }
+    const activeParts = parts.filter(p => visible[p.id])
+    const totalCarbon = activeParts.reduce((s, p) => {
+      const v = p.variants[selectedVariants[p.id] ?? 0]
+      return s + (v?.carbon_kgco2e ?? 0)
+    }, 0)
+    const totalCost = activeParts.reduce((s, p) => {
+      const v = p.variants[selectedVariants[p.id] ?? 0]
+      return s + (v?.unit_cost_usd ?? 0) + (v?.labor_cost_usd ?? 0)
+    }, 0)
+    const carbonPerM2 = totalCarbon / 16
+    const casbee = carbonPerM2 <= 200 ? 'S' : carbonPerM2 <= 350 ? 'A' : carbonPerM2 <= 500 ? 'B+' : carbonPerM2 <= 700 ? 'B-' : 'C'
+    return {
+      carbon: Math.round(totalCarbon),
+      casbee,
+      cost: `$${Math.round(totalCost).toLocaleString()}`,
+      parts: activeParts.length,
+    }
+  })()
+
+  async function handleShare() {
+    if (!rendererRef.current) return
+    const gl = rendererRef.current
+    const src = gl.domElement.toDataURL('image/png')
+
+    const img = new Image()
+    img.src = src
+    await new Promise(r => { img.onload = r })
+
+    const W = img.width, H = img.height
+    const cvs = document.createElement('canvas')
+    cvs.width = W; cvs.height = H
+    const ctx = cvs.getContext('2d')
+    ctx.drawImage(img, 0, 0)
+
+    const pad = Math.round(W * 0.018)
+    const bW = Math.round(W * 0.42)
+    const bH = Math.round(H * 0.13)
+    const bX = pad, bY = H - bH - pad, rr = 10
+
+    ctx.save()
+    ctx.beginPath()
+    ctx.moveTo(bX + rr, bY); ctx.lineTo(bX + bW - rr, bY)
+    ctx.quadraticCurveTo(bX + bW, bY, bX + bW, bY + rr)
+    ctx.lineTo(bX + bW, bY + bH - rr)
+    ctx.quadraticCurveTo(bX + bW, bY + bH, bX + bW - rr, bY + bH)
+    ctx.lineTo(bX + rr, bY + bH)
+    ctx.quadraticCurveTo(bX, bY + bH, bX, bY + bH - rr)
+    ctx.lineTo(bX, bY + rr)
+    ctx.quadraticCurveTo(bX, bY, bX + rr, bY)
+    ctx.closePath()
+    ctx.fillStyle = 'rgba(20,24,36,0.88)'
+    ctx.fill()
+    ctx.restore()
+
+    const fs1 = Math.round(bH * 0.28), fs2 = Math.round(bH * 0.22), fs3 = Math.round(bH * 0.18)
+    ctx.font = `700 ${fs1}px "Segoe UI",system-ui,sans-serif`
+    ctx.fillStyle = '#ffffff'
+    ctx.fillText('Kit-of-Parts', bX + pad, bY + bH * 0.34)
+
+    ctx.font = `500 ${fs2}px "Segoe UI",system-ui,sans-serif`
+    ctx.fillStyle = 'rgba(255,255,255,0.75)'
+    ctx.fillText(
+      `${shareMetrics.carbon} kg CO₂e · CASBEE ${shareMetrics.casbee} · ${shareMetrics.cost} · ${shareMetrics.parts} parts`,
+      bX + pad, bY + bH * 0.7
+    )
+
+    ctx.font = `400 ${fs3}px "Segoe UI",system-ui,sans-serif`
+    ctx.fillStyle = 'rgba(255,255,255,0.45)'
+    ctx.fillText('onuresen47.github.io/Kit-of-Parts', bX + pad, bY + bH * 0.92)
+
+    const link = document.createElement('a')
+    link.download = 'kit-of-parts.png'
+    link.href = cvs.toDataURL('image/png')
+    link.click()
+
+    const caption = `Designed with Kit-of-Parts — open-source 3D modular building configurator.
+
+📐 ${shareMetrics.parts} prefab components
+♻️ ${shareMetrics.carbon} kg CO₂e embodied carbon · CASBEE rank ${shareMetrics.casbee}
+💰 ${shareMetrics.cost} all-in
+
+Built in React + Three.js with real-time cost, carbon & IFC export.
+
+🔗 Try it live: https://onuresen47.github.io/Kit-of-Parts/`
+
+    try { await navigator.clipboard.writeText(caption) } catch { /* clipboard unavailable */ }
+  }
+
   if (isLoading || !parts || parts.length === 0) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'white', background: '#2c3e50' }}>
@@ -266,6 +393,14 @@ export default function App() {
         onRedo={redo}
         canUndo={canUndo}
         canRedo={canRedo}
+        showCrane={showCrane}
+        onToggleCrane={() => setShowCrane(v => !v)}
+        showEarthquake={showEarthquake}
+        onToggleEarthquake={() => { setShowEarthquake(v => !v); setHasShaken(false) }}
+        onShare={handleShare}
+        shareMetrics={shareMetrics}
+        cinematicMode={cinematicMode}
+        onToggleCinematic={() => setCinematicMode(v => !v)}
       />
 
       <Sidebar
@@ -313,6 +448,19 @@ export default function App() {
         envSettings={envSettings}
         cameraCmd={cameraCmd}
         onFramePart={handleFramePart}
+        showCrane={showCrane}
+        showCraneRadius={showCraneRadius}
+        currentPartWeight={currentPartWeight}
+        isShaking={isShaking}
+        earthquakeMagnitude={earthquakeMagnitude}
+        onRendererReady={gl => { rendererRef.current = gl }}
+        cinematicMode={cinematicMode}
+        onCinematicEnd={() => setCinematicMode(false)}
+        onSetExploded={setExploded}
+        onSetSequenceMode={setSequenceMode}
+        onSetSequenceStep={setSequenceStep}
+        onSetShowMetrics={setShowMetrics}
+        maxStep={maxStep}
       />
 
       <InfoPanel
@@ -337,6 +485,9 @@ export default function App() {
           selectedVariants={selectedVariants}
           visible={visible}
           onClose={() => setShowMetrics(false)}
+          onVariantChange={setVariant}
+          highlightedWeek={highlightedWeek}
+          onHighlightWeek={w => setHighlightedWeek(w)}
         />
       )}
 
@@ -350,6 +501,27 @@ export default function App() {
       )}
 
       {showShortcuts && <ShortcutsModal onClose={() => setShowShortcuts(false)} />}
+
+      {showCrane && (
+        <CranePanel
+          sequenceMode={sequenceMode}
+          sequenceStep={sequenceStep}
+          currentPartWeight={currentPartWeight}
+          showRadius={showCraneRadius}
+          onToggleRadius={() => setShowCraneRadius(v => !v)}
+        />
+      )}
+
+      {showEarthquake && (
+        <EarthquakePanel
+          magnitude={earthquakeMagnitude}
+          onMagnitude={setEarthquakeMagnitude}
+          isShaking={isShaking}
+          onShake={handleShake}
+          hasShaken={hasShaken}
+          selectedVariants={selectedVariants}
+        />
+      )}
 
       <ViewCube onPreset={handleCameraPreset} darkMode={darkMode} />
 
