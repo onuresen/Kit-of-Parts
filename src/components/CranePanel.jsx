@@ -26,7 +26,7 @@ const SPECS = [
   ['Rated moment',   '60 t·m'],
 ]
 
-export default function CranePanel({ sequenceMode, sequenceStep, currentPartWeight, showRadius, onToggleRadius }) {
+export default function CranePanel({ sequenceMode, sequenceStep, currentPartWeight, showRadius, onToggleRadius, onWindChange, showSecondCrane, onToggleSecondCrane, secondCraneX, onSecondCraneX }) {
   const { parts } = useKit()
 
   // ── Wind simulation ─────────────────────────────────────
@@ -35,7 +35,9 @@ export default function CranePanel({ sequenceMode, sequenceStep, currentPartWeig
   useEffect(() => {
     const id = setInterval(() => {
       windRef.current = Math.max(0, Math.min(25, windRef.current + (Math.random() - 0.5) * 0.6))
-      setWindSpeed(+(windRef.current.toFixed(1)))
+      const ws = +(windRef.current.toFixed(1))
+      setWindSpeed(ws)
+      onWindChange?.(ws)
     }, 2000)
     return () => clearInterval(id)
   }, [])
@@ -182,6 +184,47 @@ export default function CranePanel({ sequenceMode, sequenceStep, currentPartWeig
         >
           {showRadius ? 'Hide Reach Rings' : 'Show Reach Rings'}
         </button>
+      </div>
+
+      {/* ── Second Crane ─────────────────────────────────── */}
+      <div className="ipr-section" style={{ padding: '10px 14px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <div className="ipr-section-label" style={{ margin: 0 }}>Second Crane</div>
+          <button
+            onClick={onToggleSecondCrane}
+            style={{
+              padding: '3px 10px', border: 'none', borderRadius: 5, cursor: 'pointer', fontSize: 11, fontWeight: 600,
+              background: showSecondCrane ? '#e74c3c' : '#2980b9', color: '#fff',
+            }}
+          >
+            {showSecondCrane ? 'Remove' : '+ Add Crane'}
+          </button>
+        </div>
+        {showSecondCrane && (
+          <>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <span style={{ fontSize: 11, color: '#888' }}>X offset from Crane 1</span>
+              <span style={{ fontSize: 12, fontWeight: 700 }}>{secondCraneX > 0 ? '+' : ''}{secondCraneX} m</span>
+            </div>
+            <input
+              type="range" min={-18} max={18} step={0.5}
+              value={secondCraneX}
+              onChange={e => onSecondCraneX(parseFloat(e.target.value))}
+              style={{ width: '100%', accentColor: '#e74c3c' }}
+            />
+            {(() => {
+              const dist = Math.abs(secondCraneX)
+              const hasCollision = dist < 18
+              const color = hasCollision ? (dist < 10 ? '#e74c3c' : '#f39c12') : '#27ae60'
+              const label = hasCollision ? (dist < 10 ? '⚠ COLLISION ZONE ACTIVE' : '⚠ JIB RADII OVERLAP') : '✓ CLEAR'
+              return (
+                <div style={{ marginTop: 6, fontSize: 11, fontWeight: 700, color, textAlign: 'center', padding: '4px 0', background: color + '18', borderRadius: 5 }}>
+                  {label}
+                </div>
+              )
+            })()}
+          </>
+        )}
       </div>
     </div>
   )

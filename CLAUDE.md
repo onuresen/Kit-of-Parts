@@ -87,6 +87,16 @@ No Tailwind — all styling is custom CSS in `src/App.css` plus inline styles. D
 | `gameStep` | number | Current target part index |
 | `gameMistakes` | number | Wrong clicks |
 | `gameElapsed` | number | Timer ms |
+| `highlightedWeek` | number\|null | Gantt week hovered — dims non-week parts in 3D |
+| `showSecondCrane` | bool | Second crane + collision disc visible |
+| `secondCraneX` | number | X offset of second crane from first (default −8) |
+| `showWindArrows` | bool | Wind load arrow overlay active |
+| `windSpeed` | number | Shared wind speed (m/s) — lifted from CranePanel |
+| `showFloorPlan` | bool | Floor plan modal open |
+| `showEarthquake` | bool | Earthquake panel visible |
+| `earthquakeMagnitude` | number | Richter 3–9 |
+| `isShaking` | bool | Shake animation running |
+| `hasShaken` | bool | Verdict visible (true after shake completes) |
 
 **3. Component-level** — hover, animation refs, panel open states
 
@@ -151,6 +161,7 @@ Default kits in `/dist/`: `default-kit.json`, `eco-kit.json`, `premium-kit.json`
 | `src/components/SiteGrid.jsx` | 18.2m Ken grid for site plan mode |
 | `src/components/DimensionLines.jsx` | 3D dimension overlays |
 | `src/components/ViewCube.jsx` | 3D nav cube (bottom-right). Calls `onPreset(name)` |
+| `src/components/WindArrows.jsx` | Pressure arrows per part face: blue=windward, red=leeward, orange=roof. Scale pulses with `windSpeed` via `useFrame` |
 
 ### UI Panels
 | File | Role |
@@ -165,6 +176,9 @@ Default kits in `/dist/`: `default-kit.json`, `eco-kit.json`, `premium-kit.json`
 | `src/components/BuilderPanel.jsx` | Part editor: name, shape, position, size, explosion vector, variant props, GLB import |
 | `src/components/GameScorePanel.jsx` | Game completion overlay |
 | `src/components/ShortcutsModal.jsx` | Keyboard shortcuts reference |
+| `src/components/EarthquakePanel.jsx` | Right-side panel (`right:280, bottom:20`, uses `metrics-panel` class). Magnitude slider 3–9, seismic grade table, Shake button, survived/at-risk verdict |
+| `src/components/FloorPlanPanel.jsx` | Full-screen modal. 2D canvas projects parts onto XZ plane (top-down). Ken grid overlay toggle. SVG export button |
+| `src/components/GanttPanel.jsx` | Schedule tab inside MetricsPanel. CSS Gantt bars per part, grouped by week. Click week to highlight parts in 3D |
 
 ### Utils
 | File | Role |
@@ -239,7 +253,7 @@ Priority order as agreed. Build these in sequence. Each entry has enough detail 
 
 ---
 
-### 2. Construction Schedule / Gantt Overlay ⬜
+### 2. Construction Schedule / Gantt Overlay ✅ SHIPPED
 **What:** Each part already has a `sequence` field. Add a `week` field to each part (or derive from sequence). Sequence timeline becomes a Gantt chart — horizontal bars per part, grouped by week. Hover a week bar to highlight that week's parts in 3D. Export as PDF schedule.
 
 **UI:** New "Schedule" tab in MetricsPanel (alongside cost, carbon, bom, prefab, structural, ai). Gantt rendered as CSS bars (no canvas needed).
@@ -251,7 +265,7 @@ Priority order as agreed. Build these in sequence. Each entry has enough detail 
 
 ---
 
-### 3. Multi-Crane Collision Zone ⬜
+### 3. Multi-Crane Collision Zone ✅ SHIPPED
 **What:** Add a second crane to the site. Both cranes have configurable positions. The system calculates the anti-collision envelope (overlapping jib radii) and renders a translucent red disc at the danger zone. When sequence steps would put both jibs in the zone simultaneously, both freeze and flash.
 
 **UI:** "Add Crane" button in CranePanel. Second crane position slider (X offset). Anti-collision radius shown as `<mesh>` ring on site.
@@ -265,7 +279,7 @@ Priority order as agreed. Build these in sequence. Each entry has enough detail 
 
 ---
 
-### 4. Wind Load Arrows on Facade ⬜
+### 4. Wind Load Arrows on Facade ✅ SHIPPED
 **What:** A "Wind Analysis" toggle overlays animated pressure arrows on part faces. Windward faces get inward blue arrows, leeward faces get outward red arrows (suction), roof faces get uplift arrows. Arrow size scales with wind speed (already simulated in CranePanel's `windSpeed` state).
 
 **UI:** Button in Toolbar (`Wind` icon). Arrows visible in Scene when active.
@@ -279,7 +293,7 @@ Priority order as agreed. Build these in sequence. Each entry has enough detail 
 
 ---
 
-### 5. Floor Plan Auto-Generator ⬜
+### 5. Floor Plan Auto-Generator ✅ SHIPPED
 **What:** Projects all visible parts downward onto a 2D canvas. Auto-traces footprints, labels rooms/parts, shows dimensions. Export as SVG or PNG. Optionally shows Ken grid (910mm module) overlay.
 
 **UI:** New "Floor Plan" button in Toolbar or new tab in MetricsPanel. Renders a `<canvas>` element in a modal. Export button downloads SVG.
@@ -491,6 +505,10 @@ recorder.start()
 
 | Feature | Files |
 |---|---|
+| Floor Plan Auto-Generator | `src/components/FloorPlanPanel.jsx` (new — canvas 2D projection, SVG export), `src/App.jsx` (`showFloorPlan` state), `src/components/Toolbar.jsx` (`LayoutTemplate` icon) |
+| Wind Load Arrows | `src/components/WindArrows.jsx` (new — cone+cylinder arrows per face, pulsing via useFrame), `src/components/Scene.jsx`, `src/components/Toolbar.jsx` (`Wind` icon), `src/App.jsx` (`showWindArrows`, `windSpeed` state), `src/components/CranePanel.jsx` (`onWindChange` callback lifts windSpeed to App) |
+| Multi-Crane Collision Zone | `src/components/Crane.jsx` (`offsetX`/`offsetZ` props), `src/components/Scene.jsx` (second Crane instance + collision disc mesh), `src/components/CranePanel.jsx` (Add Crane toggle + X slider + warning badge), `src/App.jsx` (`showSecondCrane`, `secondCraneX` state) |
+| Construction Schedule / Gantt | `src/components/GanttPanel.jsx` (new), `src/components/MetricsPanel.jsx` (Schedule tab added), `src/App.jsx` (`highlightedWeek` state), `src/components/Scene.jsx` + `Part.jsx` (week dim/glow on highlight) |
 | Earthquake Shake Simulation | `src/components/EarthquakePanel.jsx` (panel, verdict logic), `src/components/Part.jsx` (+`isShaking`, `earthquakeMagnitude` props, GSAP shake loop), `src/App.jsx` (`showEarthquake`, `earthquakeMagnitude`, `isShaking`, `hasShaken` state + `handleShake`), `src/components/Toolbar.jsx` (`Activity` icon button), `src/components/Scene.jsx` (passes shake props to Part) |
 | OG / Twitter meta tags | `index.html`, `public/og-preview.png` (static asset, needs manual screenshot) |
 | Screenshot Share button | `src/components/ShareButton.jsx`, `src/App.jsx` (`handleShare`, `shareMetrics`), `src/components/Scene.jsx` (`preserveDrawingBuffer`) |

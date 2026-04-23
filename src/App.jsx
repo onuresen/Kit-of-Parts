@@ -9,6 +9,7 @@ import ShortcutsModal from './components/ShortcutsModal'
 import ViewCube from './components/ViewCube'
 import CranePanel from './components/CranePanel'
 import EarthquakePanel from './components/EarthquakePanel'
+import FloorPlanPanel from './components/FloorPlanPanel'
 import { useKit } from './components/KitContext'
 import './App.css'
 
@@ -57,6 +58,17 @@ export default function App() {
 
   // ── Gantt / schedule ─────────────────────────────────────
   const [highlightedWeek, setHighlightedWeek] = useState(null)
+
+  // ── Multi-crane ──────────────────────────────────────────
+  const [showSecondCrane, setShowSecondCrane] = useState(false)
+  const [secondCraneX, setSecondCraneX] = useState(-8)
+
+  // ── Wind arrows ──────────────────────────────────────────
+  const [showWindArrows, setShowWindArrows] = useState(false)
+  const [windSpeed, setWindSpeed] = useState(8.0)
+
+  // ── Floor plan ───────────────────────────────────────────
+  const [showFloorPlan, setShowFloorPlan] = useState(false)
 
   // ── Earthquake ───────────────────────────────────────────
   const [showEarthquake, setShowEarthquake] = useState(false)
@@ -397,6 +409,9 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
         onToggleCrane={() => setShowCrane(v => !v)}
         showEarthquake={showEarthquake}
         onToggleEarthquake={() => { setShowEarthquake(v => !v); setHasShaken(false) }}
+        showWindArrows={showWindArrows}
+        onToggleWindArrows={() => setShowWindArrows(v => !v)}
+        onShowFloorPlan={() => setShowFloorPlan(true)}
         onShare={handleShare}
         shareMetrics={shareMetrics}
         cinematicMode={cinematicMode}
@@ -453,6 +468,11 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
         currentPartWeight={currentPartWeight}
         isShaking={isShaking}
         earthquakeMagnitude={earthquakeMagnitude}
+        highlightedWeek={highlightedWeek}
+        showSecondCrane={showSecondCrane}
+        secondCraneX={secondCraneX}
+        showWindArrows={showWindArrows}
+        windSpeed={windSpeed}
         onRendererReady={gl => { rendererRef.current = gl }}
         cinematicMode={cinematicMode}
         onCinematicEnd={() => setCinematicMode(false)}
@@ -509,6 +529,11 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
           currentPartWeight={currentPartWeight}
           showRadius={showCraneRadius}
           onToggleRadius={() => setShowCraneRadius(v => !v)}
+          onWindChange={setWindSpeed}
+          showSecondCrane={showSecondCrane}
+          onToggleSecondCrane={() => setShowSecondCrane(v => !v)}
+          secondCraneX={secondCraneX}
+          onSecondCraneX={setSecondCraneX}
         />
       )}
 
@@ -520,6 +545,14 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
           onShake={handleShake}
           hasShaken={hasShaken}
           selectedVariants={selectedVariants}
+        />
+      )}
+
+      {showFloorPlan && (
+        <FloorPlanPanel
+          visible={visible}
+          showKenGrid={envSettings.kenGrid}
+          onClose={() => setShowFloorPlan(false)}
         />
       )}
 

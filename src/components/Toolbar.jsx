@@ -1,7 +1,7 @@
 import {
   MousePointer2, Pencil, Scissors, Copy, Trash2,
   Ruler, BarChart3, Map, Undo2, Redo2, Layers, Play, Zap,
-  Moon, Sun, Keyboard, HardHat, Clapperboard, Camera, Activity
+  Moon, Sun, Keyboard, HardHat, Clapperboard, Camera, Activity, Wind, LayoutTemplate
 } from 'lucide-react'
 import ShareButton from './ShareButton'
 
@@ -22,6 +22,8 @@ export default function Toolbar({
   onShare, shareMetrics,
   cinematicMode, onToggleCinematic,
   showEarthquake, onToggleEarthquake,
+  showWindArrows, onToggleWindArrows,
+  onShowFloorPlan,
 }) {
   const isSelectMode = !builderMode && !siteMode && !sequenceMode && !gameMode
 
@@ -131,6 +133,22 @@ export default function Toolbar({
           disabled={gameMode}
         >
           <Activity size={15} />
+        </button>
+        <button
+          className={`tb-btn ${showWindArrows ? 'tb-btn--active' : ''}`}
+          title="Wind Load Arrows"
+          onClick={onToggleWindArrows}
+          disabled={siteMode || gameMode}
+        >
+          <Wind size={15} />
+        </button>
+        <button
+          className="tb-btn"
+          title="Floor Plan"
+          onClick={onShowFloorPlan}
+          disabled={siteMode || gameMode}
+        >
+          <LayoutTemplate size={15} />
         </button>
       </div>
 

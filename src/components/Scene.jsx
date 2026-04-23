@@ -9,6 +9,7 @@ import Connection from './Connection'
 import SiteGrid from './SiteGrid'
 import Crane from './Crane'
 import CinematicMode from './CinematicMode'
+import WindArrows from './WindArrows'
 import { useKit } from './KitContext'
 function CameraController({ siteMode, controlsRef, cameraCmd }) {
   const { camera } = useThree()
@@ -99,6 +100,10 @@ export default function Scene({
   isShaking,
   earthquakeMagnitude,
   highlightedWeek,
+  showSecondCrane,
+  secondCraneX,
+  showWindArrows,
+  windSpeed,
 }) {
   const controlsRef = useRef()
   const { parts } = useKit()
@@ -238,6 +243,46 @@ export default function Scene({
           showRadius={showCraneRadius}
           currentPartWeight={currentPartWeight}
         />
+      )}
+
+      {!siteMode && showCrane && showSecondCrane && (() => {
+        // Crane 1 base X = 7, Crane 2 base X = 7 + secondCraneX
+        const c1x = 7, c2x = 7 + (secondCraneX ?? -8)
+        const JIB_REACH = 9
+        const dist = Math.abs(c1x - c2x)
+        const hasCollision = dist < JIB_REACH * 2
+        const midX = (c1x + c2x) / 2
+        // Overlap disc radius: how much the circles overlap
+        const overlapR = hasCollision ? (JIB_REACH - dist / 2) : 0
+        return (
+          <group>
+            <Crane
+              sequenceMode={false}
+              sequenceStep={0}
+              showRadius={showCraneRadius}
+              currentPartWeight={0}
+              offsetX={secondCraneX ?? -8}
+            />
+            {hasCollision && (
+              <>
+                {/* Collision zone disc */}
+                <mesh position={[midX, 0.03, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+                  <circleGeometry args={[Math.max(0.5, overlapR), 48]} />
+                  <meshBasicMaterial color="#e74c3c" transparent opacity={0.22} />
+                </mesh>
+                {/* Collision zone ring outline */}
+                <mesh position={[midX, 0.04, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+                  <torusGeometry args={[Math.max(0.5, overlapR), 0.08, 8, 48]} />
+                  <meshBasicMaterial color="#e74c3c" transparent opacity={0.6} />
+                </mesh>
+              </>
+            )}
+          </group>
+        )
+      })()}
+
+      {!siteMode && showWindArrows && (
+        <WindArrows parts={parts} visible={visible} windSpeed={windSpeed ?? 8} />
       )}
 
       <ContactShadows position={[0, -0.26, 0]} opacity={0.4} scale={siteMode ? 40 : 12} blur={2} />
