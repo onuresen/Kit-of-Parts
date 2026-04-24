@@ -41,7 +41,7 @@ export default function InfoPanel({
   }
 
   return (
-    <div className="info-panel-right">
+    <div className={`info-panel-right${part ? ' info-panel-right--open' : ''}`}>
 
       {part ? (
         /* ── Part selected ── */

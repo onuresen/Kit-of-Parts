@@ -2014,3 +2014,168 @@
   border-color: #27ae60 !important;
   color: #fff !important;
 }
+
+/* ─── Mobile hamburger / close buttons (hidden on desktop) ── */
+.tb-btn--mobile-only { display: none !important; }
+.tb-sep--mobile-only { display: none !important; }
+.sidebar-close-btn   { display: none; }
+
+/* ─── Mobile / small-screen responsive overrides ────────── */
+@media (max-width: 768px) {
+
+  /* Show mobile-only hamburger button */
+  .tb-btn--mobile-only { display: flex !important; }
+  .tb-sep--mobile-only { display: block !important; }
+
+  /* Sidebar — hidden by default, shown when toggled */
+  .sidebar { display: none; }
+  .sidebar.sidebar--open {
+    display: block;
+    z-index: 30;
+  }
+
+  /* Close button inside sidebar */
+  .sidebar-close-btn {
+    display: block;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: #aaa;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 4px;
+  }
+
+  /* InfoPanel-right — hidden when no part selected, shown when part selected */
+  .info-panel-right { display: none; }
+  .info-panel-right.info-panel-right--open { display: flex; }
+
+  /* Toolbar — scrollable strip pinned to top edge */
+  .toolbar {
+    left: 8px;
+    right: 8px;
+    transform: none;
+    max-width: calc(100vw - 16px);
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 4px 6px;
+    gap: 1px;
+    top: 8px;
+  }
+  .toolbar::-webkit-scrollbar { display: none; }
+
+  .tb-btn {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+
+  /* Hide EXPLODE/ASSEMBLE text label — keep the icon */
+  .tb-btn--text {
+    font-size: 0;
+    padding: 0;
+    width: 28px;
+  }
+  .tb-btn--text svg { flex-shrink: 0; }
+
+  .toolbar-sep {
+    height: 16px;
+    margin: 0 2px;
+  }
+
+  /* Sidebar — narrow, repositioned below toolbar */
+  .sidebar {
+    top: 54px;
+    left: 8px;
+    width: calc(100vw - 72px);
+    max-width: 260px;
+    max-height: 38vh;
+  }
+
+  /* InfoPanel right — becomes a bottom drawer */
+  .info-panel-right {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-height: 48vh;
+    height: auto;
+    border-left: none;
+    border-top: 1px solid #ebebeb;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Metrics panel — full width, bottom */
+  .metrics-panel {
+    left: 8px !important;
+    right: 8px !important;
+    bottom: 0 !important;
+    top: auto !important;
+    width: calc(100vw - 16px) !important;
+    max-width: none !important;
+    border-radius: 12px 12px 0 0;
+    max-height: 52vh;
+  }
+
+  /* CranePanel and EarthquakePanel — override inline right:280 */
+  .crane-panel,
+  .eq-panel {
+    right: 8px !important;
+    left: 8px !important;
+    bottom: 0 !important;
+    top: auto !important;
+    width: calc(100vw - 16px) !important;
+    max-width: none !important;
+    border-radius: 12px 12px 0 0;
+  }
+
+  /* BOM panel — full width, bottom */
+  .bom-panel {
+    left: 8px !important;
+    right: 8px !important;
+    bottom: 0 !important;
+    width: calc(100vw - 16px) !important;
+    max-width: none !important;
+    border-radius: 12px 12px 0 0;
+  }
+
+  /* Legacy info panel (bottom-right) */
+  .info-panel {
+    right: 8px;
+    left: 8px;
+    bottom: 8px;
+    width: auto;
+  }
+
+  /* Metrics tabs — horizontally scrollable */
+  .metrics-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+  }
+  .metrics-tabs::-webkit-scrollbar { display: none; }
+  .metrics-tab {
+    flex-shrink: 0;
+  }
+
+  /* Shortcuts modal */
+  .shortcuts-modal {
+    min-width: unset;
+    width: calc(100vw - 32px);
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  /* Game score overlay */
+  .game-score-panel {
+    width: calc(100vw - 32px);
+    padding: 24px 20px;
+  }
+}

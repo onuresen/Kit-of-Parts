@@ -26,7 +26,7 @@ export default function EarthquakePanel({ magnitude, onMagnitude, isShaking, onS
 
   return (
     <div
-      className="metrics-panel"
+      className="metrics-panel eq-panel"
       style={{ bottom: 20, right: 280, left: 'auto', top: 'auto', width: 280, maxHeight: '80vh', overflow: 'auto' }}
     >
       <div className="metrics-header" style={{ padding: '10px 14px 0' }}>

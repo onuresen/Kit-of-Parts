@@ -70,6 +70,9 @@ export default function App() {
   // ── Floor plan ───────────────────────────────────────────
   const [showFloorPlan, setShowFloorPlan] = useState(false)
 
+  // ── Mobile panel toggles ─────────────────────────────────
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+
   // ── Earthquake ───────────────────────────────────────────
   const [showEarthquake, setShowEarthquake] = useState(false)
   const [earthquakeMagnitude, setEarthquakeMagnitude] = useState(6.0)
@@ -412,6 +415,8 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
         showWindArrows={showWindArrows}
         onToggleWindArrows={() => setShowWindArrows(v => !v)}
         onShowFloorPlan={() => setShowFloorPlan(true)}
+        mobileSidebarOpen={mobileSidebarOpen}
+        onToggleMobileSidebar={() => setMobileSidebarOpen(v => !v)}
         onShare={handleShare}
         shareMetrics={shareMetrics}
         cinematicMode={cinematicMode}
@@ -422,6 +427,8 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
         visible={visible}
         onToggle={togglePart}
         selected={selected}
+        isOpen={mobileSidebarOpen}
+        onClose={() => setMobileSidebarOpen(false)}
         selectedVariants={selectedVariants}
         activePreset={activePreset}
         onApplyPreset={applyPreset}

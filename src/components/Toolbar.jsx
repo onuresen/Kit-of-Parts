@@ -1,7 +1,8 @@
 import {
   MousePointer2, Pencil, Scissors, Copy, Trash2,
   Ruler, BarChart3, Map, Undo2, Redo2, Layers, Play, Zap,
-  Moon, Sun, Keyboard, HardHat, Clapperboard, Camera, Activity, Wind, LayoutTemplate
+  Moon, Sun, Keyboard, HardHat, Clapperboard, Camera, Activity, Wind, LayoutTemplate,
+  Menu, X
 } from 'lucide-react'
 import ShareButton from './ShareButton'
 
@@ -24,6 +25,7 @@ export default function Toolbar({
   showEarthquake, onToggleEarthquake,
   showWindArrows, onToggleWindArrows,
   onShowFloorPlan,
+  mobileSidebarOpen, onToggleMobileSidebar,
 }) {
   const isSelectMode = !builderMode && !siteMode && !sequenceMode && !gameMode
 
@@ -35,6 +37,15 @@ export default function Toolbar({
 
   return (
     <div className="toolbar">
+
+      <button
+        className={`tb-btn tb-btn--mobile-only ${mobileSidebarOpen ? 'tb-btn--active' : ''}`}
+        title="Layers"
+        onClick={onToggleMobileSidebar}
+      >
+        {mobileSidebarOpen ? <X size={15} /> : <Menu size={15} />}
+      </button>
+      <div className="toolbar-sep tb-sep--mobile-only" />
 
       <div className="toolbar-group">
         <button

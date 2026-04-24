@@ -35,6 +35,7 @@ export default function Sidebar({
   siteMode, placedUnits, selectedUnitType, onSelectUnitType,
   gameMode, gamePhase, gameStep, gameMistakes, gameElapsed, maxStep, onExitGame,
   builderMode,
+  isOpen, onClose,
 }) {
   const { parts, presets, loadKitFromFile, savePreset, removePreset, projectSettings, setProjectSettings } = useKit()
   const [savingPreset, setSavingPreset] = useState(false)
@@ -52,7 +53,7 @@ export default function Sidebar({
   if (gameMode) {
     const placedCount = gameStep - 1
     return (
-      <aside className="sidebar">
+      <aside className={`sidebar${isOpen ? ' sidebar--open' : ''}`}>
         <div className="sidebar-brand">Assembly Challenge</div>
         <div className="game-hud">
           <div className="game-hud-phase">
@@ -93,7 +94,8 @@ export default function Sidebar({
   }
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar${isOpen ? ' sidebar--open' : ''}`}>
+      <button className="sidebar-close-btn" onClick={onClose} aria-label="Close">✕</button>
       <div className="sidebar-brand">
         IC Configurator
         <button

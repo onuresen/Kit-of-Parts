@@ -110,7 +110,7 @@ export default function Scene({
 
   return (
     <Canvas
-      shadows
+      shadows={{ type: THREE.PCFShadowMap }}
       style={{ position: 'absolute', inset: 0, background: siteMode ? '#eef2f7' : '#f4f4f4' }}
       gl={{ localClippingEnabled: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1, preserveDrawingBuffer: true }}
       onCreated={({ gl }) => onRendererReady?.(gl)}
