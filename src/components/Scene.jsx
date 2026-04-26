@@ -10,6 +10,8 @@ import SiteGrid from './SiteGrid'
 import Crane from './Crane'
 import CinematicMode from './CinematicMode'
 import WindArrows from './WindArrows'
+import RainSimulation from './RainSimulation'
+import WaterPressure from './WaterPressure'
 import { useKit } from './KitContext'
 function CameraController({ siteMode, controlsRef, cameraCmd }) {
   const { camera } = useThree()
@@ -104,6 +106,7 @@ export default function Scene({
   secondCraneX,
   showWindArrows,
   windSpeed,
+  showWaterSim,
 }) {
   const controlsRef = useRef()
   const { parts } = useKit()
@@ -283,6 +286,13 @@ export default function Scene({
 
       {!siteMode && showWindArrows && (
         <WindArrows parts={parts} visible={visible} windSpeed={windSpeed ?? 8} />
+      )}
+
+      {!siteMode && showWaterSim && (
+        <RainSimulation parts={parts} visible={visible} />
+      )}
+      {!siteMode && showWaterSim && (
+        <WaterPressure parts={parts} visible={visible} windSpeed={windSpeed ?? 8} />
       )}
 
       <ContactShadows position={[0, -0.26, 0]} opacity={0.4} scale={siteMode ? 40 : 12} blur={2} />

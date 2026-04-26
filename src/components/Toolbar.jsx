@@ -2,7 +2,7 @@ import {
   MousePointer2, Pencil, Scissors, Copy, Trash2,
   Ruler, BarChart3, Map, Undo2, Redo2, Layers, Play, Zap,
   Moon, Sun, Keyboard, HardHat, Clapperboard, Camera, Activity, Wind, LayoutTemplate,
-  Menu, X
+  Droplets, Menu, X
 } from 'lucide-react'
 import ShareButton from './ShareButton'
 
@@ -24,6 +24,7 @@ export default function Toolbar({
   cinematicMode, onToggleCinematic,
   showEarthquake, onToggleEarthquake,
   showWindArrows, onToggleWindArrows,
+  showWaterSim, onToggleWaterSim,
   onShowFloorPlan,
   mobileSidebarOpen, onToggleMobileSidebar,
 }) {
@@ -152,6 +153,14 @@ export default function Toolbar({
           disabled={siteMode || gameMode}
         >
           <Wind size={15} />
+        </button>
+        <button
+          className={`tb-btn ${showWaterSim ? 'tb-btn--active' : ''}`}
+          title="Water Analysis"
+          onClick={onToggleWaterSim}
+          disabled={siteMode || gameMode}
+        >
+          <Droplets size={15} />
         </button>
         <button
           className="tb-btn"

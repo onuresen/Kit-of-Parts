@@ -67,6 +67,9 @@ export default function App() {
   const [showWindArrows, setShowWindArrows] = useState(false)
   const [windSpeed, setWindSpeed] = useState(8.0)
 
+  // ── Water simulation ─────────────────────────────────────
+  const [showWaterSim, setShowWaterSim] = useState(false)
+
   // ── Floor plan ───────────────────────────────────────────
   const [showFloorPlan, setShowFloorPlan] = useState(false)
 
@@ -414,6 +417,8 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
         onToggleEarthquake={() => { setShowEarthquake(v => !v); setHasShaken(false) }}
         showWindArrows={showWindArrows}
         onToggleWindArrows={() => setShowWindArrows(v => !v)}
+        showWaterSim={showWaterSim}
+        onToggleWaterSim={() => setShowWaterSim(v => !v)}
         onShowFloorPlan={() => setShowFloorPlan(true)}
         mobileSidebarOpen={mobileSidebarOpen}
         onToggleMobileSidebar={() => setMobileSidebarOpen(v => !v)}
@@ -480,6 +485,7 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
         secondCraneX={secondCraneX}
         showWindArrows={showWindArrows}
         windSpeed={windSpeed}
+        showWaterSim={showWaterSim}
         onRendererReady={gl => { rendererRef.current = gl }}
         cinematicMode={cinematicMode}
         onCinematicEnd={() => setCinematicMode(false)}
