@@ -8,7 +8,7 @@ const GRAVITY = 0.018
 const dummy = new THREE.Object3D()
 
 function makeParticle() {
-  return { x: 0, y: -999, z: 0, vx: 0, vy: 0, vz: 0, active: false, pooled: false }
+  return { x: 0, y: -999, z: 0, vx: 0, vy: 0, vz: 0, active: false }
 }
 
 export default function RainSimulation({ parts, visible }) {
@@ -20,7 +20,9 @@ export default function RainSimulation({ parts, visible }) {
 
   useFrame((_, delta) => {
     if (!parts || !visible) return
-    spawnTimer.current += delta
+    // Cap delta to avoid large physics jumps on tab restore / GPU stalls
+    const dt = Math.min(delta, 1 / 30)
+    spawnTimer.current += dt
 
     // Build emitters from roof face centres of visible parts
     const emitters = []
@@ -47,7 +49,6 @@ export default function RainSimulation({ parts, visible }) {
           p.vy = -0.05
           p.vz = (Math.random() - 0.5) * 0.03
           p.active = true
-          p.pooled = false
           spawned++
         }
       }
@@ -55,11 +56,11 @@ export default function RainSimulation({ parts, visible }) {
 
     // Integrate gravity and check landing
     for (const p of particles.current) {
-      if (!p.active || p.pooled) continue
-      p.vy -= GRAVITY * delta * 60
-      p.x += p.vx
-      p.y += p.vy
-      p.z += p.vz
+      if (!p.active) continue
+      p.vy -= GRAVITY * dt * 60
+      p.x  += p.vx * dt * 60
+      p.y  += p.vy * dt * 60
+      p.z  += p.vz * dt * 60
 
       // Find highest surface below this particle (ground or part top)
       let landY = 0
@@ -78,8 +79,6 @@ export default function RainSimulation({ parts, visible }) {
       }
 
       if (p.y <= landY) {
-        p.y = landY
-        p.pooled = true
         // Accumulate into nearest puddle zone or start a new one
         const existing = puddles.current.find(
           pu => Math.abs(pu.x - p.x) < 0.6 && Math.abs(pu.z - p.z) < 0.6
@@ -89,6 +88,8 @@ export default function RainSimulation({ parts, visible }) {
         } else if (puddles.current.length < MAX_PUDDLES) {
           puddles.current.push({ x: p.x, z: p.z, y: landY + 0.01, count: 1 })
         }
+        // Recycle slot immediately so it can be respawned
+        p.active = false
       }
 
       if (p.y < -3) p.active = false
@@ -98,7 +99,7 @@ export default function RainSimulation({ parts, visible }) {
     if (fallRef.current) {
       let idx = 0
       for (const p of particles.current) {
-        if (p.active && !p.pooled) {
+        if (p.active) {
           dummy.position.set(p.x, p.y, p.z)
           dummy.rotation.set(0, 0, 0)
           dummy.scale.setScalar(1)

@@ -2,14 +2,15 @@ import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
+const LOW  = new THREE.Color('#bfdbfe')
+const MID  = new THREE.Color('#2563eb')
+const HIGH = new THREE.Color('#dc2626')
+
 // Map a pressure score (0–20) to a colour: light blue → deep blue → red
 function pressureColor(score) {
   const t = Math.min(score / 20, 1)
-  const low  = new THREE.Color('#bfdbfe')
-  const mid  = new THREE.Color('#2563eb')
-  const high = new THREE.Color('#dc2626')
-  if (t < 0.5) return low.lerp(mid, t * 2)
-  return mid.clone().lerp(high, (t - 0.5) * 2)
+  if (t < 0.5) return LOW.clone().lerp(MID, t * 2)
+  return MID.clone().lerp(HIGH, (t - 0.5) * 2)
 }
 
 export default function WaterPressure({ parts, visible, windSpeed }) {
@@ -47,9 +48,6 @@ export default function WaterPressure({ parts, visible, windSpeed }) {
       { pos: [px, py, pz - D / 2 - 0.02], rot: [0, Math.PI, 0],      w: W, h: H, score: ws * 0.5 },
     )
   }
-
-  // Reset mat refs to match current face count
-  matRefs.current = new Array(faces.length).fill(null)
 
   return (
     <group>

@@ -92,6 +92,7 @@ No Tailwind — all styling is custom CSS in `src/App.css` plus inline styles. D
 | `secondCraneX` | number | X offset of second crane from first (default −8) |
 | `showWindArrows` | bool | Wind load arrow overlay active |
 | `windSpeed` | number | Shared wind speed (m/s) — lifted from CranePanel |
+| `showWaterSim` | bool | Water simulation overlay active (rain + pressure planes) |
 | `showFloorPlan` | bool | Floor plan modal open |
 | `showEarthquake` | bool | Earthquake panel visible |
 | `earthquakeMagnitude` | number | Richter 3–9 |
@@ -162,6 +163,8 @@ Default kits in `/dist/`: `default-kit.json`, `eco-kit.json`, `premium-kit.json`
 | `src/components/DimensionLines.jsx` | 3D dimension overlays |
 | `src/components/ViewCube.jsx` | 3D nav cube (bottom-right). Calls `onPreset(name)` |
 | `src/components/WindArrows.jsx` | Pressure arrows per part face: blue=windward, red=leeward, orange=roof. Scale pulses with `windSpeed` via `useFrame` |
+| `src/components/RainSimulation.jsx` | Instanced rain particles + puddle accumulation. Up to 80 falling drops (spheres) and 20 puddle discs rendered via `instancedMesh`. Particles spawn from roof centres of visible parts, integrate gravity, land on part tops or ground, then recycle. Controlled by `showWaterSim` prop. |
+| `src/components/WaterPressure.jsx` | Semi-transparent pressure heatmap planes on all 5 faces of each visible part. Color scale: light blue (low) → deep blue → red (high) based on `windSpeed`. Opacity pulses sinusoidally via `useFrame`. Controlled by `showWaterSim` prop. |
 
 ### UI Panels
 | File | Role |
@@ -505,6 +508,7 @@ recorder.start()
 
 | Feature | Files |
 |---|---|
+| Water Simulation | `src/components/RainSimulation.jsx` (new — instanced rain particles + puddle accumulation), `src/components/WaterPressure.jsx` (new — wind-driven pressure heatmap planes), `src/App.jsx` (`showWaterSim` state), `src/components/Scene.jsx`, `src/components/Toolbar.jsx` (`Droplets` icon, disabled in site/game mode) |
 | Floor Plan Auto-Generator | `src/components/FloorPlanPanel.jsx` (new — canvas 2D projection, SVG export), `src/App.jsx` (`showFloorPlan` state), `src/components/Toolbar.jsx` (`LayoutTemplate` icon) |
 | Wind Load Arrows | `src/components/WindArrows.jsx` (new — cone+cylinder arrows per face, pulsing via useFrame), `src/components/Scene.jsx`, `src/components/Toolbar.jsx` (`Wind` icon), `src/App.jsx` (`showWindArrows`, `windSpeed` state), `src/components/CranePanel.jsx` (`onWindChange` callback lifts windSpeed to App) |
 | Multi-Crane Collision Zone | `src/components/Crane.jsx` (`offsetX`/`offsetZ` props), `src/components/Scene.jsx` (second Crane instance + collision disc mesh), `src/components/CranePanel.jsx` (Add Crane toggle + X slider + warning badge), `src/App.jsx` (`showSecondCrane`, `secondCraneX` state) |
