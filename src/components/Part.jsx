@@ -4,7 +4,7 @@ import { useKit } from './KitContext'
 import { gsap } from 'gsap'
 import * as THREE from 'three'
 
-function GlbMesh({ url, opacity, transparent, depthWrite, clippingPlanes, isWire, isGhost, emissiveIntensity }) {
+function GlbMesh({ url, opacity, transparent, depthWrite, clippingPlanes, isWire, isGhost, emissiveIntensity, emissiveColor }) {
   const { scene } = useGLTF(url)
 
   const cloned = useMemo(() => {
@@ -32,10 +32,11 @@ function GlbMesh({ url, opacity, transparent, depthWrite, clippingPlanes, isWire
         m.clippingPlanes = clippingPlanes
         m.clipShadows = true
         m.emissiveIntensity = emissiveIntensity
+        if (emissiveColor) m.emissive = new THREE.Color(emissiveColor)
         m.needsUpdate = true
       })
     })
-  }, [cloned, opacity, transparent, depthWrite, clippingPlanes, emissiveIntensity, isWire, isGhost])
+  }, [cloned, opacity, transparent, depthWrite, clippingPlanes, emissiveIntensity, emissiveColor, isWire, isGhost])
 
   return <primitive object={cloned} />
 }
@@ -59,6 +60,9 @@ export default function Part({
   isShaking,
   earthquakeMagnitude,
   highlightedWeek,
+  fireMode,
+  fireStatus,
+  onIgnite,
 }) {
   const meshRef = useRef()
   const { updatePart } = useKit()
@@ -197,6 +201,11 @@ export default function Part({
   function handleClick(e) {
     e.stopPropagation()
 
+    if (fireMode) {
+      onIgnite?.(data.id)
+      return
+    }
+
     if (gameMode) {
       if (!isGhost) return // clicking already-placed parts does nothing
       const correct = data.sequence === gameStep
@@ -224,13 +233,18 @@ export default function Part({
   const partWeek = data.week ?? Math.ceil((data.sequence ?? 1) / 2)
   const isWeekHighlighted = highlightedWeek != null && partWeek === highlightedWeek
   const isWeekDimmed = highlightedWeek != null && partWeek !== highlightedWeek
-  const emissive = flashState === 'correct' ? '#2ecc71'
+  const emissive = fireStatus === 'burning' ? '#ff6600'
+    : fireStatus === 'failed' ? '#330000'
+    : flashState === 'correct' ? '#2ecc71'
     : flashState === 'wrong' ? '#e74c3c'
     : shakeAtRisk ? '#e74c3c'
     : isWeekHighlighted ? '#3498db'
     : color
-  const emissiveIntensity = flashState ? 1.5 : shakeAtRisk ? 0.8 : isWeekHighlighted ? 0.5 : (hovered && !isGhost ? 0.25 : 0)
-  const opacity = isGhost ? 0.13 : isWeekDimmed ? 0.25 : (isWire ? 0.06 : isTrans ? 0.6 : 1)
+  const emissiveIntensity = fireStatus === 'burning' ? 1.2
+    : fireStatus === 'failed' ? 0.6
+    : flashState ? 1.5 : shakeAtRisk ? 0.8 : isWeekHighlighted ? 0.5 : (hovered && !isGhost ? 0.25 : 0)
+  const opacity = fireStatus === 'failed' ? 0.6
+    : isGhost ? 0.13 : isWeekDimmed ? 0.25 : (isWire ? 0.06 : isTrans ? 0.6 : 1)
   const transparent = isGhost || isWire || isTrans || isWeekDimmed
   const depthWrite = !isGhost && !isWire
 
@@ -290,6 +304,7 @@ export default function Part({
           isWire={isWire}
           isGhost={isGhost}
           emissiveIntensity={emissiveIntensity}
+          emissiveColor={fireStatus ? emissive : undefined}
         />
       </Suspense>
       {showLabel && (

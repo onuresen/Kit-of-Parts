@@ -55,7 +55,7 @@ function MiniBuilding({ presetId, col, row }) {
   )
 }
 
-function GridCell({ col, row, placed, onPlace, onRemove, selectedUnitType }) {
+function GridCell({ col, row, placed, onPlace, onRemove, selectedUnitType, liftPlanMode, onLiftPoint }) {
   const { presets } = useKit()
   const [hovered, setHovered] = useState(false)
   const [cx, cz] = cellPos(col, row)
@@ -88,7 +88,11 @@ function GridCell({ col, row, placed, onPlace, onRemove, selectedUnitType }) {
       <mesh
         position={[0, 0.05, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
-        onClick={(e) => { e.stopPropagation(); placed ? onRemove(col, row) : onPlace(col, row, selectedUnitType) }}
+        onClick={(e) => {
+          e.stopPropagation()
+          if (liftPlanMode) { onLiftPoint?.({ x: cx, z: cz }); return }
+          placed ? onRemove(col, row) : onPlace(col, row, selectedUnitType)
+        }}
         onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
         onPointerOut={() => setHovered(false)}
       >
@@ -99,7 +103,7 @@ function GridCell({ col, row, placed, onPlace, onRemove, selectedUnitType }) {
       {hovered && (
         <Html position={[0, placed ? 1.8 : 0.5, 0]} center style={{ pointerEvents: 'none' }}>
           <div style={{
-            background: placed ? 'rgba(231,76,60,0.92)' : 'rgba(52,152,219,0.92)',
+            background: liftPlanMode ? 'rgba(39,174,96,0.92)' : placed ? 'rgba(231,76,60,0.92)' : 'rgba(52,152,219,0.92)',
             color: '#fff',
             padding: '3px 10px',
             borderRadius: '3px',
@@ -109,7 +113,7 @@ function GridCell({ col, row, placed, onPlace, onRemove, selectedUnitType }) {
             whiteSpace: 'nowrap',
             userSelect: 'none',
           }}>
-            {placed ? '✕ Remove' : `+ ${presetLabel}`}
+            {liftPlanMode ? '📍 Set lift point' : placed ? '✕ Remove' : `+ ${presetLabel}`}
           </div>
         </Html>
       )}
@@ -117,7 +121,7 @@ function GridCell({ col, row, placed, onPlace, onRemove, selectedUnitType }) {
   )
 }
 
-export default function SiteGrid({ placedUnits, onPlace, onRemove, selectedUnitType }) {
+export default function SiteGrid({ placedUnits, onPlace, onRemove, selectedUnitType, liftPlanMode, onLiftPoint }) {
   return (
     <group>
       <Grid
@@ -147,6 +151,8 @@ export default function SiteGrid({ placedUnits, onPlace, onRemove, selectedUnitT
               onPlace={onPlace}
               onRemove={onRemove}
               selectedUnitType={selectedUnitType}
+              liftPlanMode={liftPlanMode}
+              onLiftPoint={onLiftPoint}
             />
           )
         })

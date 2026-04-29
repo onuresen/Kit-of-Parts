@@ -10,6 +10,7 @@ import ViewCube from './components/ViewCube'
 import CranePanel from './components/CranePanel'
 import EarthquakePanel from './components/EarthquakePanel'
 import FloorPlanPanel from './components/FloorPlanPanel'
+import FirePanel from './components/FirePanel'
 import { useKit } from './components/KitContext'
 import './App.css'
 
@@ -75,6 +76,19 @@ export default function App() {
 
   // ── Mobile panel toggles ─────────────────────────────────
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+
+  // ── Group A: Crane Tools ─────────────────────────────────
+  const [liftPlanMode, setLiftPlanMode] = useState(false)
+  const [liftStart, setLiftStart] = useState(null)   // {x, z} world coords
+  const [liftEnd, setLiftEnd] = useState(null)       // {x, z} world coords
+  const [craneCabView, setCraneCabView] = useState(false)
+
+  // ── Group B: Fire & Safety ───────────────────────────────
+  const [fireMode, setFireMode] = useState(false)
+  const [fireState, setFireState] = useState({})
+  const [fireElapsed, setFireElapsed] = useState(0)
+  const [showFireCompartments, setShowFireCompartments] = useState(false)
+  const fireBurnStartRef = useRef({})
 
   // ── Earthquake ───────────────────────────────────────────
   const [showEarthquake, setShowEarthquake] = useState(false)
@@ -282,6 +296,76 @@ export default function App() {
     }, duration)
   }
 
+  // ── Fire propagation ─────────────────────────────────────
+  useEffect(() => {
+    if (!fireMode || !parts) return
+    const id = setInterval(() => {
+      setFireElapsed(e => e + 1)
+      const now = Date.now()
+      setFireState(prev => {
+        const next = { ...prev }
+        for (const part of parts) {
+          if (next[part.id] !== 'burning') continue
+          const burnSecs = (now - (fireBurnStartRef.current[part.id] ?? now)) / 1000
+          const vi = selectedVariants[part.id] ?? 0
+          const grade = part.variants[vi]?.fire_resistance_grade ?? 'non-rated'
+          const failTime = grade === '2hr' ? Infinity : grade === '1hr' ? 15 : 5
+          if (burnSecs >= failTime) { next[part.id] = 'failed'; continue }
+          const propDelay = grade === '1hr' ? 3 : 1
+          if (burnSecs < propDelay) continue
+          for (const conn of (part.connections ?? [])) {
+            if (next[conn.to] && next[conn.to] !== 'ok') continue
+            const cp = parts.find(p => p.id === conn.to)
+            if (!cp) continue
+            const cvi = selectedVariants[conn.to] ?? 0
+            if (cp.variants[cvi]?.fire_resistance_grade === '2hr') continue
+            next[conn.to] = 'burning'
+            if (!fireBurnStartRef.current[conn.to]) fireBurnStartRef.current[conn.to] = now
+          }
+        }
+        return next
+      })
+    }, 1000)
+    return () => clearInterval(id)
+  }, [fireMode, parts, selectedVariants])
+
+  function handleIgnite(partId) {
+    fireBurnStartRef.current = { [partId]: Date.now() }
+    setFireState({ [partId]: 'burning' })
+    setFireElapsed(0)
+  }
+
+  function handleExtinguish() {
+    fireBurnStartRef.current = {}
+    setFireState({})
+    setFireElapsed(0)
+  }
+
+  function handleToggleFireMode() {
+    if (fireMode) { handleExtinguish() }
+    setFireMode(v => !v)
+  }
+
+  // ── Lift plan handlers ────────────────────────────────────
+  function handleLiftPoint({ x, z }) {
+    if (!liftStart) {
+      setLiftStart({ x, z })
+      setLiftEnd(null)
+    } else if (!liftEnd) {
+      setLiftEnd({ x, z })
+    } else {
+      // Reset and start new plan
+      setLiftStart({ x, z })
+      setLiftEnd(null)
+    }
+  }
+
+  function handleToggleLiftPlan() {
+    setLiftPlanMode(v => !v)
+    setLiftStart(null)
+    setLiftEnd(null)
+  }
+
   // ── Share / screenshot ───────────────────────────────────
   const shareMetrics = (() => {
     if (!parts) return { carbon: 0, casbee: 'A', cost: '$0', parts: 0 }
@@ -420,6 +504,10 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
         showWaterSim={showWaterSim}
         onToggleWaterSim={() => setShowWaterSim(v => !v)}
         onShowFloorPlan={() => setShowFloorPlan(true)}
+        fireMode={fireMode}
+        onToggleFireMode={handleToggleFireMode}
+        showFireCompartments={showFireCompartments}
+        onToggleFireCompartments={() => setShowFireCompartments(v => !v)}
         mobileSidebarOpen={mobileSidebarOpen}
         onToggleMobileSidebar={() => setMobileSidebarOpen(v => !v)}
         onShare={handleShare}
@@ -486,6 +574,16 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
         showWindArrows={showWindArrows}
         windSpeed={windSpeed}
         showWaterSim={showWaterSim}
+        liftPlanMode={liftPlanMode}
+        liftStart={liftStart}
+        liftEnd={liftEnd}
+        onLiftPoint={handleLiftPoint}
+        craneCabView={craneCabView}
+        fireMode={fireMode}
+        fireState={fireState}
+        onIgnite={handleIgnite}
+        showFireCompartments={showFireCompartments}
+        selectedVariants={selectedVariants}
         onRendererReady={gl => { rendererRef.current = gl }}
         cinematicMode={cinematicMode}
         onCinematicEnd={() => setCinematicMode(false)}
@@ -547,6 +645,22 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
           onToggleSecondCrane={() => setShowSecondCrane(v => !v)}
           secondCraneX={secondCraneX}
           onSecondCraneX={setSecondCraneX}
+          siteMode={siteMode}
+          liftPlanMode={liftPlanMode}
+          liftStart={liftStart}
+          liftEnd={liftEnd}
+          onToggleLiftPlan={handleToggleLiftPlan}
+          craneCabView={craneCabView}
+          onToggleCabView={() => setCraneCabView(v => !v)}
+        />
+      )}
+
+      {fireMode && (
+        <FirePanel
+          fireState={fireState}
+          fireElapsed={fireElapsed}
+          onExtinguish={handleExtinguish}
+          selectedVariants={selectedVariants}
         />
       )}
 
