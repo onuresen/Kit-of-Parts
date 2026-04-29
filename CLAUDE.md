@@ -98,6 +98,14 @@ No Tailwind — all styling is custom CSS in `src/App.css` plus inline styles. D
 | `earthquakeMagnitude` | number | Richter 3–9 |
 | `isShaking` | bool | Shake animation running |
 | `hasShaken` | bool | Verdict visible (true after shake completes) |
+| `liftPlanMode` | bool | Crane lift path planner active |
+| `liftStart` | `{x,z}\|null` | Pick-up point world coords |
+| `liftEnd` | `{x,z}\|null` | Installation point world coords |
+| `craneCabView` | bool | First-person crane cab camera active |
+| `fireMode` | bool | Fire spread simulation active |
+| `fireState` | `{[partId]: 'ok'\|'burning'\|'failed'}` | Per-part fire status |
+| `fireElapsed` | number | Seconds since first ignition |
+| `showFireCompartments` | bool | Fire compartment wireframe overlay active |
 
 **3. Component-level** — hover, animation refs, panel open states
 
@@ -165,6 +173,7 @@ Default kits in `/dist/`: `default-kit.json`, `eco-kit.json`, `premium-kit.json`
 | `src/components/WindArrows.jsx` | Pressure arrows per part face: blue=windward, red=leeward, orange=roof. Scale pulses with `windSpeed` via `useFrame` |
 | `src/components/RainSimulation.jsx` | Instanced rain particles + puddle accumulation. Up to 80 falling drops (spheres) and 20 puddle discs rendered via `instancedMesh`. Particles spawn from roof centres of visible parts, integrate gravity, land on part tops or ground, then recycle. Controlled by `showWaterSim` prop. |
 | `src/components/WaterPressure.jsx` | Semi-transparent pressure heatmap planes on all 5 faces of each visible part. Color scale: light blue (low) → deep blue → red (high) based on `windSpeed`. Opacity pulses sinusoidally via `useFrame`. Controlled by `showWaterSim` prop. |
+| `src/components/FireCompartments.jsx` | Groups visible parts by `part.fire_compartment` field. Computes AABB per group, renders wireframe box colored by worst fire rating (non-rated=#e74c3c, 1hr=#f39c12, 2hr=#27ae60). Html label shows compartment area vs BSL 500m² limit. |
 
 ### UI Panels
 | File | Role |
@@ -182,6 +191,7 @@ Default kits in `/dist/`: `default-kit.json`, `eco-kit.json`, `premium-kit.json`
 | `src/components/EarthquakePanel.jsx` | Right-side panel (`right:280, bottom:20`, uses `metrics-panel` class). Magnitude slider 3–9, seismic grade table, Shake button, survived/at-risk verdict |
 | `src/components/FloorPlanPanel.jsx` | Full-screen modal. 2D canvas projects parts onto XZ plane (top-down). Ken grid overlay toggle. SVG export button |
 | `src/components/GanttPanel.jsx` | Schedule tab inside MetricsPanel. CSS Gantt bars per part, grouped by week. Click week to highlight parts in 3D |
+| `src/components/FirePanel.jsx` | Fire mode overlay panel (bottom-right). Shows elapsed timer, burning/failed part counts, per-part status list with fire resistance grade, Extinguish All button. |
 
 ### Utils
 | File | Role |
@@ -308,199 +318,77 @@ Priority order as agreed. Build these in sequence. Each entry has enough detail 
 
 ---
 
-### 6. Crane Swing Path Planner ⬜
-**What:** In site mode, click a laydown point on the grid, then the installation point. Crane animates the full slew arc. Shows swing radius danger zone as a translucent arc sweep. Warns if path crosses adjacent placed units.
+---
 
-**UI:** "Plan Lift" button in CranePanel (active only in site mode + crane visible). Click-to-pick interaction on SiteGrid.
+### Group A — Crane Tools ✅ SHIPPED
+**Shared files:** `Crane.jsx`, `CranePanel.jsx`, `Scene.jsx`, `App.jsx`, `SiteGrid.jsx`
 
-**State to add in App.jsx:** `liftPlanMode: bool`, `liftStart: [col, row] | null`, `liftEnd: [col, row] | null`
-
-**3D implementation:** In `SiteGrid.jsx`, when `liftPlanMode` is true, clicks set `liftStart` then `liftEnd`. In `Crane.jsx`, when both set, GSAP animates jib slew angle from start azimuth to end azimuth. Sweep arc rendered as `<line>` with arc points.
-
-**New files:** None
-**Modified files:** `src/components/SiteGrid.jsx`, `src/components/Crane.jsx`, `src/components/CranePanel.jsx`, `src/App.jsx`, `src/App.css`
+#### 6. Crane Swing Path Planner ✅ SHIPPED
+#### 10. Crane Operator First-Person View ✅ SHIPPED
 
 ---
 
-### 7. Fire Spread Simulation ⬜
-**What:** Click "Ignite" on any part to start fire. Fire propagates to connected neighbours based on fire resistance rating — 1hr parts hold 3× longer before turning orange/red, non-rated parts ignite immediately. Parts glow orange then red then dark. When fire hits a 2hr-rated boundary, it stops.
+### Group B — Fire & Safety ✅ SHIPPED
+**Shared files:** `App.jsx`, `Toolbar.jsx`, `Part.jsx`, `Scene.jsx`
 
-**UI:** "Fire" mode button in Toolbar (`Flame` icon). Click any part to ignite. Panel shows time elapsed and parts compromised.
-
-**State to add in App.jsx:** `fireMode: bool`, `fireState: { [partId]: 'ok'|'burning'|'failed' }`, `fireElapsed: number`
-
-**3D implementation:** In `Part.jsx`, when `fireState[part.id]` is `'burning'`, animate emissive color from `0x000000` → `0xff6600` with GSAP. When `'failed'` → `0x1a0000` (char). `useEffect` in App.jsx propagates fire via `part.connections` array every `N` seconds where `N` depends on `fire_resistance_grade`.
-
-**New files:** `src/components/FirePanel.jsx`
-**Modified files:** `src/App.jsx`, `src/components/Toolbar.jsx`, `src/components/Part.jsx`, `src/App.css`
+#### 7. Fire Spread Simulation ✅ SHIPPED
+#### 12. Japanese Fire Compartment Visualizer ✅ SHIPPED
 
 ---
 
-### 8. Thermal Bridge Visualizer ⬜
-**What:** Heatmap overlay on all connection joints. Blue = well-insulated, red = cold bridge. Based on material thermal conductivity (W/mK) stored on variants. Shows where heat loss detailing matters in prefab construction.
+### Group C — Material Overlays ⬜
+All are variant-data-driven toggle overlays. **Shared files:** `App.jsx`, `Toolbar.jsx`, `App.css`. Add one bool state + one Toolbar button per item.
 
-**UI:** Toggle button in Toolbar (`Thermometer` icon). Heatmap spheres rendered at connection midpoints in Scene.
+#### 8. Thermal Bridge Visualizer
+State: `showThermal`. Data: add `thermal_conductivity_wpmk: number` to variant schema (steel=50, CLT=0.13, concrete=1.7). New `ThermalOverlay.jsx`: sphere at each connection midpoint, color lerp blue→red by conductivity, pulse via `useFrame`.
+New file: `ThermalOverlay.jsx` (`Thermometer` icon). Also modifies: `Scene.jsx`.
 
-**Data:** Add optional `thermal_conductivity_wpmk: number` to variant schema (e.g. steel = 50, CLT = 0.13, concrete = 1.7).
+#### 13. Material Supply Chain Risk
+State: `showSupplyRisk`. Data: add optional `supply_risk: 'low'|'medium'|'high'` to variant (derive from `lead_time_days`: >60→high, >30→medium). New "Supply" tab in MetricsPanel + risk badge in BOM table. "Simulate shortage" button auto-switches that material's variants to next best.
+New file: `SupplyRiskPanel.jsx`. Also modifies: `MetricsPanel.jsx`.
 
-**3D implementation:** In `Connection.jsx` (or new `ThermalOverlay.jsx`), render a `<mesh><sphereGeometry /></mesh>` at the midpoint between connected parts. Color interpolated from blue (low conductivity) to red (high). Animate pulse with `useFrame`.
-
-**New files:** `src/components/ThermalOverlay.jsx`
-**Modified files:** `src/App.jsx` (`showThermal` state), `src/components/Toolbar.jsx`, `src/components/Scene.jsx`, `src/App.css`
-
----
-
-### 9. Prefab Factory Layout Planner ⬜
-**What:** A second grid view — not the site, but the factory floor. Shows how parts are laid out for fabrication in sequence: panel by panel, jig positions, welding/curing zones. Entirely different view of the supply chain that no configurator shows.
-
-**UI:** "Factory" toggle in Toolbar (alongside "Site"). Replaces the 3D building view with a top-down factory floor grid. Parts shown flat (rotated to XZ plane) in sequence order with zone labels.
-
-**State to add in App.jsx:** `factoryMode: bool`
-
-**3D implementation:** New `FactoryGrid.jsx` component. When `factoryMode` is true, render parts in a grid layout (one per bay) at Y=0 with `rotation.x = -PI/2`. Bays drawn as `<gridHelper>` sections. Sequence numbers as 3D text labels.
-
-**New files:** `src/components/FactoryGrid.jsx`
-**Modified files:** `src/App.jsx`, `src/components/Toolbar.jsx`, `src/components/Scene.jsx`, `src/App.css`
+#### 15. Acoustic Performance Overlay
+State: `showAcoustic`. Data: add `stc_rating: number` to variant. In `Part.jsx` when `showAcoustic`, override material color lerp red→green (`stc_rating/60`); floating label with STC value. Show STC in `InfoPanel.jsx` variant stats. (`Volume2` icon).
 
 ---
 
-### 10. Crane Operator First-Person View ⬜
-**What:** "Cab View" button teleports the camera inside the crane operator's cab. You see the load dangling below, the site grid, and the building under construction from 30m up. Purely experiential — the kind of screenshot that gets shared.
+### Group D — Carbon & Sustainability ⬜
+All extend MetricsPanel. **Shared files:** `MetricsPanel.jsx`, `App.css`.
 
-**UI:** Small "Cab View" button in CranePanel (visible only when crane is shown).
+#### 11. Carbon vs Cost Pareto Frontier
+New "Pareto" tab. Enumerate variant combinations (cap at 5000 samples if V^N > 5000; 8 parts × 3 variants = 6561 — fully enumerable). Find Pareto-optimal set (no point dominates on both axes). Render SVG scatter: X=cost, Y=carbon, frontier highlighted. Click point → apply that variant combo via `onVariantChange`.
+New file: `ParetoPanel.jsx`.
 
-**State to add in App.jsx:** `craneCabView: bool`
+#### 16. Carbon Payback Calculator
+New section in Carbon tab below CASBEE. Data: add `operational_carbon_kgco2e_per_year` to `projectSettings` in KitContext; slider in InfoPanel settings. `paybackYear = totalEmbodied / (3500 - operationalCarbon)` (baseline 3500 kg CO₂e/yr per 16m² module). Bar chart 0–50 yr timeline. Also modifies: `KitContext.jsx`, `InfoPanel.jsx`.
 
-**3D implementation:** In `Scene.jsx` (or `CameraController`), when `craneCabView` is true, position camera at crane cab position: `[craneX, mastHeight + 2, craneZ - 1]`, look toward `[craneX + 20, mastHeight, craneZ]`. Disable OrbitControls. Re-enable on exit.
-
-**Modified files:** `src/components/CranePanel.jsx` (Cab View button), `src/App.jsx`, `src/components/Scene.jsx`, `src/components/Toolbar.jsx` (disable conflicting modes)
-
----
-
-### 11. Carbon vs Cost Pareto Frontier ⬜
-**What:** Scatter chart of all possible variant combinations: X = total cost, Y = total carbon. Current config shown as highlighted dot. Pareto frontier (optimal trade-off curve) drawn. Click any frontier point to apply that variant configuration instantly.
-
-**UI:** New "Pareto" tab in MetricsPanel.
-
-**Implementation:** Enumerate combinations (if >1000, sample). For each: compute total cost and carbon. Find Pareto-optimal set (no point dominates on both axes). Render as SVG or HTML canvas. Click handler calls `onVariantChange` for each part in that combination.
-
-**Performance note:** With N parts each having V variants, combinations = V^N. Cap at 5000 random samples if too large. With typical 8 parts × 3 variants = 6561 — fully enumerable.
-
-**New files:** `src/components/ParetoPanel.jsx`
-**Modified files:** `src/components/MetricsPanel.jsx` (add 'pareto' tab), `src/App.css`
+#### 17. Circular Economy End-of-Life Score
+New "Circular" tab. Data: add `recyclability_pct: number` + optional `end_of_life_cost_usd` to variant (derive defaults: steel→98, timber/CLT→60, concrete→30 by label keyword). Circularity score = weighted avg recyclability. Show gauge + per-part breakdown.
+New file: `CircularEconomyPanel.jsx`.
 
 ---
 
-### 12. Japanese Fire Compartment Visualizer ⬜
-**What:** Groups parts into fire compartments based on `fire_resistance_grade`. Each compartment gets a translucent bounding box in the 3D scene. Shows whether the design meets BSL maximum compartment area rules (500 m² unsprinklered, 1500 m² sprinklered).
+### Group E — Structural Compliance ⬜
+**Shared files:** `App.jsx`, `MetricsPanel.jsx`, `App.css`.
 
-**UI:** Toggle in Toolbar (`Shield` icon). Bounding boxes in Scene. Panel shows compartment areas and compliance status.
+#### 14. BSL / Seismic Compliance Report Card
+New "Compliance" tab (or extend "structural"). Existing `minSeismicGrade` + `bslCompliantCount` already in MetricsPanel. Add: highlight non-compliant parts in 3D via `onHighlight` callback to App.jsx. Traffic-light verdict (Pass/Conditional/Fail). "Export Compliance PDF" button → `pdfGenerator.js`. Also modifies: `pdfGenerator.js`.
 
-**Data:** Add optional `fire_compartment: string` field to part schema (e.g. `"zone-A"`). Parts in the same compartment are grouped.
-
-**3D implementation:** New `FireCompartments.jsx`. Group parts by `fire_compartment` field. For each group, compute bounding box from positions/sizes. Render as `<Box args={[w,h,d]}><meshBasicMaterial wireframe /></Box>` with color-coded opacity by fire rating.
-
-**New files:** `src/components/FireCompartments.jsx`
-**Modified files:** `src/App.jsx` (`showFireCompartments` state), `src/components/Toolbar.jsx`, `src/components/Scene.jsx`, `src/App.css`
+#### 18. Structural Redundancy Heatmap
+State: `redundancyMode: bool`, `removedPartId: string|null`. UI: Toolbar toggle + click any part to simulate removal. Distribute removed part's `load_bearing_kn` across connected parts; parts exceeding capacity → red, partial → yellow, unaffected → green. Label as indicative (no FEM). Toolbar button.
+New file: `RedundancyOverlay.jsx`. Also modifies: `Toolbar.jsx`, `Scene.jsx`.
 
 ---
 
-### 13. Material Supply Chain Risk ⬜
-**What:** Supply risk badge (Low/Medium/High) per variant based on `lead_time_days` and `supplier` count. A "Supply Risk" overlay highlights high-risk parts in the 3D view and MetricsPanel. Scenario: "What if steel is unavailable?" — auto-switches steel variants to next best.
+### Group F — Standalone ⬜
 
-**UI:** New "Supply" tab in MetricsPanel. Risk badge in BOM table (already exists, just add the badge). "Simulate shortage" button per material type.
+#### 9. Prefab Factory Layout Planner
+State: `factoryMode: bool`. UI: Toolbar "Factory" toggle. New `FactoryGrid.jsx`: render parts flat (`rotation.x=-PI/2`) in sequence order, one per bay at Y=0; bays as `<gridHelper>` sections; sequence number as 3D text label. Replaces building view when active.
+New file: `FactoryGrid.jsx`. Modifies: `App.jsx`, `Toolbar.jsx`, `Scene.jsx`, `App.css`.
 
-**Data:** Add optional `supply_risk: 'low'|'medium'|'high'` to variant schema. Derive if absent: `lead_time_days > 60` → high, `> 30` → medium, else low.
-
-**New files:** `src/components/SupplyRiskPanel.jsx`
-**Modified files:** `src/components/MetricsPanel.jsx` (add 'supply' tab or fold into BOM), `src/App.css`
-
----
-
-### 14. BSL / Seismic Compliance Report Card ⬜
-**What:** One-page visual report card: minimum seismic grade in assembly, which parts are the weak links (highlighted in 3D), traffic-light verdict (Pass/Conditional/Fail per BSL criteria). Exportable as PDF compliance summary — the kind of document submitted to building councils.
-
-**UI:** "Compliance" tab in MetricsPanel (or extend existing "structural" tab with a Report Card section and export button).
-
-**Implementation:** Already have `minSeismicGrade` and `bslCompliantCount` in MetricsPanel. Extend with: highlight non-compliant parts in 3D (`onHighlight` callback to App.jsx), add "Export Compliance PDF" button that calls `pdfGenerator.js` with the compliance data.
-
-**Modified files:** `src/components/MetricsPanel.jsx`, `src/utils/pdfGenerator.js`, `src/App.jsx`, `src/App.css`
-
----
-
-### 15. Acoustic Performance Overlay ⬜
-**What:** Assigns STC (Sound Transmission Class) ratings to parts/connections. A "Noise Map" shows predicted sound attenuation through walls and slabs — colour-coded by STC (red = poor <35, yellow = ok 35–50, green = good >50). Useful for residential prefab compliance with Japanese noise standards.
-
-**UI:** Toggle in Toolbar (`Volume2` icon). STC displayed as colour gradient on part faces in Scene.
-
-**Data:** Add optional `stc_rating: number` to variant schema.
-
-**3D implementation:** In `Part.jsx`, when `showAcoustic` prop is true, override material color with STC-derived hue (lerp red→green based on `stc_rating / 60`). Show STC number as floating label.
-
-**Modified files:** `src/App.jsx` (`showAcoustic` state), `src/components/Toolbar.jsx`, `src/components/Part.jsx`, `src/components/InfoPanel.jsx` (show STC in variant stats), `src/App.css`
-
----
-
-### 16. Carbon Payback Calculator ⬜
-**What:** Embodied carbon already tracked. Add `operational_carbon_kgco2e_per_year: number` to project settings (from U-values, heating loads). Show break-even year when operational savings offset embodied carbon. Timeline chart. A single "Carbon Payback: 14 years" headline is extremely shareable in sustainability circles.
-
-**UI:** New section in Carbon tab of MetricsPanel, below the existing CASBEE section. Timeline bar chart (0–50 years).
-
-**Data:** Add `operational_carbon_kgco2e_per_year` to `projectSettings` in KitContext. Add UI slider in InfoPanel's environment/settings section.
-
-**Calculation:** `paybackYear = totalEmbodied / annualSaving` where `annualSaving = conventionalBaseline - operationalCarbon`. Conventional baseline = 3500 kg CO₂e/year for a 16m² module (configurable).
-
-**Modified files:** `src/components/MetricsPanel.jsx` (carbon tab extension), `src/components/KitContext.jsx` (projectSettings schema), `src/components/InfoPanel.jsx` (settings slider), `src/App.css`
-
----
-
-### 17. Circular Economy End-of-Life Score ⬜
-**What:** Each variant gets a `recyclability_pct: number` (steel=98, CLT=60, concrete=30). Show total end-of-life recovered carbon value and circularity score (0–100%). A "Circularity Gauge" on the MetricsPanel. Ties into CASBEE LCA framework.
-
-**UI:** New "Circular" tab in MetricsPanel with gauge, per-part recyclability breakdown.
-
-**Data:** Add `recyclability_pct: number` and optionally `end_of_life_cost_usd: number` to variant schema. Derive defaults by material keyword in label if absent (steel→98, timber/CLT→60, concrete→30).
-
-**New files:** `src/components/CircularEconomyPanel.jsx`
-**Modified files:** `src/components/MetricsPanel.jsx` (add 'circular' tab), `src/App.css`
-
----
-
-### 18. Structural Redundancy Heatmap ⬜
-**What:** Virtually "remove" any part and calculate which remaining parts are now critical (load redistribution approximation). Highlight critical-path parts in red in the 3D view. Shows structural robustness — important for progressive collapse resistance.
-
-**UI:** "Redundancy" toggle in Toolbar. Click a part to simulate its removal. Heatmap colours on remaining parts: green=redundant, yellow=contributing, red=critical.
-
-**Implementation:** Simplified approach — use `load_bearing_kn` data from variants. When a primary structural part is removed, distribute its load across connected parts. Parts whose `load_bearing_kn` would be exceeded go red. No FEM required — this is indicative only (label it as such).
-
-**New files:** `src/components/RedundancyOverlay.jsx`
-**Modified files:** `src/App.jsx` (`redundancyMode`, `removedPartId` state), `src/components/Toolbar.jsx`, `src/components/Scene.jsx`, `src/App.css`
-
----
-
-### 19. 4D Time-Lapse Recording ⬜
-**What:** Built-in screen recorder using the `MediaRecorder` API + Canvas stream. Press Record → cinematic demo auto-plays → Press Stop → downloads `.webm` video. No external screen-capture software needed. The LinkedIn video asset generates itself.
-
-**UI:** "Record" button in Toolbar (`Circle` icon, turns red when recording). Stop button while recording.
-
-**State to add in App.jsx:** `isRecording: bool`, `mediaRecorderRef: ref`
-
-**Implementation:**
-```js
-const stream = canvasRef.current.captureStream(30) // 30fps
-const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' })
-const chunks = []
-recorder.ondataavailable = e => chunks.push(e.data)
-recorder.onstop = () => {
-  const blob = new Blob(chunks, { type: 'video/webm' })
-  // trigger download
-}
-recorder.start()
-// auto-start cinematic mode
-```
-`canvasRef` is `rendererRef.current.domElement`. When recording starts, auto-trigger `setCinematicMode(true)`. When cinematic ends, auto-stop recording.
-
-**Modified files:** `src/App.jsx`, `src/components/Toolbar.jsx`, `src/App.css`
+#### 19. 4D Time-Lapse Recording
+State: `isRecording: bool`, `mediaRecorderRef: ref`. UI: Toolbar `Circle` icon (red when recording). `rendererRef.current.domElement.captureStream(30)` → `MediaRecorder({mimeType:'video/webm'})`. On start: auto-trigger cinematic mode. On cinematic end: auto-stop recorder → download `.webm` blob.
+Modifies: `App.jsx`, `Toolbar.jsx`, `App.css`.
 
 ---
 
@@ -508,6 +396,8 @@ recorder.start()
 
 | Feature | Files |
 |---|---|
+| Crane Swing Path Planner + Cab View | `src/components/Crane.jsx` (GSAP jib slew to liftStart/liftEnd angles, sweep arc SectorMesh, lift point spheres), `src/components/CranePanel.jsx` (Plan Lift section, Cab View button), `src/components/SiteGrid.jsx` (liftPlanMode click handler), `src/components/Scene.jsx` (craneCabView→CameraController, lift props to Crane, crane now visible in site mode), `src/App.jsx` (`liftPlanMode`, `liftStart`, `liftEnd`, `craneCabView` state) |
+| Fire Spread Simulation + Compartment Visualizer | `src/components/FirePanel.jsx` (new — timer, status list, extinguish), `src/components/FireCompartments.jsx` (new — AABB wireframe per compartment, BSL check), `src/components/Part.jsx` (`fireMode`/`fireStatus`/`onIgnite` props, emissive overrides), `src/App.jsx` (`fireMode`, `fireState`, `fireElapsed`, `showFireCompartments`, `fireBurnStartRef`, propagation interval), `src/components/Toolbar.jsx` (`Flame`+`Shield` icons), `src/components/Scene.jsx` (renders FireCompartments, passes fire props to Part) |
 | Water Simulation | `src/components/RainSimulation.jsx` (new — instanced rain particles + puddle accumulation), `src/components/WaterPressure.jsx` (new — wind-driven pressure heatmap planes), `src/App.jsx` (`showWaterSim` state), `src/components/Scene.jsx`, `src/components/Toolbar.jsx` (`Droplets` icon, disabled in site/game mode) |
 | Floor Plan Auto-Generator | `src/components/FloorPlanPanel.jsx` (new — canvas 2D projection, SVG export), `src/App.jsx` (`showFloorPlan` state), `src/components/Toolbar.jsx` (`LayoutTemplate` icon) |
 | Wind Load Arrows | `src/components/WindArrows.jsx` (new — cone+cylinder arrows per face, pulsing via useFrame), `src/components/Scene.jsx`, `src/components/Toolbar.jsx` (`Wind` icon), `src/App.jsx` (`showWindArrows`, `windSpeed` state), `src/components/CranePanel.jsx` (`onWindChange` callback lifts windSpeed to App) |

@@ -26,7 +26,7 @@ const SPECS = [
   ['Rated moment',   '60 t·m'],
 ]
 
-export default function CranePanel({ sequenceMode, sequenceStep, currentPartWeight, showRadius, onToggleRadius, onWindChange, showSecondCrane, onToggleSecondCrane, secondCraneX, onSecondCraneX }) {
+export default function CranePanel({ sequenceMode, sequenceStep, currentPartWeight, showRadius, onToggleRadius, onWindChange, showSecondCrane, onToggleSecondCrane, secondCraneX, onSecondCraneX, siteMode, liftPlanMode, liftStart, liftEnd, onToggleLiftPlan, craneCabView, onToggleCabView }) {
   const { parts } = useKit()
 
   // ── Wind simulation ─────────────────────────────────────
@@ -185,6 +185,51 @@ export default function CranePanel({ sequenceMode, sequenceStep, currentPartWeig
           {showRadius ? 'Hide Reach Rings' : 'Show Reach Rings'}
         </button>
       </div>
+
+      {/* ── Cab View ─────────────────────────────────────── */}
+      <div style={{ padding: '0 14px 10px' }}>
+        <button
+          onClick={onToggleCabView}
+          style={{
+            width: '100%', padding: '6px 0', border: 'none', borderRadius: 6, cursor: 'pointer',
+            fontSize: 12, fontWeight: 600,
+            background: craneCabView ? '#e74c3c' : '#7f8c8d', color: '#fff',
+          }}
+        >
+          {craneCabView ? '🏗 Exit Cab View' : '🏗 Cab View'}
+        </button>
+      </div>
+
+      {/* ── Lift Plan ────────────────────────────────────── */}
+      {siteMode && (
+        <div className="ipr-section" style={{ padding: '10px 14px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <div className="ipr-section-label" style={{ margin: 0 }}>Lift Path Planner</div>
+            <button
+              onClick={onToggleLiftPlan}
+              style={{
+                padding: '3px 10px', border: 'none', borderRadius: 5, cursor: 'pointer', fontSize: 11, fontWeight: 600,
+                background: liftPlanMode ? '#e74c3c' : '#2980b9', color: '#fff',
+              }}
+            >
+              {liftPlanMode ? 'Cancel' : 'Plan Lift'}
+            </button>
+          </div>
+          {liftPlanMode && (
+            <div style={{ fontSize: 11, color: '#888' }}>
+              {!liftStart && <span>Click a <strong>pick-up point</strong> on the grid</span>}
+              {liftStart && !liftEnd && (
+                <span>
+                  <span style={{ color: '#27ae60' }}>✓ Pick-up set</span> — now click an <strong>installation point</strong>
+                </span>
+              )}
+              {liftStart && liftEnd && (
+                <span style={{ color: '#2980b9' }}>✓ Lift path planned — click to reset</span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Second Crane ─────────────────────────────────── */}
       <div className="ipr-section" style={{ padding: '10px 14px' }}>

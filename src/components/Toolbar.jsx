@@ -2,7 +2,7 @@ import {
   MousePointer2, Pencil, Scissors, Copy, Trash2,
   Ruler, BarChart3, Map, Undo2, Redo2, Layers, Play, Zap,
   Moon, Sun, Keyboard, HardHat, Clapperboard, Camera, Activity, Wind, LayoutTemplate,
-  Droplets, Menu, X
+  Droplets, Menu, X, Flame, Shield
 } from 'lucide-react'
 import ShareButton from './ShareButton'
 
@@ -26,6 +26,8 @@ export default function Toolbar({
   showWindArrows, onToggleWindArrows,
   showWaterSim, onToggleWaterSim,
   onShowFloorPlan,
+  fireMode, onToggleFireMode,
+  showFireCompartments, onToggleFireCompartments,
   mobileSidebarOpen, onToggleMobileSidebar,
 }) {
   const isSelectMode = !builderMode && !siteMode && !sequenceMode && !gameMode
@@ -169,6 +171,23 @@ export default function Toolbar({
           disabled={siteMode || gameMode}
         >
           <LayoutTemplate size={15} />
+        </button>
+        <button
+          className={`tb-btn ${fireMode ? 'tb-btn--active' : ''}`}
+          title="Fire Spread Simulation"
+          onClick={onToggleFireMode}
+          disabled={gameMode}
+          style={fireMode ? { color: '#e74c3c' } : {}}
+        >
+          <Flame size={15} />
+        </button>
+        <button
+          className={`tb-btn ${showFireCompartments ? 'tb-btn--active' : ''}`}
+          title="Fire Compartment Visualizer"
+          onClick={onToggleFireCompartments}
+          disabled={siteMode || gameMode}
+        >
+          <Shield size={15} />
         </button>
       </div>
 

@@ -12,8 +12,10 @@ import CinematicMode from './CinematicMode'
 import WindArrows from './WindArrows'
 import RainSimulation from './RainSimulation'
 import WaterPressure from './WaterPressure'
+import FireCompartments from './FireCompartments'
 import { useKit } from './KitContext'
-function CameraController({ siteMode, controlsRef, cameraCmd }) {
+
+function CameraController({ siteMode, controlsRef, cameraCmd, craneCabView }) {
   const { camera } = useThree()
 
   useEffect(() => {
@@ -61,6 +63,28 @@ function CameraController({ siteMode, controlsRef, cameraCmd }) {
     })
   }, [cameraCmd?.ts])
 
+  // ── Crane Cab View ───────────────────────────────────────
+  useEffect(() => {
+    if (!controlsRef.current) return
+    if (craneCabView) {
+      controlsRef.current.enabled = false
+      gsap.to(camera.position, { x: 7, y: 11, z: -1, duration: 1.2, ease: 'expo.inOut' })
+      gsap.to(controlsRef.current.target, {
+        x: 27, y: 9, z: 0,
+        duration: 1.2, ease: 'expo.inOut',
+        onUpdate: () => controlsRef.current?.update(),
+      })
+    } else {
+      controlsRef.current.enabled = true
+      gsap.to(camera.position, { x: 8, y: 8, z: 8, duration: 1.2, ease: 'expo.inOut' })
+      gsap.to(controlsRef.current.target, {
+        x: 0, y: 0, z: 0,
+        duration: 1.2, ease: 'expo.inOut',
+        onUpdate: () => controlsRef.current?.update(),
+      })
+    }
+  }, [craneCabView])
+
   return null
 }
 
@@ -107,6 +131,15 @@ export default function Scene({
   showWindArrows,
   windSpeed,
   showWaterSim,
+  liftPlanMode,
+  liftStart,
+  liftEnd,
+  onLiftPoint,
+  craneCabView,
+  fireMode,
+  fireState,
+  onIgnite,
+  showFireCompartments,
 }) {
   const controlsRef = useRef()
   const { parts } = useKit()
@@ -120,7 +153,7 @@ export default function Scene({
     >
       <PerspectiveCamera makeDefault position={[8, 8, 8]} fov={45} />
       <OrbitControls ref={controlsRef} makeDefault enableDamping />
-      <CameraController siteMode={siteMode} controlsRef={controlsRef} cameraCmd={cameraCmd} />
+      <CameraController siteMode={siteMode} controlsRef={controlsRef} cameraCmd={cameraCmd} craneCabView={craneCabView} />
 
       <ambientLight intensity={!siteMode && envSettings && (envSettings.time < 6 || envSettings.time > 18) ? 0.2 : 0.8} />
       
@@ -169,6 +202,8 @@ export default function Scene({
           onPlace={onPlaceUnit}
           onRemove={onRemoveUnit}
           selectedUnitType={selectedUnitType}
+          liftPlanMode={liftPlanMode}
+          onLiftPoint={onLiftPoint}
         />
       )}
 
@@ -197,6 +232,9 @@ export default function Scene({
             isShaking={isShaking}
             earthquakeMagnitude={earthquakeMagnitude}
             highlightedWeek={highlightedWeek}
+            fireMode={fireMode}
+            fireStatus={fireState?.[part.id] ?? 'ok'}
+            onIgnite={onIgnite}
           />
         )
       })}
@@ -239,16 +277,19 @@ export default function Scene({
         </mesh>
       )}
 
-      {!siteMode && showCrane && (
+      {showCrane && (
         <Crane
           sequenceMode={sequenceMode}
           sequenceStep={sequenceStep}
           showRadius={showCraneRadius}
           currentPartWeight={currentPartWeight}
+          liftPlanMode={liftPlanMode}
+          liftStart={liftStart}
+          liftEnd={liftEnd}
         />
       )}
 
-      {!siteMode && showCrane && showSecondCrane && (() => {
+      {showCrane && showSecondCrane && (() => {
         // Crane 1 base X = 7, Crane 2 base X = 7 + secondCraneX
         const c1x = 7, c2x = 7 + (secondCraneX ?? -8)
         const JIB_REACH = 9
@@ -293,6 +334,10 @@ export default function Scene({
       )}
       {!siteMode && showWaterSim && (
         <WaterPressure parts={parts} visible={visible} windSpeed={windSpeed ?? 8} />
+      )}
+
+      {!siteMode && showFireCompartments && (
+        <FireCompartments parts={parts} visible={visible} selectedVariants={selectedVariants} />
       )}
 
       <ContactShadows position={[0, -0.26, 0]} opacity={0.4} scale={siteMode ? 40 : 12} blur={2} />
