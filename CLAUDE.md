@@ -98,6 +98,14 @@ No Tailwind — all styling is custom CSS in `src/App.css` plus inline styles. D
 | `earthquakeMagnitude` | number | Richter 3–9 |
 | `isShaking` | bool | Shake animation running |
 | `hasShaken` | bool | Verdict visible (true after shake completes) |
+| `liftPlanMode` | bool | Crane lift path planner active |
+| `liftStart` | `{x,z}\|null` | Pick-up point world coords |
+| `liftEnd` | `{x,z}\|null` | Installation point world coords |
+| `craneCabView` | bool | First-person crane cab camera active |
+| `fireMode` | bool | Fire spread simulation active |
+| `fireState` | `{[partId]: 'ok'\|'burning'\|'failed'}` | Per-part fire status |
+| `fireElapsed` | number | Seconds since first ignition |
+| `showFireCompartments` | bool | Fire compartment wireframe overlay active |
 
 **3. Component-level** — hover, animation refs, panel open states
 
@@ -165,6 +173,7 @@ Default kits in `/dist/`: `default-kit.json`, `eco-kit.json`, `premium-kit.json`
 | `src/components/WindArrows.jsx` | Pressure arrows per part face: blue=windward, red=leeward, orange=roof. Scale pulses with `windSpeed` via `useFrame` |
 | `src/components/RainSimulation.jsx` | Instanced rain particles + puddle accumulation. Up to 80 falling drops (spheres) and 20 puddle discs rendered via `instancedMesh`. Particles spawn from roof centres of visible parts, integrate gravity, land on part tops or ground, then recycle. Controlled by `showWaterSim` prop. |
 | `src/components/WaterPressure.jsx` | Semi-transparent pressure heatmap planes on all 5 faces of each visible part. Color scale: light blue (low) → deep blue → red (high) based on `windSpeed`. Opacity pulses sinusoidally via `useFrame`. Controlled by `showWaterSim` prop. |
+| `src/components/FireCompartments.jsx` | Groups visible parts by `part.fire_compartment` field. Computes AABB per group, renders wireframe box colored by worst fire rating (non-rated=#e74c3c, 1hr=#f39c12, 2hr=#27ae60). Html label shows compartment area vs BSL 500m² limit. |
 
 ### UI Panels
 | File | Role |
@@ -182,6 +191,7 @@ Default kits in `/dist/`: `default-kit.json`, `eco-kit.json`, `premium-kit.json`
 | `src/components/EarthquakePanel.jsx` | Right-side panel (`right:280, bottom:20`, uses `metrics-panel` class). Magnitude slider 3–9, seismic grade table, Shake button, survived/at-risk verdict |
 | `src/components/FloorPlanPanel.jsx` | Full-screen modal. 2D canvas projects parts onto XZ plane (top-down). Ken grid overlay toggle. SVG export button |
 | `src/components/GanttPanel.jsx` | Schedule tab inside MetricsPanel. CSS Gantt bars per part, grouped by week. Click week to highlight parts in 3D |
+| `src/components/FirePanel.jsx` | Fire mode overlay panel (bottom-right). Shows elapsed timer, burning/failed part counts, per-part status list with fire resistance grade, Extinguish All button. |
 
 ### Utils
 | File | Role |
@@ -310,27 +320,19 @@ Priority order as agreed. Build these in sequence. Each entry has enough detail 
 
 ---
 
-### Group A — Crane Tools ⬜
-**Shared files:** `Crane.jsx`, `CranePanel.jsx`, `Scene.jsx`, `App.jsx`, `App.css`
+### Group A — Crane Tools ✅ SHIPPED
+**Shared files:** `Crane.jsx`, `CranePanel.jsx`, `Scene.jsx`, `App.jsx`, `SiteGrid.jsx`
 
-#### 6. Crane Swing Path Planner
-State: `liftPlanMode: bool`, `liftStart: [col,row]|null`, `liftEnd: [col,row]|null`. UI: "Plan Lift" button in CranePanel (site mode + crane only). In `SiteGrid.jsx`, clicks set start then end when `liftPlanMode` is true. In `Crane.jsx`, GSAP animates jib slew angle start→end azimuth; sweep arc as `<line>`. Warns if arc crosses placed units.
-
-#### 10. Crane Operator First-Person View
-State: `craneCabView: bool`. UI: "Cab View" button in CranePanel. In `CameraController` (Scene.jsx), position camera at `[craneX, mastHeight+2, craneZ-1]` looking toward `[craneX+20, mastHeight, craneZ]`; disable OrbitControls. Re-enable on exit. Disable conflicting modes in Toolbar.
+#### 6. Crane Swing Path Planner ✅ SHIPPED
+#### 10. Crane Operator First-Person View ✅ SHIPPED
 
 ---
 
-### Group B — Fire & Safety ⬜
-**Shared files:** `App.jsx`, `Toolbar.jsx`, `App.css`
+### Group B — Fire & Safety ✅ SHIPPED
+**Shared files:** `App.jsx`, `Toolbar.jsx`, `Part.jsx`, `Scene.jsx`
 
-#### 7. Fire Spread Simulation
-State: `fireMode: bool`, `fireState: {[partId]: 'ok'|'burning'|'failed'}`, `fireElapsed: number`. UI: Toolbar `Flame` icon → new `FirePanel.jsx`. In `Part.jsx`: `'burning'` → GSAP emissive `0x000000→0xff6600`; `'failed'` → `0x1a0000`. `useEffect` in App.jsx propagates fire via `part.connections` every N seconds (N from `fire_resistance_grade`: non-rated=1s, 1hr=3s, 2hr=stops spread).
-New file: `FirePanel.jsx`. Also modifies: `Part.jsx`.
-
-#### 12. Japanese Fire Compartment Visualizer
-State: `showFireCompartments: bool`. UI: Toolbar `Shield` icon. Data: add optional `fire_compartment: string` to part schema. New `FireCompartments.jsx`: group parts by `fire_compartment`, compute bounding box per group, render as `<Box><meshBasicMaterial wireframe /></Box>` color-coded by fire rating. Panel shows compartment areas vs BSL limits (500 m² unsprinklered / 1500 m² sprinklered).
-New file: `FireCompartments.jsx`. Also modifies: `Scene.jsx`.
+#### 7. Fire Spread Simulation ✅ SHIPPED
+#### 12. Japanese Fire Compartment Visualizer ✅ SHIPPED
 
 ---
 
@@ -394,6 +396,8 @@ Modifies: `App.jsx`, `Toolbar.jsx`, `App.css`.
 
 | Feature | Files |
 |---|---|
+| Crane Swing Path Planner + Cab View | `src/components/Crane.jsx` (GSAP jib slew to liftStart/liftEnd angles, sweep arc SectorMesh, lift point spheres), `src/components/CranePanel.jsx` (Plan Lift section, Cab View button), `src/components/SiteGrid.jsx` (liftPlanMode click handler), `src/components/Scene.jsx` (craneCabView→CameraController, lift props to Crane, crane now visible in site mode), `src/App.jsx` (`liftPlanMode`, `liftStart`, `liftEnd`, `craneCabView` state) |
+| Fire Spread Simulation + Compartment Visualizer | `src/components/FirePanel.jsx` (new — timer, status list, extinguish), `src/components/FireCompartments.jsx` (new — AABB wireframe per compartment, BSL check), `src/components/Part.jsx` (`fireMode`/`fireStatus`/`onIgnite` props, emissive overrides), `src/App.jsx` (`fireMode`, `fireState`, `fireElapsed`, `showFireCompartments`, `fireBurnStartRef`, propagation interval), `src/components/Toolbar.jsx` (`Flame`+`Shield` icons), `src/components/Scene.jsx` (renders FireCompartments, passes fire props to Part) |
 | Water Simulation | `src/components/RainSimulation.jsx` (new — instanced rain particles + puddle accumulation), `src/components/WaterPressure.jsx` (new — wind-driven pressure heatmap planes), `src/App.jsx` (`showWaterSim` state), `src/components/Scene.jsx`, `src/components/Toolbar.jsx` (`Droplets` icon, disabled in site/game mode) |
 | Floor Plan Auto-Generator | `src/components/FloorPlanPanel.jsx` (new — canvas 2D projection, SVG export), `src/App.jsx` (`showFloorPlan` state), `src/components/Toolbar.jsx` (`LayoutTemplate` icon) |
 | Wind Load Arrows | `src/components/WindArrows.jsx` (new — cone+cylinder arrows per face, pulsing via useFrame), `src/components/Scene.jsx`, `src/components/Toolbar.jsx` (`Wind` icon), `src/App.jsx` (`showWindArrows`, `windSpeed` state), `src/components/CranePanel.jsx` (`onWindChange` callback lifts windSpeed to App) |
