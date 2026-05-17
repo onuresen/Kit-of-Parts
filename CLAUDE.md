@@ -149,7 +149,7 @@ To trigger camera movement from outside Scene: `setCameraCmd({ type: 'preset', p
   }]
 }
 ```
-Default kits in `/dist/`: `default-kit.json`, `eco-kit.json`, `premium-kit.json`
+Bundled kits in `/public/` and copied to `/dist/`: `default-kit.json` (basic), `advanced-kit.json` (large feature-test sample), `eco-kit.json`, `premium-kit.json`
 
 ---
 
@@ -171,7 +171,7 @@ Default kits in `/dist/`: `default-kit.json`, `eco-kit.json`, `premium-kit.json`
 | `src/components/Crane.jsx` | Tower crane 3D mesh (mast, jib, hook, trolley). Animates trolley to part positions during sequence mode |
 | `src/components/CinematicMode.jsx` | GSAP timeline for scripted demo tour. Disables OrbitControls during playback. Calls `onEnd` when complete |
 | `src/components/SiteGrid.jsx` | 18.2m Ken grid for site plan mode |
-| `src/components/FactoryGrid.jsx` | Factory layout planner. Replaces building view with parts laid flat in sequence order across production bays, with bay/sequence labels. |
+| `src/components/FactoryGrid.jsx` | Factory layout planner. Replaces building view with parts laid flat in sequence order across production bays, with bay/sequence labels, bay capacity warnings, and drag-to-reorder sequence sync. |
 | `src/components/DimensionLines.jsx` | 3D dimension overlays |
 | `src/components/ViewCube.jsx` | 3D nav cube (bottom-right). Calls `onPreset(name)` |
 | `src/components/WindArrows.jsx` | Pressure arrows per part face: blue=windward, red=leeward, orange=roof. Scale pulses with `windSpeed` via `useFrame` |
@@ -185,7 +185,7 @@ Default kits in `/dist/`: `default-kit.json`, `eco-kit.json`, `premium-kit.json`
 |---|---|
 | `src/components/Toolbar.jsx` | Top-center toolbar. Imports `ShareButton`. Props: all toggle handlers + `onShare`, `shareMetrics`, `cinematicMode`, `onToggleCinematic` |
 | `src/components/ShareButton.jsx` | Camera icon button — calls `onShare` prop (logic lives in App.jsx) |
-| `src/components/Sidebar.jsx` | Left 220px panel: visibility toggles, presets, game HUD, kit loader |
+| `src/components/Sidebar.jsx` | Left 220px panel: visibility toggles, presets, game HUD, bundled sample kit loader (Basic/Advanced/Eco/Premium), custom kit loader |
 | `src/components/InfoPanel.jsx` | Right 272px panel: selected part detail, variants, connections, environment settings |
 | `src/components/CranePanel.jsx` | Right panel (when crane visible): lift specs, wind sim (Beaufort, EN 14439), load % bar |
 | `src/components/MetricsPanel.jsx` | Bottom-left modal. Tabs: cost, carbon, bom, prefab, structural, ai. Props include `onVariantChange` |
@@ -388,8 +388,8 @@ New file: `RedundancyOverlay.jsx`. Also modifies: `Toolbar.jsx`, `Scene.jsx`.
 ### Group F — Standalone ⬜
 
 #### 9. Prefab Factory Layout Planner ✅ SHIPPED
-State: `factoryMode: bool`. UI: Toolbar `Factory` toggle. `FactoryGrid.jsx` renders visible parts flat in sequence order, one per production bay, with bay and sequence labels. Replaces the building view when active and disables conflicting site/sequence/builder/game overlays.
-New file: `FactoryGrid.jsx`. Modified: `App.jsx`, `Toolbar.jsx`, `Scene.jsx`, `App.css`.
+State: `factoryMode: bool`. UI: Toolbar `Factory` toggle and keyboard shortcut `F`. `FactoryGrid.jsx` renders visible parts flat in sequence order, one per production bay, with bay and sequence labels. Bays warn on weight (>3000kg), size overflow, and lead-time bottlenecks (>45d). Drag one bay onto another to reorder the visible sequence; the new order syncs back to `part.sequence` via `KitContext.updatePartSequences`. Replaces the building view when active, shows a factory summary in Sidebar, and disables conflicting site/sequence/builder/game overlays.
+New file: `FactoryGrid.jsx`. Modified: `KitContext.jsx`, `App.jsx`, `Toolbar.jsx`, `Scene.jsx`, `Sidebar.jsx`, `ShortcutsModal.jsx`, `App.css`.
 
 #### 19. 4D Time-Lapse Recording
 State: `isRecording: bool`, `mediaRecorderRef: ref`. UI: Toolbar `Circle` icon (red when recording). `rendererRef.current.domElement.captureStream(30)` → `MediaRecorder({mimeType:'video/webm'})`. On start: auto-trigger cinematic mode. On cinematic end: auto-stop recorder → download `.webm` blob.
@@ -404,7 +404,8 @@ Modifies: `App.jsx`, `Toolbar.jsx`, `App.css`.
 | Crane Swing Path Planner + Cab View | `src/components/Crane.jsx` (GSAP jib slew to liftStart/liftEnd angles, sweep arc SectorMesh, lift point spheres), `src/components/CranePanel.jsx` (Plan Lift section, Cab View button), `src/components/SiteGrid.jsx` (liftPlanMode click handler), `src/components/Scene.jsx` (craneCabView→CameraController, lift props to Crane, crane now visible in site mode), `src/App.jsx` (`liftPlanMode`, `liftStart`, `liftEnd`, `craneCabView` state) |
 | Fire Spread Simulation + Compartment Visualizer | `src/components/FirePanel.jsx` (new — timer, status list, extinguish), `src/components/FireCompartments.jsx` (new — AABB wireframe per compartment, BSL check), `src/components/Part.jsx` (`fireMode`/`fireStatus`/`onIgnite` props, emissive overrides), `src/App.jsx` (`fireMode`, `fireState`, `fireElapsed`, `showFireCompartments`, `fireBurnStartRef`, propagation interval), `src/components/Toolbar.jsx` (`Flame`+`Shield` icons), `src/components/Scene.jsx` (renders FireCompartments, passes fire props to Part) |
 | Group C Material Overlays | `src/components/ThermalOverlay.jsx` (new — pulsing connection midpoint thermal bridge nodes), `src/components/SupplyRiskPanel.jsx` (new — Supply tab, shortage simulation), `src/utils/materialMetrics.js` (new — derived thermal/risk/STC defaults), `src/components/Part.jsx` (`showAcoustic` color/STC labels), `src/components/InfoPanel.jsx` (thermal/STC/risk stats), `src/components/MetricsPanel.jsx` (Supply tab + BOM risk badges), `src/components/KitContext.jsx` (normalizes legacy variants), `src/components/Toolbar.jsx` (`Thermometer` + `Volume2` icons), `src/components/Scene.jsx`, `src/App.jsx`, `src/App.css` |
-| Prefab Factory Layout Planner | `src/components/FactoryGrid.jsx` (new — production bays, sequence labels, flat part layout), `src/App.jsx` (`factoryMode` state + mode toggling), `src/components/Toolbar.jsx` (`Factory` icon), `src/components/Scene.jsx` (factory scene swap + camera), `src/App.css` |
+| Prefab Factory Layout Planner | `src/components/FactoryGrid.jsx` (new — production bays, capacity warnings, drag-to-reorder, sequence labels, flat part layout), `src/components/KitContext.jsx` (`updatePartSequences`), `src/App.jsx` (`factoryMode` state + mode toggling), `src/components/Toolbar.jsx` (`Factory` icon), `src/components/Scene.jsx` (factory scene swap + camera), `src/App.css` |
+| Advanced sample kit | `public/advanced-kit.json` (new — 12-part demonstrator for current overlays/simulations), `src/components/KitContext.jsx` (`loadBundledKit`), `src/components/Sidebar.jsx` (Basic/Advanced/Eco/Premium sample buttons), `src/App.css` |
 | Water Simulation | `src/components/RainSimulation.jsx` (new — instanced rain particles + puddle accumulation), `src/components/WaterPressure.jsx` (new — wind-driven pressure heatmap planes), `src/App.jsx` (`showWaterSim` state), `src/components/Scene.jsx`, `src/components/Toolbar.jsx` (`Droplets` icon, disabled in site/game mode) |
 | Floor Plan Auto-Generator | `src/components/FloorPlanPanel.jsx` (new — canvas 2D projection, SVG export), `src/App.jsx` (`showFloorPlan` state), `src/components/Toolbar.jsx` (`LayoutTemplate` icon) |
 | Wind Load Arrows | `src/components/WindArrows.jsx` (new — cone+cylinder arrows per face, pulsing via useFrame), `src/components/Scene.jsx`, `src/components/Toolbar.jsx` (`Wind` icon), `src/App.jsx` (`showWindArrows`, `windSpeed` state), `src/components/CranePanel.jsx` (`onWindChange` callback lifts windSpeed to App) |

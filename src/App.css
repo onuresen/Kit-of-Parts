@@ -759,6 +759,32 @@
   text-align: center;
 }
 
+.sample-kit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+.sample-kit-grid button {
+  padding: 7px 6px;
+  border: 1px solid #dde5ec;
+  border-radius: 5px;
+  background: #f7f9fb;
+  color: #2c3e50;
+  cursor: pointer;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.sample-kit-grid button:hover {
+  background: rgba(52,152,219,0.1);
+  border-color: rgba(52,152,219,0.35);
+  color: #2980b9;
+}
+
 /* ─── Info panel (bottom-right) ───────────────────────── */
 .info-panel {
   position: absolute;
@@ -1840,6 +1866,16 @@
 [data-theme="dark"] .sidebar-section-label { color: #4a5568; }
 [data-theme="dark"] .sidebar-divider { background: #2d3848; }
 [data-theme="dark"] .sidebar-hint   { color: #4a5568; }
+[data-theme="dark"] .sample-kit-grid button {
+  background: #252d3a;
+  color: #95a5a6;
+  border-color: #2d3848;
+}
+[data-theme="dark"] .sample-kit-grid button:hover {
+  background: #2d3848;
+  color: #ecf0f1;
+  border-color: #3498db;
+}
 
 [data-theme="dark"] .part-item { color: #b0bec5; }
 [data-theme="dark"] .part-item:hover { background: #252d3a; }
@@ -2275,6 +2311,33 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+.factory-bay-label--warning {
+  border-color: rgba(243,156,18,0.45);
+  color: #7a4d00;
+}
+.factory-warning-stack {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3px;
+  max-width: 150px;
+}
+.factory-warning-stack span {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(243,156,18,0.94);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.14);
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.factory-warning-stack--high span {
+  background: rgba(231,76,60,0.94);
+}
 .factory-part-label {
   display: flex;
   flex-direction: column;
@@ -2303,6 +2366,70 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
+.factory-part-label--dragging {
+  border-left-color: #8e44ad;
+  box-shadow: 0 0 0 2px rgba(142,68,173,0.2), 0 8px 22px rgba(0,0,0,0.22);
+}
+.factory-sidebar-summary {
+  display: flex;
+  flex-direction: column;
+}
+.factory-sidebar-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  margin-bottom: 8px;
+}
+.factory-sidebar-kpis div {
+  border-radius: 6px;
+  background: rgba(52,152,219,0.08);
+  border: 1px solid rgba(52,152,219,0.15);
+  padding: 7px 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.factory-sidebar-kpis strong {
+  color: #2c3e50;
+  font-size: 15px;
+  line-height: 1;
+}
+.factory-sidebar-kpis span {
+  color: #7f8c8d;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.factory-sequence-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 2px;
+}
+.factory-sequence-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 5px;
+  background: rgba(0,0,0,0.025);
+}
+.factory-sequence-row span {
+  width: 26px;
+  color: #95a5a6;
+  font-size: 9px;
+  font-weight: 800;
+}
+.factory-sequence-row strong {
+  min-width: 0;
+  color: #2c3e50;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 [data-theme="dark"] .factory-bay-label,
 [data-theme="dark"] .factory-part-label {
   background: rgba(30,37,48,0.94);
@@ -2311,6 +2438,14 @@
 }
 [data-theme="dark"] .factory-bay-label span,
 [data-theme="dark"] .factory-part-label span { color: #7f8c8d; }
+[data-theme="dark"] .factory-bay-label--warning { color: #f8c471; }
+[data-theme="dark"] .factory-sidebar-kpis div,
+[data-theme="dark"] .factory-sequence-row {
+  background: rgba(255,255,255,0.04);
+  border-color: #2d3848;
+}
+[data-theme="dark"] .factory-sidebar-kpis strong,
+[data-theme="dark"] .factory-sequence-row strong { color: #ecf0f1; }
 
 .tool-btn--carbon {
   border-color: rgba(39, 174, 96, 0.4) !important;

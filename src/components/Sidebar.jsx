@@ -38,7 +38,7 @@ export default function Sidebar({
   builderMode,
   isOpen, onClose,
 }) {
-  const { parts, presets, loadKitFromFile, savePreset, removePreset, projectSettings, setProjectSettings } = useKit()
+  const { parts, presets, loadKitFromFile, loadBundledKit, savePreset, removePreset, projectSettings, setProjectSettings } = useKit()
   const [savingPreset, setSavingPreset] = useState(false)
   const [presetName, setPresetName] = useState('')
 
@@ -273,6 +273,13 @@ export default function Sidebar({
       {/* ── Load Kit ── */}
       {!siteMode && !builderMode && (
         <div style={{ paddingBottom: 12 }}>
+          <div className="sidebar-section-label">Sample Kits</div>
+          <div className="sample-kit-grid">
+            <button onClick={() => loadBundledKit('default-kit.json')} title="Small baseline sample">Basic</button>
+            <button onClick={() => loadBundledKit('advanced-kit.json')} title="Larger sample covering current analysis features">Advanced</button>
+            <button onClick={() => loadBundledKit('eco-kit.json')} title="Low-carbon round pavilion sample">Eco</button>
+            <button onClick={() => loadBundledKit('premium-kit.json')} title="Premium tower sample">Premium</button>
+          </div>
           <button className="tool-btn" style={{ width: '100%', position: 'relative' }}>
             LOAD KIT JSON
             <input

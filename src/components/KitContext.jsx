@@ -135,6 +135,28 @@ export function KitProvider({ children }) {
     reader.readAsText(file);
   };
 
+  const loadBundledKit = (filename) => {
+    const basePath = import.meta.env.BASE_URL;
+    fetch(`${basePath}${filename}`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`Failed to load ${filename}`);
+        return res.json();
+      })
+      .then((data) => {
+        if (data.parts && data.presets) {
+          setPartsNoHistory(normalizeParts(data.parts));
+          setPresets(data.presets);
+          setProjectSettings({ ...DEFAULT_PROJECT, ...data.projectSettings });
+        } else {
+          alert('Invalid bundled kit format. Missing parts or presets array.');
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        alert(`Failed to load bundled kit: ${filename}`);
+      });
+  };
+
   const addPart = () => {
     setParts(prev => [...prev, {
       id: `Custom Part ${prev.length + 1}`,
@@ -172,6 +194,11 @@ export function KitProvider({ children }) {
 
   const updatePart = (id, newProps) => {
     setParts(prev => prev.map(p => p.id === id ? { ...p, ...newProps } : p));
+  };
+
+  const updatePartSequences = (orderedIds) => {
+    const order = new Map(orderedIds.map((id, idx) => [id, idx + 1]));
+    setParts(prev => prev.map(p => order.has(p.id) ? { ...p, sequence: order.get(p.id) } : p));
   };
 
   const addConnection = (fromId, conn) => {
@@ -252,8 +279,8 @@ export function KitProvider({ children }) {
     <KitContext.Provider value={{
       parts, presets, setPresets,
       projectSettings, setProjectSettings, formatCurrency,
-      loadKitFromFile, isLoading,
-      addPart, duplicatePart, updatePart, removePart, exportKit, clearAutoSave,
+      loadKitFromFile, loadBundledKit, isLoading,
+      addPart, duplicatePart, updatePart, updatePartSequences, removePart, exportKit, clearAutoSave,
       savePreset, removePreset, addConnection, removeConnection,
       undo, redo, canUndo, canRedo,
     }}>
