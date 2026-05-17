@@ -92,6 +92,7 @@ export default function App() {
   const [fireMode, setFireMode] = useState(false)
   const [fireState, setFireState] = useState({})
   const [fireElapsed, setFireElapsed] = useState(0)
+  const [fireIntensity, setFireIntensity] = useState(65)
   const [showFireCompartments, setShowFireCompartments] = useState(false)
   const fireBurnStartRef = useRef({})
 
@@ -338,9 +339,10 @@ export default function App() {
           const burnSecs = (now - (fireBurnStartRef.current[part.id] ?? now)) / 1000
           const vi = selectedVariants[part.id] ?? 0
           const grade = part.variants[vi]?.fire_resistance_grade ?? 'non-rated'
-          const failTime = grade === '2hr' ? Infinity : grade === '1hr' ? 15 : 5
+          const intensityFactor = 1.35 - (fireIntensity / 100) * 0.7
+          const failTime = grade === '2hr' ? Infinity : (grade === '1hr' ? 15 : 5) * intensityFactor
           if (burnSecs >= failTime) { next[part.id] = 'failed'; continue }
-          const propDelay = grade === '1hr' ? 3 : 1
+          const propDelay = (grade === '1hr' ? 3 : 1) * intensityFactor
           if (burnSecs < propDelay) continue
           for (const conn of (part.connections ?? [])) {
             if (next[conn.to] && next[conn.to] !== 'ok') continue
@@ -356,12 +358,26 @@ export default function App() {
       })
     }, 1000)
     return () => clearInterval(id)
-  }, [fireMode, parts, selectedVariants])
+  }, [fireMode, parts, selectedVariants, fireIntensity])
 
   function handleIgnite(partId) {
     fireBurnStartRef.current = { [partId]: Date.now() }
     setFireState({ [partId]: 'burning' })
     setFireElapsed(0)
+  }
+
+  function handleIgniteFirst() {
+    if (!parts?.length) return
+    const candidates = parts
+      .filter(p => visible[p.id] !== false)
+      .map(p => {
+        const vi = selectedVariants[p.id] ?? 0
+        const grade = p.variants[vi]?.fire_resistance_grade ?? 'non-rated'
+        const risk = grade === 'non-rated' ? 0 : grade === '1hr' ? 1 : 2
+        return { part: p, risk }
+      })
+      .sort((a, b) => a.risk - b.risk || (a.part.sequence ?? 99) - (b.part.sequence ?? 99))
+    handleIgnite(candidates[0]?.part.id ?? parts[0].id)
   }
 
   function handleExtinguish() {
@@ -620,6 +636,7 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
         craneCabView={craneCabView}
         fireMode={fireMode}
         fireState={fireState}
+        fireIntensity={fireIntensity}
         onIgnite={handleIgnite}
         showFireCompartments={showFireCompartments}
         selectedVariants={selectedVariants}
@@ -699,6 +716,9 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
         <FirePanel
           fireState={fireState}
           fireElapsed={fireElapsed}
+          fireIntensity={fireIntensity}
+          onFireIntensity={setFireIntensity}
+          onIgniteFirst={handleIgniteFirst}
           onExtinguish={handleExtinguish}
           selectedVariants={selectedVariants}
         />

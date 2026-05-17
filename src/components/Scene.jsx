@@ -15,6 +15,8 @@ import WaterPressure from './WaterPressure'
 import FireCompartments from './FireCompartments'
 import ThermalOverlay from './ThermalOverlay'
 import FactoryGrid from './FactoryGrid'
+import FireEffects from './FireEffects'
+import WindStreamlines from './WindStreamlines'
 import { useKit } from './KitContext'
 
 function CameraController({ siteMode, factoryMode, controlsRef, cameraCmd, craneCabView }) {
@@ -144,6 +146,7 @@ export default function Scene({
   craneCabView,
   fireMode,
   fireState,
+  fireIntensity,
   onIgnite,
   showFireCompartments,
 }) {
@@ -337,7 +340,10 @@ export default function Scene({
       })()}
 
       {!siteMode && !factoryMode && showWindArrows && (
-        <WindArrows parts={parts} visible={visible} windSpeed={windSpeed ?? 8} />
+        <>
+          <WindStreamlines parts={parts} visible={visible} windSpeed={windSpeed ?? 8} />
+          <WindArrows parts={parts} visible={visible} windSpeed={windSpeed ?? 8} />
+        </>
       )}
 
       {!siteMode && !factoryMode && showWaterSim && (
@@ -353,6 +359,10 @@ export default function Scene({
 
       {!siteMode && !factoryMode && showFireCompartments && (
         <FireCompartments parts={parts} visible={visible} selectedVariants={selectedVariants} />
+      )}
+
+      {!siteMode && !factoryMode && fireMode && (
+        <FireEffects parts={parts} visible={visible} fireState={fireState} intensity={fireIntensity} />
       )}
 
       <ContactShadows position={[0, -0.26, 0]} opacity={0.4} scale={siteMode || factoryMode ? 40 : 12} blur={2} />

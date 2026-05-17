@@ -175,9 +175,11 @@ Bundled kits in `/public/` and copied to `/dist/`: `default-kit.json` (basic), `
 | `src/components/DimensionLines.jsx` | 3D dimension overlays |
 | `src/components/ViewCube.jsx` | 3D nav cube (bottom-right). Calls `onPreset(name)` |
 | `src/components/WindArrows.jsx` | Pressure arrows per part face: blue=windward, red=leeward, orange=roof. Scale pulses with `windSpeed` via `useFrame` |
-| `src/components/RainSimulation.jsx` | Instanced rain particles + puddle accumulation. Up to 80 falling drops (spheres) and 20 puddle discs rendered via `instancedMesh`. Particles spawn from roof centres of visible parts, integrate gravity, land on part tops or ground, then recycle. Controlled by `showWaterSim` prop. |
+| `src/components/WindStreamlines.jsx` | Animated wind-field ribbons and moving beads around the active kit. Shares the existing wind-speed state so it reads as visual analysis, not a separate toy simulation. |
+| `src/components/RainSimulation.jsx` | Instanced rain streaks, puddle accumulation, and splash rings. Up to 150 falling drops, 28 puddles, and 36 splash events rendered via `instancedMesh`. Controlled by `showWaterSim` prop. |
 | `src/components/WaterPressure.jsx` | Semi-transparent pressure heatmap planes on all 5 faces of each visible part. Color scale: light blue (low) → deep blue → red (high) based on `windSpeed`. Opacity pulses sinusoidally via `useFrame`. Controlled by `showWaterSim` prop. |
 | `src/components/FireCompartments.jsx` | Groups visible parts by `part.fire_compartment` field. Computes AABB per group, renders wireframe box colored by worst fire rating (non-rated=#e74c3c, 1hr=#f39c12, 2hr=#27ae60). Html label shows compartment area vs BSL 500m² limit. |
+| `src/components/FireEffects.jsx` | Visual fire layer for burning/failed parts: flame columns, smoke plumes, heat rings, point lights, embers, and hazard labels driven by `fireState` plus user-controlled `fireIntensity`. |
 | `src/components/ThermalOverlay.jsx` | Thermal bridge visualizer. Renders pulsing spheres/rings at visible connection midpoints; color derives from active variant thermal conductivity. |
 
 ### UI Panels
@@ -196,7 +198,7 @@ Bundled kits in `/public/` and copied to `/dist/`: `default-kit.json` (basic), `
 | `src/components/EarthquakePanel.jsx` | Right-side panel (`right:280, bottom:20`, uses `metrics-panel` class). Magnitude slider 3–9, seismic grade table, Shake button, survived/at-risk verdict |
 | `src/components/FloorPlanPanel.jsx` | Full-screen modal. 2D canvas projects parts onto XZ plane (top-down). Ken grid overlay toggle. SVG export button |
 | `src/components/GanttPanel.jsx` | Schedule tab inside MetricsPanel. CSS Gantt bars per part, grouped by week. Click week to highlight parts in 3D |
-| `src/components/FirePanel.jsx` | Fire mode overlay panel (bottom-right). Shows elapsed timer, burning/failed part counts, per-part status list with fire resistance grade, Extinguish All button. |
+| `src/components/FirePanel.jsx` | Fire mode overlay panel (bottom-right). Editable scenario intensity slider, Ignite Test Part action, elapsed timer, burning/failed part counts, per-part status list with fire resistance grade, Extinguish All button. |
 | `src/components/SupplyRiskPanel.jsx` | Supply tab inside MetricsPanel. Lead-time-derived risk summary, per-part risk rows, and shortage simulation that switches to lower-risk variants. |
 
 ### Utils
@@ -401,6 +403,7 @@ Modifies: `App.jsx`, `Toolbar.jsx`, `App.css`.
 
 | Feature | Files |
 |---|---|
+| Weather & Hazard Visual Wow | `src/components/FireEffects.jsx` (new - flame columns, smoke plumes, heat rings, embers, point lights, hazard labels), `src/components/WindStreamlines.jsx` (new - animated wind-field ribbons and speed beads), `src/components/RainSimulation.jsx` (storm streaks + splash rings), `src/components/FirePanel.jsx` (editable scenario intensity slider + Ignite Test Part), `src/components/Scene.jsx` (renders visual FX from existing wind/water/fire state), `src/App.jsx` (`fireIntensity` affects spread/failure timing), `src/App.css` (hazard labels + fire controls). Implementation note: this is a presentation layer on top of existing engineering data; fire state, wind speed, and water pressure logic remain the source of truth. |
 | Crane Swing Path Planner + Cab View | `src/components/Crane.jsx` (GSAP jib slew to liftStart/liftEnd angles, sweep arc SectorMesh, lift point spheres), `src/components/CranePanel.jsx` (Plan Lift section, Cab View button), `src/components/SiteGrid.jsx` (liftPlanMode click handler), `src/components/Scene.jsx` (craneCabView→CameraController, lift props to Crane, crane now visible in site mode), `src/App.jsx` (`liftPlanMode`, `liftStart`, `liftEnd`, `craneCabView` state) |
 | Fire Spread Simulation + Compartment Visualizer | `src/components/FirePanel.jsx` (new — timer, status list, extinguish), `src/components/FireCompartments.jsx` (new — AABB wireframe per compartment, BSL check), `src/components/Part.jsx` (`fireMode`/`fireStatus`/`onIgnite` props, emissive overrides), `src/App.jsx` (`fireMode`, `fireState`, `fireElapsed`, `showFireCompartments`, `fireBurnStartRef`, propagation interval), `src/components/Toolbar.jsx` (`Flame`+`Shield` icons), `src/components/Scene.jsx` (renders FireCompartments, passes fire props to Part) |
 | Group C Material Overlays | `src/components/ThermalOverlay.jsx` (new — pulsing connection midpoint thermal bridge nodes), `src/components/SupplyRiskPanel.jsx` (new — Supply tab, shortage simulation), `src/utils/materialMetrics.js` (new — derived thermal/risk/STC defaults), `src/components/Part.jsx` (`showAcoustic` color/STC labels), `src/components/InfoPanel.jsx` (thermal/STC/risk stats), `src/components/MetricsPanel.jsx` (Supply tab + BOM risk badges), `src/components/KitContext.jsx` (normalizes legacy variants), `src/components/Toolbar.jsx` (`Thermometer` + `Volume2` icons), `src/components/Scene.jsx`, `src/App.jsx`, `src/App.css` |

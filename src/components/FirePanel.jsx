@@ -10,7 +10,7 @@ function fmt(s) {
 }
 
 export default function FirePanel({
-  fireState, fireElapsed, onExtinguish, selectedVariants,
+  fireState, fireElapsed, fireIntensity, onFireIntensity, onIgniteFirst, onExtinguish, selectedVariants,
 }) {
   const { parts } = useKit()
   if (!parts) return null
@@ -18,10 +18,11 @@ export default function FirePanel({
   const burning = Object.values(fireState).filter(s => s === 'burning').length
   const failed  = Object.values(fireState).filter(s => s === 'failed').length
   const anyFire = burning + failed > 0
+  const damagePct = parts.length > 0 ? Math.round(((burning * 0.6 + failed) / parts.length) * 100) : 0
 
   return (
     <div
-      className="metrics-panel"
+      className="metrics-panel fire-sim-panel"
       style={{ right: 280, bottom: 20, left: 'auto', top: 'auto', width: 260, maxHeight: '70vh', overflow: 'auto', position: 'fixed' }}
     >
       <div className="metrics-header" style={{ padding: '10px 14px 0' }}>
@@ -32,6 +33,26 @@ export default function FirePanel({
 
       {/* Timer + stats */}
       <div className="ipr-section" style={{ padding: '10px 14px' }}>
+        <div className="fire-risk-meter">
+          <div className="fire-risk-meter__bar" style={{ width: `${Math.min(fireIntensity, 100)}%` }} />
+        </div>
+        <div className="fire-risk-meter__label">
+          <span>Scenario intensity</span>
+          <strong>{fireIntensity}%</strong>
+        </div>
+        <input
+          className="fire-intensity-slider"
+          type="range"
+          min="10"
+          max="100"
+          step="5"
+          value={fireIntensity}
+          onChange={e => onFireIntensity?.(Number(e.target.value))}
+          title="Adjust fire load and visual intensity"
+        />
+        <div className="fire-damage-readout">
+          Spread impact <strong>{damagePct}%</strong>
+        </div>
         <div style={{ display: 'flex', gap: 10, marginBottom: 6 }}>
           <div style={{ flex: 1, textAlign: 'center' }}>
             <div style={{ fontSize: 18, fontWeight: 700, color: '#e74c3c' }}>{fmt(fireElapsed)}</div>
@@ -51,6 +72,9 @@ export default function FirePanel({
             Click a part in the 3D view to ignite it
           </div>
         )}
+        <button className="fire-ignite-btn" onClick={onIgniteFirst}>
+          Ignite Test Part
+        </button>
       </div>
 
       {/* Parts list */}
