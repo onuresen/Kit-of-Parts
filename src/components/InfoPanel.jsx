@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useKit } from './KitContext'
 import { TYPE_COLOR } from './Connection'
+import { getSupplyRiskMeta, inferStcRating, inferThermalConductivity } from '../utils/materialMetrics'
 
 const CONN_TYPES = ['bolted', 'dry-fit', 'welded', 'adhesive', 'damper', 'base-isolation']
 
@@ -15,6 +16,7 @@ export default function InfoPanel({
   sectionCutActive, sectionCutY, onSectionCutY,
   envSettings, setEnvSettings,
   gameMode,
+  showAcoustic,
 }) {
   const { parts, addConnection, removeConnection: removeConn, formatCurrency } = useKit()
   const [addingConn, setAddingConn] = useState(false)
@@ -25,6 +27,7 @@ export default function InfoPanel({
   const part = selected ? parts.find(p => p.id === selected.id) : null
   const activeIdx = part ? (selectedVariants[part.id] ?? 0) : 0
   const activeVariant = part ? part.variants[activeIdx] : null
+  const supplyRisk = activeVariant ? getSupplyRiskMeta(activeVariant) : null
 
   const otherParts = part ? parts.filter(p => p.id !== part.id) : []
   const connections = part?.connections ?? []
@@ -106,11 +109,16 @@ export default function InfoPanel({
                   >
                     <span className="variant-swatch" style={{ background: v.color }} />
                     {v.label}
-                    {v.lead_time_days != null && (
-                      <span className="variant-lead-badge">{v.lead_time_days}d</span>
-                    )}
-                  </button>
-                ))}
+              {v.lead_time_days != null && (
+                <span className="variant-lead-badge">{v.lead_time_days}d</span>
+              )}
+              <span
+                className="variant-risk-dot"
+                style={{ background: getSupplyRiskMeta(v).color }}
+                title={`${getSupplyRiskMeta(v).label} supply risk`}
+              />
+            </button>
+          ))}
               </div>
             </div>
           )}
@@ -152,6 +160,26 @@ export default function InfoPanel({
                 <span className="info-stat-value">{activeVariant.lead_time_days} days</span>
               </div>
             )}
+            <div className="info-stat">
+              <span className="info-stat-label">Thermal</span>
+              <span className="info-stat-value">{inferThermalConductivity(activeVariant).toFixed(2)} W/mK</span>
+            </div>
+            <div className="info-stat">
+              <span className="info-stat-label">STC</span>
+              <span className="info-stat-value">{inferStcRating(activeVariant)}</span>
+            </div>
+          </div>
+
+          <div className="ipr-section">
+            <div className="ipr-section-label">Material Risk</div>
+            <div className="ipr-material-row">
+              <span className="supply-risk-badge" style={{ color: supplyRisk.color, borderColor: supplyRisk.color }}>
+                {supplyRisk.label} supply risk
+              </span>
+              <span className="ipr-dim-sub">
+                {showAcoustic ? `Acoustic overlay active · STC ${inferStcRating(activeVariant)}` : 'Lead-time derived unless explicit on variant'}
+              </span>
+            </div>
           </div>
 
           <div className="ipr-section">

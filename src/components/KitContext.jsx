@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { inferStcRating, inferSupplyRisk, inferThermalConductivity } from '../utils/materialMetrics';
 
 const KitContext = createContext();
 
@@ -10,6 +11,18 @@ const DEFAULT_PROJECT = {
   casbee_building_type: 'residential',
   casbee_target_rank: 'A',
 };
+
+function normalizeParts(parts) {
+  return (parts || []).map(part => ({
+    ...part,
+    variants: (part.variants || []).map(variant => ({
+      ...variant,
+      thermal_conductivity_wpmk: variant.thermal_conductivity_wpmk ?? inferThermalConductivity(variant),
+      supply_risk: variant.supply_risk ?? inferSupplyRisk(variant),
+      stc_rating: variant.stc_rating ?? inferStcRating(variant),
+    })),
+  }));
+}
 
 export function KitProvider({ children }) {
   const [parts, setPartsInternal] = useState([]);
@@ -74,7 +87,7 @@ export function KitProvider({ children }) {
     if (saved) {
       try {
         const data = JSON.parse(saved);
-        setPartsInternal(data.parts || []);
+        setPartsInternal(normalizeParts(data.parts));
         setPresets(data.presets || []);
         if (data.projectSettings) setProjectSettings({ ...DEFAULT_PROJECT, ...data.projectSettings });
         setIsLoading(false);
@@ -86,7 +99,7 @@ export function KitProvider({ children }) {
     fetch(`${basePath}default-kit.json`)
       .then((res) => res.json())
       .then((data) => {
-        setPartsInternal(data.parts || []);
+        setPartsInternal(normalizeParts(data.parts));
         setPresets(data.presets || []);
         if (data.projectSettings) setProjectSettings({ ...DEFAULT_PROJECT, ...data.projectSettings });
         setIsLoading(false);
@@ -109,7 +122,7 @@ export function KitProvider({ children }) {
       try {
         const data = JSON.parse(e.target.result);
         if (data.parts && data.presets) {
-          setPartsNoHistory(data.parts);
+          setPartsNoHistory(normalizeParts(data.parts));
           setPresets(data.presets);
           if (data.projectSettings) setProjectSettings({ ...DEFAULT_PROJECT, ...data.projectSettings });
         } else {
@@ -140,6 +153,9 @@ export function KitProvider({ children }) {
         weight_kg: 1000,
         unit_cost_usd: 5000,
         carbon_kgco2e: 500,
+        thermal_conductivity_wpmk: 0.8,
+        supply_risk: 'low',
+        stc_rating: 40,
         seismic_grade: null,
         fire_resistance_grade: null,
         load_bearing_kn: null,

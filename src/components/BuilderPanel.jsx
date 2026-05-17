@@ -123,6 +123,22 @@ export default function BuilderPanel({ selected }) {
             <input type="number" value={part.variants[0].weight_kg} onChange={e => handleVariant('weight_kg', e.target.value, true)} style={{ width: '100%', padding: '2px' }} />
           </label>
 
+          <label style={{ fontSize: '11px', display: 'block' }}>Thermal conductivity (W/mK):
+            <input type="number" step="0.01" value={part.variants[0].thermal_conductivity_wpmk ?? 0.8} onChange={e => handleVariant('thermal_conductivity_wpmk', e.target.value, true)} style={{ width: '100%', padding: '2px' }} />
+          </label>
+
+          <label style={{ fontSize: '11px', display: 'block' }}>Supply risk:
+            <select value={part.variants[0].supply_risk ?? 'low'} onChange={e => handleVariant('supply_risk', e.target.value)} style={{ width: '100%', fontSize: '12px', padding: '4px' }}>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </label>
+
+          <label style={{ fontSize: '11px', display: 'block' }}>STC rating:
+            <input type="number" min="20" max="70" value={part.variants[0].stc_rating ?? 40} onChange={e => handleVariant('stc_rating', e.target.value, true)} style={{ width: '100%', padding: '2px' }} />
+          </label>
+
           <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', marginTop: '4px' }}>
             <input type="checkbox" checked={!!part.wire} onChange={e => updatePart(part.id, { wire: e.target.checked })} style={{ marginRight: '6px' }} />
             Wireframe Only

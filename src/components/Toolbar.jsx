@@ -2,7 +2,7 @@ import {
   MousePointer2, Pencil, Scissors, Copy, Trash2,
   Ruler, BarChart3, Map, Undo2, Redo2, Layers, Play, Zap,
   Moon, Sun, Keyboard, HardHat, Clapperboard, Camera, Activity, Wind, LayoutTemplate,
-  Droplets, Menu, X, Flame, Shield
+  Droplets, Menu, X, Flame, Shield, Thermometer, Volume2, Factory
 } from 'lucide-react'
 import ShareButton from './ShareButton'
 
@@ -13,6 +13,7 @@ export default function Toolbar({
   showDimensions, onToggleDimensions,
   showMetrics, onToggleMetrics,
   siteMode, onToggleSiteMode,
+  factoryMode, onToggleFactoryMode,
   sequenceMode, onToggleSequence,
   gameMode, onStartGame,
   selected,
@@ -25,16 +26,19 @@ export default function Toolbar({
   showEarthquake, onToggleEarthquake,
   showWindArrows, onToggleWindArrows,
   showWaterSim, onToggleWaterSim,
+  showThermal, onToggleThermal,
+  showAcoustic, onToggleAcoustic,
   onShowFloorPlan,
   fireMode, onToggleFireMode,
   showFireCompartments, onToggleFireCompartments,
   mobileSidebarOpen, onToggleMobileSidebar,
 }) {
-  const isSelectMode = !builderMode && !siteMode && !sequenceMode && !gameMode
+  const isSelectMode = !builderMode && !siteMode && !factoryMode && !sequenceMode && !gameMode
 
   function handleSelectMode() {
     if (builderMode) onToggleBuilderMode()
     if (siteMode) onToggleSiteMode()
+    if (factoryMode) onToggleFactoryMode()
     if (sequenceMode) onToggleSequence()
   }
 
@@ -62,7 +66,7 @@ export default function Toolbar({
           className={`tb-btn ${builderMode ? 'tb-btn--active' : ''}`}
           title="Builder Mode"
           onClick={onToggleBuilderMode}
-          disabled={siteMode || sequenceMode || gameMode}
+          disabled={siteMode || factoryMode || sequenceMode || gameMode}
         >
           <Pencil size={15} />
         </button>
@@ -70,7 +74,7 @@ export default function Toolbar({
           className={`tb-btn ${sectionCutActive ? 'tb-btn--active' : ''}`}
           title="Section Cut"
           onClick={onToggleSectionCut}
-          disabled={siteMode || gameMode}
+          disabled={siteMode || factoryMode || gameMode}
         >
           <Scissors size={15} />
         </button>
@@ -104,7 +108,7 @@ export default function Toolbar({
           className={`tb-btn ${showDimensions ? 'tb-btn--active' : ''}`}
           title="Dimension Overlay"
           onClick={onToggleDimensions}
-          disabled={siteMode || gameMode}
+          disabled={siteMode || factoryMode || gameMode}
         >
           <Ruler size={15} />
         </button>
@@ -120,15 +124,23 @@ export default function Toolbar({
           className={`tb-btn ${siteMode ? 'tb-btn--active' : ''}`}
           title="Site Plan"
           onClick={onToggleSiteMode}
-          disabled={sequenceMode || builderMode || gameMode}
+          disabled={sequenceMode || builderMode || factoryMode || gameMode}
         >
           <Map size={15} />
+        </button>
+        <button
+          className={`tb-btn ${factoryMode ? 'tb-btn--active' : ''}`}
+          title="Prefab Factory Layout"
+          onClick={onToggleFactoryMode}
+          disabled={sequenceMode || builderMode || siteMode || gameMode}
+        >
+          <Factory size={15} />
         </button>
         <button
           className={`tb-btn ${sequenceMode ? 'tb-btn--active' : ''}`}
           title="Assembly Sequence"
           onClick={onToggleSequence}
-          disabled={siteMode || gameMode}
+          disabled={siteMode || factoryMode || gameMode}
         >
           <Layers size={15} />
         </button>
@@ -136,7 +148,7 @@ export default function Toolbar({
           className={`tb-btn ${showCrane ? 'tb-btn--active' : ''}`}
           title="Tower Crane"
           onClick={onToggleCrane}
-          disabled={siteMode || gameMode}
+          disabled={siteMode || factoryMode || gameMode}
         >
           <HardHat size={15} />
         </button>
@@ -144,7 +156,7 @@ export default function Toolbar({
           className={`tb-btn ${showEarthquake ? 'tb-btn--active' : ''}`}
           title="Earthquake Simulation"
           onClick={onToggleEarthquake}
-          disabled={gameMode}
+          disabled={factoryMode || gameMode}
         >
           <Activity size={15} />
         </button>
@@ -152,7 +164,7 @@ export default function Toolbar({
           className={`tb-btn ${showWindArrows ? 'tb-btn--active' : ''}`}
           title="Wind Load Arrows"
           onClick={onToggleWindArrows}
-          disabled={siteMode || gameMode}
+          disabled={siteMode || factoryMode || gameMode}
         >
           <Wind size={15} />
         </button>
@@ -160,15 +172,31 @@ export default function Toolbar({
           className={`tb-btn ${showWaterSim ? 'tb-btn--active' : ''}`}
           title="Water Analysis"
           onClick={onToggleWaterSim}
-          disabled={siteMode || gameMode}
+          disabled={siteMode || factoryMode || gameMode}
         >
           <Droplets size={15} />
+        </button>
+        <button
+          className={`tb-btn ${showThermal ? 'tb-btn--active' : ''}`}
+          title="Thermal Bridge Visualizer"
+          onClick={onToggleThermal}
+          disabled={siteMode || factoryMode || gameMode}
+        >
+          <Thermometer size={15} />
+        </button>
+        <button
+          className={`tb-btn ${showAcoustic ? 'tb-btn--active' : ''}`}
+          title="Acoustic Performance Overlay"
+          onClick={onToggleAcoustic}
+          disabled={siteMode || factoryMode || gameMode}
+        >
+          <Volume2 size={15} />
         </button>
         <button
           className="tb-btn"
           title="Floor Plan"
           onClick={onShowFloorPlan}
-          disabled={siteMode || gameMode}
+          disabled={siteMode || factoryMode || gameMode}
         >
           <LayoutTemplate size={15} />
         </button>
@@ -176,7 +204,7 @@ export default function Toolbar({
           className={`tb-btn ${fireMode ? 'tb-btn--active' : ''}`}
           title="Fire Spread Simulation"
           onClick={onToggleFireMode}
-          disabled={gameMode}
+          disabled={factoryMode || gameMode}
           style={fireMode ? { color: '#e74c3c' } : {}}
         >
           <Flame size={15} />
@@ -185,7 +213,7 @@ export default function Toolbar({
           className={`tb-btn ${showFireCompartments ? 'tb-btn--active' : ''}`}
           title="Fire Compartment Visualizer"
           onClick={onToggleFireCompartments}
-          disabled={siteMode || gameMode}
+          disabled={siteMode || factoryMode || gameMode}
         >
           <Shield size={15} />
         </button>
@@ -209,7 +237,7 @@ export default function Toolbar({
           className={`tb-btn tb-btn--text ${exploded ? 'tb-btn--active' : ''}`}
           title="Explode / Assemble"
           onClick={onToggleExplode}
-          disabled={sequenceMode || siteMode || gameMode}
+          disabled={sequenceMode || siteMode || factoryMode || gameMode}
         >
           <Zap size={13} />
           {exploded ? 'ASSEMBLE' : 'EXPLODE'}
@@ -237,7 +265,7 @@ export default function Toolbar({
           className={`tb-btn tb-btn--text ${cinematicMode ? 'tb-btn--active' : ''}`}
           title="Cinematic demo tour"
           onClick={onToggleCinematic}
-          disabled={gameMode || builderMode}
+          disabled={gameMode || builderMode || factoryMode}
         >
           <Clapperboard size={13} />
           DEMO

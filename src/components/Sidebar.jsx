@@ -33,6 +33,7 @@ export default function Sidebar({
   selectedVariants,
   activePreset, onApplyPreset,
   siteMode, placedUnits, selectedUnitType, onSelectUnitType,
+  factoryMode,
   gameMode, gamePhase, gameStep, gameMistakes, gameElapsed, maxStep, onExitGame,
   builderMode,
   isOpen, onClose,
@@ -48,6 +49,10 @@ export default function Sidebar({
     setPresetName('')
     setSavingPreset(false)
   }
+
+  const visibleParts = parts.filter(part => visible[part.id])
+  const factoryParts = visibleParts.filter(part => part.factory_work === true)
+  const sitePrepParts = visibleParts.filter(part => part.factory_work === false)
 
   /* ── Game HUD ── */
   if (gameMode) {
@@ -125,6 +130,38 @@ export default function Sidebar({
           </div>
           <div className="site-unit-count">
             {placedUnits.length} unit{placedUnits.length !== 1 ? 's' : ''} placed &nbsp;·&nbsp; 25 cells
+          </div>
+          <div className="sidebar-divider" />
+        </div>
+      )}
+
+      {factoryMode && (
+        <div className="factory-sidebar-summary">
+          <div className="sidebar-section-label">Factory Plan</div>
+          <div className="factory-sidebar-kpis">
+            <div>
+              <strong>{visibleParts.length}</strong>
+              <span>bays</span>
+            </div>
+            <div>
+              <strong>{factoryParts.length}</strong>
+              <span>factory</span>
+            </div>
+            <div>
+              <strong>{sitePrepParts.length}</strong>
+              <span>site prep</span>
+            </div>
+          </div>
+          <div className="factory-sequence-list">
+            {visibleParts
+              .slice()
+              .sort((a, b) => (a.sequence ?? 99) - (b.sequence ?? 99))
+              .map(part => (
+                <div key={part.id} className="factory-sequence-row">
+                  <span>#{part.sequence ?? '-'}</span>
+                  <strong>{part.id}</strong>
+                </div>
+              ))}
           </div>
           <div className="sidebar-divider" />
         </div>
@@ -249,7 +286,11 @@ export default function Sidebar({
       )}
 
       <div className="sidebar-hint">
-        {siteMode ? 'Click a cell to place · Click unit to remove' : 'Click a part to inspect'}
+        {siteMode
+          ? 'Click a cell to place · Click unit to remove'
+          : factoryMode
+            ? 'Toggle layers to update factory bays'
+            : 'Click a part to inspect'}
       </div>
     </aside>
   )

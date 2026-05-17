@@ -13,23 +13,26 @@ import WindArrows from './WindArrows'
 import RainSimulation from './RainSimulation'
 import WaterPressure from './WaterPressure'
 import FireCompartments from './FireCompartments'
+import ThermalOverlay from './ThermalOverlay'
+import FactoryGrid from './FactoryGrid'
 import { useKit } from './KitContext'
 
-function CameraController({ siteMode, controlsRef, cameraCmd, craneCabView }) {
+function CameraController({ siteMode, factoryMode, controlsRef, cameraCmd, craneCabView }) {
   const { camera } = useThree()
 
   useEffect(() => {
-    const pos = siteMode ? { x: 2, y: 20, z: 10 } : { x: 8, y: 8, z: 8 }
+    const pos = factoryMode ? { x: 0, y: 12, z: 9 } : siteMode ? { x: 2, y: 20, z: 10 } : { x: 8, y: 8, z: 8 }
     gsap.to(camera.position, { ...pos, duration: 1.2, ease: 'expo.inOut' })
     if (controlsRef.current) {
       const targetY = siteMode ? 0.5 : 0
+      const targetZ = factoryMode ? 1.2 : 0
       gsap.to(controlsRef.current.target, {
-        x: 0, y: targetY, z: 0,
+        x: 0, y: targetY, z: targetZ,
         duration: 1.2, ease: 'expo.inOut',
         onUpdate: () => controlsRef.current?.update(),
       })
     }
-  }, [siteMode, camera, controlsRef])
+  }, [siteMode, factoryMode, camera, controlsRef])
 
   useEffect(() => {
     if (!cameraCmd || !controlsRef.current) return
@@ -100,6 +103,7 @@ export default function Scene({
   sectionCutActive,
   sectionCutY,
   siteMode,
+  factoryMode,
   placedUnits,
   onPlaceUnit,
   onRemoveUnit,
@@ -131,6 +135,8 @@ export default function Scene({
   showWindArrows,
   windSpeed,
   showWaterSim,
+  showThermal,
+  showAcoustic,
   liftPlanMode,
   liftStart,
   liftEnd,
@@ -147,19 +153,19 @@ export default function Scene({
   return (
     <Canvas
       shadows={{ type: THREE.PCFShadowMap }}
-      style={{ position: 'absolute', inset: 0, background: siteMode ? '#eef2f7' : '#f4f4f4' }}
+      style={{ position: 'absolute', inset: 0, background: siteMode || factoryMode ? '#eef2f7' : '#f4f4f4' }}
       gl={{ localClippingEnabled: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1, preserveDrawingBuffer: true }}
       onCreated={({ gl }) => onRendererReady?.(gl)}
     >
       <PerspectiveCamera makeDefault position={[8, 8, 8]} fov={45} />
       <OrbitControls ref={controlsRef} makeDefault enableDamping />
-      <CameraController siteMode={siteMode} controlsRef={controlsRef} cameraCmd={cameraCmd} craneCabView={craneCabView} />
+      <CameraController siteMode={siteMode} factoryMode={factoryMode} controlsRef={controlsRef} cameraCmd={cameraCmd} craneCabView={craneCabView} />
 
-      <ambientLight intensity={!siteMode && envSettings && (envSettings.time < 6 || envSettings.time > 18) ? 0.2 : 0.8} />
+      <ambientLight intensity={!siteMode && !factoryMode && envSettings && (envSettings.time < 6 || envSettings.time > 18) ? 0.2 : 0.8} />
       
       {/* ── Dynamic Sky and Sun ─────────────────────────── */}
       {(() => {
-        if (siteMode || !envSettings) {
+        if (siteMode || factoryMode || !envSettings) {
           return (
             <>
               <directionalLight position={[5, 10, 5]} intensity={1} castShadow />
@@ -207,8 +213,12 @@ export default function Scene({
         />
       )}
 
+      {factoryMode && (
+        <FactoryGrid parts={parts} visible={visible} selectedVariants={selectedVariants} />
+      )}
+
       {/* ── Regular parts (hidden in site mode) ────────── */}
-      {!siteMode && parts && parts.map((part) => {
+      {!siteMode && !factoryMode && parts && parts.map((part) => {
         const variantIdx = selectedVariants[part.id] ?? 0
         const activeVariant = part.variants[variantIdx]
         return (
@@ -232,6 +242,7 @@ export default function Scene({
             isShaking={isShaking}
             earthquakeMagnitude={earthquakeMagnitude}
             highlightedWeek={highlightedWeek}
+            showAcoustic={showAcoustic}
             fireMode={fireMode}
             fireStatus={fireState?.[part.id] ?? 'ok'}
             onIgnite={onIgnite}
@@ -240,7 +251,7 @@ export default function Scene({
       })}
 
       {/* ── Connection indicators (deduplicated) ────────── */}
-      {!siteMode && !gameMode && parts && (() => {
+      {!siteMode && !factoryMode && !gameMode && parts && (() => {
         const rendered = new Set()
         return parts.flatMap(partA =>
           (partA.connections ?? []).flatMap(conn => {
@@ -254,10 +265,10 @@ export default function Scene({
         )
       })()}
 
-      {!siteMode && showDimensions && <DimensionLines parts={parts} visible={visible} />}
+      {!siteMode && !factoryMode && showDimensions && <DimensionLines parts={parts} visible={visible} />}
 
       {/* Grass / Background plane */}
-      {!siteMode && envSettings?.grass && (
+      {!siteMode && !factoryMode && envSettings?.grass && (
         <mesh position={[0, -0.27, 0]} rotation={[-Math.PI / 2, 0, 0]} onClick={onClearSelect} receiveShadow>
           <planeGeometry args={[100, 100]} />
           <meshStandardMaterial color="#557a2b" roughness={0.9} />
@@ -265,19 +276,19 @@ export default function Scene({
       )}
 
       {/* Ken Grid — 910mm modular grid (Japan standard) */}
-      {!siteMode && envSettings?.kenGrid && (
+      {!siteMode && !factoryMode && envSettings?.kenGrid && (
         <gridHelper args={[18.2, 20, '#8b7355', '#c4b49a']} position={[0, -0.265, 0]} />
       )}
 
       {/* Invisible click plane when grass is off */}
-      {!siteMode && !envSettings?.grass && (
+      {!siteMode && !factoryMode && !envSettings?.grass && (
         <mesh position={[0, -2, 0]} rotation={[-Math.PI / 2, 0, 0]} onClick={onClearSelect}>
           <planeGeometry args={[100, 100]} />
           <meshBasicMaterial transparent opacity={0} />
         </mesh>
       )}
 
-      {showCrane && (
+      {!factoryMode && showCrane && (
         <Crane
           sequenceMode={sequenceMode}
           sequenceStep={sequenceStep}
@@ -289,7 +300,7 @@ export default function Scene({
         />
       )}
 
-      {showCrane && showSecondCrane && (() => {
+      {!factoryMode && showCrane && showSecondCrane && (() => {
         // Crane 1 base X = 7, Crane 2 base X = 7 + secondCraneX
         const c1x = 7, c2x = 7 + (secondCraneX ?? -8)
         const JIB_REACH = 9
@@ -325,22 +336,26 @@ export default function Scene({
         )
       })()}
 
-      {!siteMode && showWindArrows && (
+      {!siteMode && !factoryMode && showWindArrows && (
         <WindArrows parts={parts} visible={visible} windSpeed={windSpeed ?? 8} />
       )}
 
-      {!siteMode && showWaterSim && (
+      {!siteMode && !factoryMode && showWaterSim && (
         <RainSimulation parts={parts} visible={visible} />
       )}
-      {!siteMode && showWaterSim && (
+      {!siteMode && !factoryMode && showWaterSim && (
         <WaterPressure parts={parts} visible={visible} windSpeed={windSpeed ?? 8} />
       )}
 
-      {!siteMode && showFireCompartments && (
+      {!siteMode && !factoryMode && showThermal && (
+        <ThermalOverlay parts={parts} visible={visible} selectedVariants={selectedVariants} />
+      )}
+
+      {!siteMode && !factoryMode && showFireCompartments && (
         <FireCompartments parts={parts} visible={visible} selectedVariants={selectedVariants} />
       )}
 
-      <ContactShadows position={[0, -0.26, 0]} opacity={0.4} scale={siteMode ? 40 : 12} blur={2} />
+      <ContactShadows position={[0, -0.26, 0]} opacity={0.4} scale={siteMode || factoryMode ? 40 : 12} blur={2} />
 
       <CinematicMode
         active={cinematicMode}

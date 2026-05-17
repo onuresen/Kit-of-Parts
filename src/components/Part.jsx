@@ -3,8 +3,9 @@ import { Edges, Html, TransformControls, useGLTF } from '@react-three/drei'
 import { useKit } from './KitContext'
 import { gsap } from 'gsap'
 import * as THREE from 'three'
+import { acousticColor, inferStcRating } from '../utils/materialMetrics'
 
-function GlbMesh({ url, opacity, transparent, depthWrite, clippingPlanes, isWire, isGhost, emissiveIntensity, emissiveColor }) {
+function GlbMesh({ url, opacity, transparent, depthWrite, clippingPlanes, isWire, isGhost, emissiveIntensity, emissiveColor, colorOverride }) {
   const { scene } = useGLTF(url)
 
   const cloned = useMemo(() => {
@@ -31,12 +32,13 @@ function GlbMesh({ url, opacity, transparent, depthWrite, clippingPlanes, isWire
         m.depthWrite = depthWrite
         m.clippingPlanes = clippingPlanes
         m.clipShadows = true
+        if (colorOverride && m.color) m.color.set(colorOverride)
         m.emissiveIntensity = emissiveIntensity
         if (emissiveColor) m.emissive = new THREE.Color(emissiveColor)
         m.needsUpdate = true
       })
     })
-  }, [cloned, opacity, transparent, depthWrite, clippingPlanes, emissiveIntensity, emissiveColor, isWire, isGhost])
+  }, [cloned, opacity, transparent, depthWrite, clippingPlanes, emissiveIntensity, emissiveColor, colorOverride, isWire, isGhost])
 
   return <primitive object={cloned} />
 }
@@ -60,6 +62,7 @@ export default function Part({
   isShaking,
   earthquakeMagnitude,
   highlightedWeek,
+  showAcoustic,
   fireMode,
   fireStatus,
   onIgnite,
@@ -70,7 +73,10 @@ export default function Part({
   const [flashState, setFlashState] = useState(null) // null | 'correct' | 'wrong'
   const prevSequenceStep = useRef(-1)
 
-  const color = activeVariant?.color ?? data.variants[0].color
+  const baseColor = activeVariant?.color ?? data.variants[0].color
+  const stcRating = inferStcRating(activeVariant)
+  const acousticTint = acousticColor(stcRating)
+  const color = showAcoustic ? acousticTint : baseColor
   const isWire = data.wire ?? false
   const isTrans = data.transparent ?? false
 
@@ -239,10 +245,11 @@ export default function Part({
     : flashState === 'wrong' ? '#e74c3c'
     : shakeAtRisk ? '#e74c3c'
     : isWeekHighlighted ? '#3498db'
+    : showAcoustic ? acousticTint
     : color
   const emissiveIntensity = fireStatus === 'burning' ? 1.2
     : fireStatus === 'failed' ? 0.6
-    : flashState ? 1.5 : shakeAtRisk ? 0.8 : isWeekHighlighted ? 0.5 : (hovered && !isGhost ? 0.25 : 0)
+    : flashState ? 1.5 : shakeAtRisk ? 0.8 : isWeekHighlighted ? 0.5 : showAcoustic ? 0.35 : (hovered && !isGhost ? 0.25 : 0)
   const opacity = fireStatus === 'failed' ? 0.6
     : isGhost ? 0.13 : isWeekDimmed ? 0.25 : (isWire ? 0.06 : isTrans ? 0.6 : 1)
   const transparent = isGhost || isWire || isTrans || isWeekDimmed
@@ -256,13 +263,16 @@ export default function Part({
   // ── Label ────────────────────────────────────────────────
   const showNormalLabel = !gameMode && (hovered || isExploded || (sequenceMode && sequenceStep === data.sequence))
   const showGameLabel = gameMode && ((isGhost && hovered) || flashState !== null)
-  const showLabel = showNormalLabel || showGameLabel
+  const showAcousticLabel = showAcoustic && finalVisible
+  const showLabel = showNormalLabel || showGameLabel || showAcousticLabel
 
   let labelText = data.id
   if (gameMode) {
     if (flashState === 'correct') labelText = `✓ ${data.id}`
     else if (flashState === 'wrong') labelText = '✗ Wrong order!'
     else labelText = '?'
+  } else if (showAcousticLabel && !showNormalLabel) {
+    labelText = `STC ${stcRating}`
   }
 
   const labelY = data.size[1] / 2 + 0.25
@@ -305,6 +315,7 @@ export default function Part({
           isGhost={isGhost}
           emissiveIntensity={emissiveIntensity}
           emissiveColor={fireStatus ? emissive : undefined}
+          colorOverride={showAcoustic ? acousticTint : undefined}
         />
       </Suspense>
       {showLabel && (

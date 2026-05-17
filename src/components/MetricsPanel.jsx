@@ -4,6 +4,8 @@ import { generatePDF } from '../utils/pdfGenerator'
 import { exportIFC } from '../utils/ifcExporter'
 import AIOptimiserPanel from './AIOptimiserPanel'
 import GanttPanel from './GanttPanel'
+import SupplyRiskPanel from './SupplyRiskPanel'
+import { getSupplyRiskMeta } from '../utils/materialMetrics'
 
 const FOOTPRINT_M2 = 16
 const RIBA_BUDGET = 300
@@ -124,7 +126,7 @@ export default function MetricsPanel({ selectedVariants, visible, onClose, onVar
     exportIFC(parts, selectedVariants)
   }
 
-  const tabs = ['cost', 'carbon', 'bom', 'prefab', 'structural', 'ai', 'schedule']
+  const tabs = ['cost', 'carbon', 'bom', 'prefab', 'structural', 'supply', 'ai', 'schedule']
 
   return (
     <div className="metrics-panel">
@@ -141,6 +143,7 @@ export default function MetricsPanel({ selectedVariants, visible, onClose, onVar
                tab === 'bom' ? 'BOM' :
                tab === 'prefab' ? 'Prefab' :
                tab === 'structural' ? '構造' :
+               tab === 'supply' ? 'Supply' :
                tab === 'ai' ? '✦ AI' :
                '📅 Schedule'}
             </button>
@@ -332,6 +335,7 @@ export default function MetricsPanel({ selectedVariants, visible, onClose, onVar
                 <th>Material</th>
                 {hasLabourData && <th>Labour</th>}
                 <th>Lead</th>
+                <th>Risk</th>
               </tr>
             </thead>
             <tbody>
@@ -359,6 +363,16 @@ export default function MetricsPanel({ selectedVariants, visible, onClose, onVar
                       <td className="bom-num">{v.labor_cost_usd != null ? formatCurrency(v.labor_cost_usd) : '—'}</td>
                     )}
                     <td className="bom-num">{v.lead_time_days != null ? `${v.lead_time_days}d` : '—'}</td>
+                    <td className="bom-num">
+                      {(() => {
+                        const risk = getSupplyRiskMeta(v)
+                        return (
+                          <span className="supply-risk-mini" style={{ color: risk.color, borderColor: risk.color }}>
+                            {risk.label}
+                          </span>
+                        )
+                      })()}
+                    </td>
                   </tr>
                 )
               })}
@@ -369,6 +383,7 @@ export default function MetricsPanel({ selectedVariants, visible, onClose, onVar
                 <td className="bom-num">{totalWeight.toLocaleString()}</td>
                 <td className="bom-num">{formatCurrency(totalMaterial)}</td>
                 {hasLabourData && <td className="bom-num">{formatCurrency(totalLabour)}</td>}
+                <td />
                 <td />
               </tr>
             </tfoot>
@@ -536,6 +551,16 @@ export default function MetricsPanel({ selectedVariants, visible, onClose, onVar
         <AIOptimiserPanel
           parts={parts}
           selectedVariants={selectedVariants}
+          onVariantChange={onVariantChange}
+        />
+      )}
+
+      {/* ── Supply chain risk tab ── */}
+      {activeTab === 'supply' && (
+        <SupplyRiskPanel
+          parts={parts}
+          selectedVariants={selectedVariants}
+          visible={visible}
           onVariantChange={onVariantChange}
         />
       )}

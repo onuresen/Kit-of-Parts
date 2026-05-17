@@ -46,6 +46,7 @@ export default function App() {
   const [siteMode, setSiteMode] = useState(false)
   const [placedUnits, setPlacedUnits] = useState([])
   const [selectedUnitType, setSelectedUnitType] = useState(null)
+  const [factoryMode, setFactoryMode] = useState(false)
 
   const [builderMode, setBuilderMode] = useState(false)
   const [cameraCmd, setCameraCmd] = useState(null)
@@ -70,6 +71,10 @@ export default function App() {
 
   // ── Water simulation ─────────────────────────────────────
   const [showWaterSim, setShowWaterSim] = useState(false)
+
+  // ── Group C: Material overlays ───────────────────────────
+  const [showThermal, setShowThermal] = useState(false)
+  const [showAcoustic, setShowAcoustic] = useState(false)
 
   // ── Floor plan ───────────────────────────────────────────
   const [showFloorPlan, setShowFloorPlan] = useState(false)
@@ -145,6 +150,7 @@ export default function App() {
       if (e.key === 'm' || e.key === 'M') setShowMetrics(v => !v)
       if (e.key === 'x' || e.key === 'X') setSectionCutActive(v => !v)
       if (e.key === 'b' || e.key === 'B') toggleBuilderMode()
+      if (e.key === 'f' || e.key === 'F') toggleFactoryMode()
       if (e.key === '1') handleCameraPreset('front')
       if (e.key === '2') handleCameraPreset('top')
       if (e.key === '3') handleCameraPreset('right')
@@ -152,13 +158,14 @@ export default function App() {
       if (e.key === 's' || e.key === 'S') {
         if (builderMode) setBuilderMode(false)
         if (siteMode) setSiteMode(false)
+        if (factoryMode) setFactoryMode(false)
         if (sequenceMode) { setSequenceMode(false); setSequenceStep(0) }
         setSelected(null)
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [builderMode, siteMode, sequenceMode])
+  }, [builderMode, siteMode, factoryMode, sequenceMode])
 
   // ── Handlers ─────────────────────────────────────────────
   function togglePart(id) {
@@ -203,6 +210,7 @@ export default function App() {
       setSequenceStep(0)
       setGameMode(false)
       setGamePhase('idle')
+      setFactoryMode(false)
     }
     setSiteMode(v => !v)
   }
@@ -215,9 +223,29 @@ export default function App() {
       setGameMode(false)
       setGamePhase('idle')
       setSiteMode(false)
+      setFactoryMode(false)
     }
     setBuilderMode(v => !v)
     setSelected(null)
+  }
+
+  function toggleFactoryMode() {
+    if (!factoryMode) {
+      setExploded(false)
+      setSequenceMode(false)
+      setSequenceStep(0)
+      setGameMode(false)
+      setGamePhase('idle')
+      setSiteMode(false)
+      setBuilderMode(false)
+      setCinematicMode(false)
+      setCraneCabView(false)
+      setLiftPlanMode(false)
+      setLiftStart(null)
+      setLiftEnd(null)
+      setSelected(null)
+    }
+    setFactoryMode(v => !v)
   }
 
   function placeUnit(col, row, presetId) {
@@ -257,6 +285,7 @@ export default function App() {
     setSequenceMode(false)
     setSequenceStep(0)
     setSiteMode(false)
+    setFactoryMode(false)
     setShowMetrics(false)
     setSelected(null)
   }
@@ -481,6 +510,8 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
         onToggleMetrics={() => setShowMetrics(v => !v)}
         siteMode={siteMode}
         onToggleSiteMode={toggleSiteMode}
+        factoryMode={factoryMode}
+        onToggleFactoryMode={toggleFactoryMode}
         sequenceMode={sequenceMode}
         onToggleSequence={toggleSequenceMode}
         gameMode={gameMode}
@@ -503,6 +534,10 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
         onToggleWindArrows={() => setShowWindArrows(v => !v)}
         showWaterSim={showWaterSim}
         onToggleWaterSim={() => setShowWaterSim(v => !v)}
+        showThermal={showThermal}
+        onToggleThermal={() => setShowThermal(v => !v)}
+        showAcoustic={showAcoustic}
+        onToggleAcoustic={() => setShowAcoustic(v => !v)}
         onShowFloorPlan={() => setShowFloorPlan(true)}
         fireMode={fireMode}
         onToggleFireMode={handleToggleFireMode}
@@ -526,6 +561,7 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
         activePreset={activePreset}
         onApplyPreset={applyPreset}
         siteMode={siteMode}
+        factoryMode={factoryMode}
         placedUnits={placedUnits}
         selectedUnitType={selectedUnitType}
         onSelectUnitType={setSelectedUnitType}
@@ -553,6 +589,7 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
         sectionCutActive={sectionCutActive}
         sectionCutY={sectionCutY}
         siteMode={siteMode}
+        factoryMode={factoryMode}
         placedUnits={placedUnits}
         onPlaceUnit={placeUnit}
         onRemoveUnit={removeUnit}
@@ -574,6 +611,8 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
         showWindArrows={showWindArrows}
         windSpeed={windSpeed}
         showWaterSim={showWaterSim}
+        showThermal={showThermal}
+        showAcoustic={showAcoustic}
         liftPlanMode={liftPlanMode}
         liftStart={liftStart}
         liftEnd={liftEnd}
@@ -609,6 +648,7 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
         envSettings={envSettings}
         setEnvSettings={setEnvSettings}
         gameMode={gameMode}
+        showAcoustic={showAcoustic}
       />
 
       {showMetrics && (

@@ -4,6 +4,7 @@ const SHORTCUTS = [
   { key: 'M', desc: 'Open / close Metrics panel' },
   { key: 'X', desc: 'Toggle section cut' },
   { key: 'B', desc: 'Toggle Builder mode' },
+  { key: 'F', desc: 'Toggle Factory layout' },
   { key: 'S', desc: 'Return to Select mode' },
   { key: 'Esc', desc: 'Clear selection / close panels' },
   { key: '?', desc: 'Show this shortcuts list' },
