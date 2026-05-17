@@ -101,6 +101,7 @@ export default function App() {
   const [earthquakeMagnitude, setEarthquakeMagnitude] = useState(6.0)
   const [isShaking, setIsShaking] = useState(false)
   const [hasShaken, setHasShaken] = useState(false)
+  const [earthquakeCountdown, setEarthquakeCountdown] = useState(null)
 
   const currentPartWeight = (() => {
     if (!sequenceMode || !parts || sequenceStep <= 0) return 0
@@ -316,14 +317,25 @@ export default function App() {
 
   // ── Earthquake ───────────────────────────────────────────
   function handleShake() {
-    if (isShaking) return
-    setIsShaking(true)
+    if (isShaking || earthquakeCountdown != null) return
     setHasShaken(false)
-    const duration = (earthquakeMagnitude * 0.35 + 1) * 1000
-    setTimeout(() => {
-      setIsShaking(false)
-      setHasShaken(true)
-    }, duration)
+    setEarthquakeCountdown(3)
+    let next = 3
+    const countdownId = setInterval(() => {
+      next -= 1
+      if (next <= 0) {
+        clearInterval(countdownId)
+        setEarthquakeCountdown(null)
+        setIsShaking(true)
+        const duration = (earthquakeMagnitude * 0.35 + 1) * 1000
+        setTimeout(() => {
+          setIsShaking(false)
+          setHasShaken(true)
+        }, duration)
+      } else {
+        setEarthquakeCountdown(next)
+      }
+    }, 650)
   }
 
   // ── Fire propagation ─────────────────────────────────────
@@ -621,6 +633,7 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
         currentPartWeight={currentPartWeight}
         isShaking={isShaking}
         earthquakeMagnitude={earthquakeMagnitude}
+        hasShaken={hasShaken}
         highlightedWeek={highlightedWeek}
         showSecondCrane={showSecondCrane}
         secondCraneX={secondCraneX}
@@ -729,6 +742,7 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
           magnitude={earthquakeMagnitude}
           onMagnitude={setEarthquakeMagnitude}
           isShaking={isShaking}
+          countdown={earthquakeCountdown}
           onShake={handleShake}
           hasShaken={hasShaken}
           selectedVariants={selectedVariants}

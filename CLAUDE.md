@@ -101,6 +101,7 @@ No Tailwind — all styling is custom CSS in `src/App.css` plus inline styles. D
 | `earthquakeMagnitude` | number | Richter 3–9 |
 | `isShaking` | bool | Shake animation running |
 | `hasShaken` | bool | Verdict visible (true after shake completes) |
+| `earthquakeCountdown` | number\|null | 3-2-1 brace countdown before earthquake run starts |
 | `liftPlanMode` | bool | Crane lift path planner active |
 | `liftStart` | `{x,z}\|null` | Pick-up point world coords |
 | `liftEnd` | `{x,z}\|null` | Installation point world coords |
@@ -180,6 +181,7 @@ Bundled kits in `/public/` and copied to `/dist/`: `default-kit.json` (basic), `
 | `src/components/WaterPressure.jsx` | Semi-transparent pressure heatmap planes on all 5 faces of each visible part. Color scale: light blue (low) → deep blue → red (high) based on `windSpeed`. Opacity pulses sinusoidally via `useFrame`. Controlled by `showWaterSim` prop. |
 | `src/components/FireCompartments.jsx` | Groups visible parts by `part.fire_compartment` field. Computes AABB per group, renders wireframe box colored by worst fire rating (non-rated=#e74c3c, 1hr=#f39c12, 2hr=#27ae60). Html label shows compartment area vs BSL 500m² limit. |
 | `src/components/FireEffects.jsx` | Visual fire layer for burning/failed parts: flame columns, smoke plumes, heat rings, point lights, embers, and hazard labels driven by `fireState` plus user-controlled `fireIntensity`. |
+| `src/components/EarthquakeEffects.jsx` | Earthquake game-feel layer: camera rumble, shockwave rings, fault-line cracks, and stress/critical labels driven by seismic grade, magnitude, and base-isolation status. |
 | `src/components/ThermalOverlay.jsx` | Thermal bridge visualizer. Renders pulsing spheres/rings at visible connection midpoints; color derives from active variant thermal conductivity. |
 
 ### UI Panels
@@ -195,7 +197,7 @@ Bundled kits in `/public/` and copied to `/dist/`: `default-kit.json` (basic), `
 | `src/components/BuilderPanel.jsx` | Part editor: name, shape, position, size, explosion vector, variant props, GLB import |
 | `src/components/GameScorePanel.jsx` | Game completion overlay |
 | `src/components/ShortcutsModal.jsx` | Keyboard shortcuts reference |
-| `src/components/EarthquakePanel.jsx` | Right-side panel (`right:280, bottom:20`, uses `metrics-panel` class). Magnitude slider 3–9, seismic grade table, Shake button, survived/at-risk verdict |
+| `src/components/EarthquakePanel.jsx` | Right-side panel (`right:280, bottom:20`, uses `metrics-panel` class). Magnitude slider/presets 3–9, brace countdown, indicative PGA, seismic score, seismic grade table, Shake button, survived/at-risk verdict |
 | `src/components/FloorPlanPanel.jsx` | Full-screen modal. 2D canvas projects parts onto XZ plane (top-down). Ken grid overlay toggle. SVG export button |
 | `src/components/GanttPanel.jsx` | Schedule tab inside MetricsPanel. CSS Gantt bars per part, grouped by week. Click week to highlight parts in 3D |
 | `src/components/FirePanel.jsx` | Fire mode overlay panel (bottom-right). Editable scenario intensity slider, Ignite Test Part action, elapsed timer, burning/failed part counts, per-part status list with fire resistance grade, Extinguish All button. |
@@ -403,6 +405,7 @@ Modifies: `App.jsx`, `Toolbar.jsx`, `App.css`.
 
 | Feature | Files |
 |---|---|
+| Earthquake Game Feel | `src/components/EarthquakeEffects.jsx` (new - camera rumble, shockwave rings, fault-line cracks, stress/critical labels), `src/components/EarthquakePanel.jsx` (countdown, presets, indicative PGA, seismic score), `src/components/Part.jsx` (stronger sway with tilt/bounce while retaining seismic-grade/base-isolation scaling), `src/App.jsx` (`earthquakeCountdown` state), `src/components/Scene.jsx`, `src/App.css`. Implementation note: all game-feel cues derive from the existing magnitude, `seismic_grade`, and `base-isolation` logic. |
 | Weather & Hazard Visual Wow | `src/components/FireEffects.jsx` (new - flame columns, smoke plumes, heat rings, embers, point lights, hazard labels), `src/components/WindStreamlines.jsx` (new - animated wind-field ribbons and speed beads), `src/components/RainSimulation.jsx` (storm streaks + splash rings), `src/components/FirePanel.jsx` (editable scenario intensity slider + Ignite Test Part), `src/components/Scene.jsx` (renders visual FX from existing wind/water/fire state), `src/App.jsx` (`fireIntensity` affects spread/failure timing), `src/App.css` (hazard labels + fire controls). Implementation note: this is a presentation layer on top of existing engineering data; fire state, wind speed, and water pressure logic remain the source of truth. |
 | Crane Swing Path Planner + Cab View | `src/components/Crane.jsx` (GSAP jib slew to liftStart/liftEnd angles, sweep arc SectorMesh, lift point spheres), `src/components/CranePanel.jsx` (Plan Lift section, Cab View button), `src/components/SiteGrid.jsx` (liftPlanMode click handler), `src/components/Scene.jsx` (craneCabView→CameraController, lift props to Crane, crane now visible in site mode), `src/App.jsx` (`liftPlanMode`, `liftStart`, `liftEnd`, `craneCabView` state) |
 | Fire Spread Simulation + Compartment Visualizer | `src/components/FirePanel.jsx` (new — timer, status list, extinguish), `src/components/FireCompartments.jsx` (new — AABB wireframe per compartment, BSL check), `src/components/Part.jsx` (`fireMode`/`fireStatus`/`onIgnite` props, emissive overrides), `src/App.jsx` (`fireMode`, `fireState`, `fireElapsed`, `showFireCompartments`, `fireBurnStartRef`, propagation interval), `src/components/Toolbar.jsx` (`Flame`+`Shield` icons), `src/components/Scene.jsx` (renders FireCompartments, passes fire props to Part) |

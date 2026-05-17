@@ -17,12 +17,36 @@ function getVerdict(magnitude, parts, selectedVariants) {
   return { level: 'safe', label: 'STRUCTURE SURVIVED', color: '#27ae60', parts: [] }
 }
 
-export default function EarthquakePanel({ magnitude, onMagnitude, isShaking, onShake, hasShaken, selectedVariants }) {
+function getSeismicScore(magnitude, parts, selectedVariants) {
+  if (!parts.length) return 100
+  const total = parts.reduce((sum, part) => {
+    const grade = part.variants[selectedVariants[part.id] ?? 0]?.seismic_grade ?? 1
+    const hasBaseIso = (part.connections ?? []).some(c => c.type === 'base-isolation')
+    const capacity = grade * 3 + (hasBaseIso ? 1.1 : 0)
+    const margin = capacity - magnitude
+    let partScore
+    if (margin < 0) {
+      partScore = Math.max(18, 52 + margin * 12)
+    } else if (magnitude > grade * 2.2) {
+      partScore = Math.min(78, 62 + margin * 8)
+    } else {
+      partScore = Math.min(100, 84 + margin * 5)
+    }
+    return sum + partScore
+  }, 0)
+  return Math.round(total / parts.length)
+}
+
+export default function EarthquakePanel({ magnitude, onMagnitude, isShaking, countdown, onShake, hasShaken, selectedVariants }) {
   const { parts } = useKit()
   const primaryParts = parts.filter(p => !p.structural_role || p.structural_role === 'primary')
   const verdict = hasShaken ? getVerdict(magnitude, primaryParts, selectedVariants) : null
   const richterLabel = RICHTER_LABELS[Math.floor(magnitude)] ?? 'Major'
   const trackColor = magnitude < 5 ? '#27ae60' : magnitude < 7 ? '#f39c12' : '#e74c3c'
+  const seismicScore = getSeismicScore(magnitude, primaryParts, selectedVariants)
+  const isPrimed = countdown != null
+  const isLocked = isShaking || isPrimed
+  const pga = Math.min(2.4, 0.016 * Math.pow(10, 0.42 * magnitude))
 
   return (
     <div
@@ -35,6 +59,11 @@ export default function EarthquakePanel({ magnitude, onMagnitude, isShaking, onS
         </div>
       </div>
 
+      <div className={`eq-status-strip ${isShaking ? 'eq-status-strip--active' : isPrimed ? 'eq-status-strip--countdown' : ''}`}>
+        <span>{isShaking ? 'SEISMIC EVENT' : isPrimed ? 'COUNTDOWN' : hasShaken ? 'POST-EVENT REVIEW' : 'READY'}</span>
+        <strong>{isPrimed ? countdown : isShaking ? 'LIVE' : `${seismicScore}/100`}</strong>
+      </div>
+
       {/* Magnitude slider */}
       <div className="ipr-section" style={{ padding: '10px 14px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -45,13 +74,41 @@ export default function EarthquakePanel({ magnitude, onMagnitude, isShaking, onS
           type="range" min={3} max={9} step={0.1}
           value={magnitude}
           onChange={e => onMagnitude(parseFloat(e.target.value))}
-          disabled={isShaking}
+          disabled={isLocked}
           style={{ width: '100%', accentColor: trackColor }}
         />
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#888', marginTop: 4 }}>
           <span>3.0 Minor</span>
           <span style={{ fontWeight: 600, color: trackColor }}>{richterLabel}</span>
           <span>9.0 Catastrophic</span>
+        </div>
+        <div className="eq-presets" aria-label="Earthquake presets">
+          {[5.5, 6.8, 7.6].map(preset => (
+            <button
+              key={preset}
+              onClick={() => onMagnitude(preset)}
+              disabled={isLocked}
+              className={Math.abs(magnitude - preset) < 0.05 ? 'eq-preset--active' : ''}
+            >
+              M{preset}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="ipr-section eq-game-readout" style={{ padding: '0 14px 10px' }}>
+        <div>
+          <span>Indicative PGA</span>
+          <strong>{pga.toFixed(2)}g</strong>
+        </div>
+        <div>
+          <span>Seismic score</span>
+          <strong style={{ color: seismicScore >= 82 ? '#27ae60' : seismicScore >= 62 ? '#f39c12' : '#e74c3c' }}>
+            {seismicScore}/100
+          </strong>
+        </div>
+        <div className="eq-score-meter">
+          <div style={{ width: `${seismicScore}%`, background: seismicScore >= 82 ? '#27ae60' : seismicScore >= 62 ? '#f39c12' : '#e74c3c' }} />
         </div>
       </div>
 
@@ -86,16 +143,16 @@ export default function EarthquakePanel({ magnitude, onMagnitude, isShaking, onS
       <div style={{ padding: '0 14px 10px' }}>
         <button
           onClick={onShake}
-          disabled={isShaking}
+          disabled={isLocked}
           style={{
-            width: '100%', padding: '9px 0', border: 'none', borderRadius: 6, cursor: isShaking ? 'default' : 'pointer',
-            background: isShaking ? '#95a5a6' : `linear-gradient(135deg, ${trackColor}, #c0392b)`,
+            width: '100%', padding: '9px 0', border: 'none', borderRadius: 6, cursor: isLocked ? 'default' : 'pointer',
+            background: isLocked ? '#95a5a6' : `linear-gradient(135deg, ${trackColor}, #c0392b)`,
             color: '#fff', fontWeight: 700, fontSize: 12, letterSpacing: '0.05em',
             transition: 'background 0.3s',
-            animation: isShaking ? 'eq-shake-btn 0.15s infinite' : 'none',
+            animation: isShaking ? 'eq-shake-btn 0.15s infinite' : isPrimed ? 'eq-prime-btn 0.65s infinite' : 'none',
           }}
         >
-          {isShaking ? '⚡ SHAKING…' : '⚡ SIMULATE EARTHQUAKE'}
+          {isPrimed ? `⚡ BRACE ${countdown}` : isShaking ? '⚡ SHAKING…' : '⚡ SIMULATE EARTHQUAKE'}
         </button>
       </div>
 

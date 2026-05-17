@@ -167,25 +167,40 @@ export default function Part({
     if (!isShaking || !meshRef.current) return
     const mesh = meshRef.current
     const baseX = mesh.position.x
+    const baseY = mesh.position.y
     const baseZ = mesh.position.z
+    const baseRotZ = mesh.rotation.z
     const seismicGrade = activeVariant?.seismic_grade ?? 1
     const hasBaseIso = (data.connections ?? []).some(c => c.type === 'base-isolation')
     const isoFactor = hasBaseIso ? 0.15 : 1
-    const amplitude = (earthquakeMagnitude ?? 5) * 0.045 * (1 / seismicGrade) * isoFactor
+    const amplitude = (earthquakeMagnitude ?? 5) * 0.055 * (1 / seismicGrade) * isoFactor
     const cycles = Math.round((earthquakeMagnitude ?? 5) * 4)
     const tl = gsap.timeline({
-      onComplete: () => gsap.to(mesh.position, { x: baseX, z: baseZ, duration: 0.4, ease: 'expo.out' }),
+      onComplete: () => {
+        gsap.to(mesh.position, { x: baseX, y: baseY, z: baseZ, duration: 0.4, ease: 'expo.out' })
+        gsap.to(mesh.rotation, { z: baseRotZ, duration: 0.4, ease: 'expo.out' })
+      },
     })
     for (let i = 0; i < cycles; i++) {
       const a = (i / cycles) * Math.PI * 4 + Math.random() * 0.5
       tl.to(mesh.position, {
         x: baseX + Math.cos(a) * amplitude * (1 - i / cycles * 0.5),
+        y: baseY + Math.abs(Math.sin(a * 1.3)) * amplitude * 0.18,
         z: baseZ + Math.sin(a) * amplitude * (1 - i / cycles * 0.5),
         duration: 0.07, ease: 'none',
-      })
+      }, '<')
+      tl.to(mesh.rotation, {
+        z: baseRotZ + Math.sin(a) * amplitude * 0.1,
+        duration: 0.07, ease: 'none',
+      }, '<')
     }
-    tl.to(mesh.position, { x: baseX, z: baseZ, duration: 0.4, ease: 'expo.out' })
-    return () => { tl.kill(); gsap.to(mesh.position, { x: baseX, z: baseZ, duration: 0.2 }) }
+    tl.to(mesh.position, { x: baseX, y: baseY, z: baseZ, duration: 0.4, ease: 'expo.out' })
+    tl.to(mesh.rotation, { z: baseRotZ, duration: 0.4, ease: 'expo.out' }, '<')
+    return () => {
+      tl.kill()
+      gsap.to(mesh.position, { x: baseX, y: baseY, z: baseZ, duration: 0.2 })
+      gsap.to(mesh.rotation, { z: baseRotZ, duration: 0.2 })
+    }
   }, [isShaking])
 
   // ── Pointer cursor ───────────────────────────────────────

@@ -17,6 +17,7 @@ import ThermalOverlay from './ThermalOverlay'
 import FactoryGrid from './FactoryGrid'
 import FireEffects from './FireEffects'
 import WindStreamlines from './WindStreamlines'
+import EarthquakeEffects from './EarthquakeEffects'
 import { useKit } from './KitContext'
 
 function CameraController({ siteMode, factoryMode, controlsRef, cameraCmd, craneCabView }) {
@@ -131,6 +132,7 @@ export default function Scene({
   maxStep,
   isShaking,
   earthquakeMagnitude,
+  hasShaken,
   highlightedWeek,
   showSecondCrane,
   secondCraneX,
@@ -355,6 +357,17 @@ export default function Scene({
 
       {!siteMode && !factoryMode && showThermal && (
         <ThermalOverlay parts={parts} visible={visible} selectedVariants={selectedVariants} />
+      )}
+
+      {!siteMode && !factoryMode && (isShaking || hasShaken) && (
+        <EarthquakeEffects
+          parts={parts}
+          visible={visible}
+          selectedVariants={selectedVariants}
+          magnitude={earthquakeMagnitude ?? 6}
+          isShaking={isShaking}
+          hasShaken={hasShaken}
+        />
       )}
 
       {!siteMode && !factoryMode && showFireCompartments && (
