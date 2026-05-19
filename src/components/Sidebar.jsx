@@ -29,7 +29,7 @@ function formatTime(ms) {
 }
 
 export default function Sidebar({
-  visible, onToggle, selected,
+  visible, onToggle, selected, onSelect,
   selectedVariants,
   activePreset, onApplyPreset,
   siteMode, placedUnits, selectedUnitType, onSelectUnitType,
@@ -251,7 +251,7 @@ export default function Sidebar({
                   ].join(' ')}
                 >
                   <div className="part-swatch" style={{ background: activeColor }} />
-                  <span className="part-name">{part.id}</span>
+                  <span className="part-name" onClick={() => onSelect?.(part)} style={{ cursor: 'pointer' }}>{part.id}</span>
                   <button
                     className="part-toggle"
                     onClick={() => onToggle(part.id)}

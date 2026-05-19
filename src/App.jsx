@@ -583,6 +583,7 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
         visible={visible}
         onToggle={togglePart}
         selected={selected}
+        onSelect={setSelected}
         isOpen={mobileSidebarOpen}
         onClose={() => setMobileSidebarOpen(false)}
         selectedVariants={selectedVariants}
