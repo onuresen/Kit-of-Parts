@@ -220,6 +220,7 @@ export default function Part({
   }
 
   function handleClick(e) {
+    if (isTrans) return // click passes through to parts behind the transparent container
     e.stopPropagation()
 
     if (fireMode) {
