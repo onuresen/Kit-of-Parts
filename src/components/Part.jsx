@@ -220,7 +220,6 @@ export default function Part({
   }
 
   function handleClick(e) {
-    if (isTrans) return // click passes through to parts behind the transparent container
     e.stopPropagation()
 
     if (fireMode) {
@@ -315,10 +314,10 @@ export default function Part({
       ref={meshRef}
       position={data.pos}
       visible={finalVisible}
-      onClick={handleClick}
-      onDoubleClick={handleDoubleClick}
-      onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
-      onPointerOut={() => setHovered(false)}
+      onClick={isTrans ? undefined : handleClick}
+      onDoubleClick={isTrans ? undefined : handleDoubleClick}
+      onPointerOver={isTrans ? undefined : (e) => { e.stopPropagation(); setHovered(true) }}
+      onPointerOut={isTrans ? undefined : () => setHovered(false)}
     >
       <Suspense fallback={null}>
         <GlbMesh
@@ -347,10 +346,10 @@ export default function Part({
       ref={meshRef}
       position={data.pos}
       visible={finalVisible}
-      onClick={handleClick}
-      onDoubleClick={handleDoubleClick}
-      onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
-      onPointerOut={() => setHovered(false)}
+      onClick={isTrans ? undefined : handleClick}
+      onDoubleClick={isTrans ? undefined : handleDoubleClick}
+      onPointerOver={isTrans ? undefined : (e) => { e.stopPropagation(); setHovered(true) }}
+      onPointerOut={isTrans ? undefined : () => setHovered(false)}
     >
       {/* top bar */}
       <mesh position={[0, H / 2 - t / 2, 0]} castShadow={!isWire && !isGhost} receiveShadow>
@@ -411,10 +410,10 @@ export default function Part({
       ref={meshRef}
       position={data.pos}
       visible={finalVisible}
-      onClick={handleClick}
-      onDoubleClick={handleDoubleClick}
-      onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
-      onPointerOut={() => setHovered(false)}
+      onClick={isTrans ? undefined : handleClick}
+      onDoubleClick={isTrans ? undefined : handleDoubleClick}
+      onPointerOver={isTrans ? undefined : (e) => { e.stopPropagation(); setHovered(true) }}
+      onPointerOut={isTrans ? undefined : () => setHovered(false)}
       castShadow={!isWire && !isGhost}
       receiveShadow
     >
