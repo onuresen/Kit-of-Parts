@@ -157,9 +157,16 @@ export default function Scene({
 
   return (
     <Canvas
-      shadows={{ type: THREE.PCFShadowMap }}
+      dpr={[1, 1.5]}
+      shadows={false}
       style={{ position: 'absolute', inset: 0, background: siteMode || factoryMode ? '#eef2f7' : '#f4f4f4' }}
-      gl={{ localClippingEnabled: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1, preserveDrawingBuffer: true }}
+      gl={{
+        localClippingEnabled: true,
+        toneMapping: THREE.ACESFilmicToneMapping,
+        toneMappingExposure: 1.1,
+        preserveDrawingBuffer: true,
+        powerPreference: 'high-performance',
+      }}
       onCreated={({ gl }) => onRendererReady?.(gl)}
     >
       <PerspectiveCamera makeDefault position={[8, 8, 8]} fov={45} />
@@ -173,7 +180,7 @@ export default function Scene({
         if (siteMode || factoryMode || !envSettings) {
           return (
             <>
-              <directionalLight position={[5, 10, 5]} intensity={1} castShadow />
+              <directionalLight position={[5, 10, 5]} intensity={1} />
               <Environment preset="city" />
             </>
           )
@@ -191,7 +198,7 @@ export default function Scene({
           <>
             <Environment preset="city" />
             <Sky sunPosition={sunPos} turbidity={0.6} rayleigh={0.8} />
-            {isDaytime && <directionalLight position={sunPos} intensity={Math.max(0, Math.sin(theta))} castShadow />}
+            {isDaytime && <directionalLight position={sunPos} intensity={Math.max(0, Math.sin(theta))} />}
             
             {envSettings.stars && (
               <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
@@ -378,7 +385,14 @@ export default function Scene({
         <FireEffects parts={parts} visible={visible} fireState={fireState} intensity={fireIntensity} />
       )}
 
-      <ContactShadows position={[0, -0.26, 0]} opacity={0.4} scale={siteMode || factoryMode ? 40 : 12} blur={2} />
+      <ContactShadows
+        position={[0, -0.26, 0]}
+        opacity={0.28}
+        scale={siteMode || factoryMode ? 40 : 12}
+        blur={1.5}
+        resolution={512}
+        frames={1}
+      />
 
       <CinematicMode
         active={cinematicMode}

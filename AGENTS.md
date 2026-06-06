@@ -150,7 +150,7 @@ To trigger camera movement from outside Scene: `setCameraCmd({ type: 'preset', p
   }]
 }
 ```
-Bundled kits in `/public/` and copied to `/dist/`: `default-kit.json` (basic), `advanced-kit.json` (large feature-test sample), `eco-kit.json`, `premium-kit.json`
+Bundled kits in `/public/` and copied to `/dist/`: `default-kit.json` (playable first-open modular house kit), `advanced-kit.json` (large feature-test sample), `eco-kit.json`, `premium-kit.json`
 
 ---
 
@@ -254,12 +254,26 @@ Bundled kits in `/public/` and copied to `/dist/`: `default-kit.json` (basic), `
 - Clipping planes GPU-side
 - Suspense boundaries for GLB async loading
 - `preserveDrawingBuffer: true` on Canvas — needed for screenshots, slight GPU memory cost
+- Default Canvas performance budget: `dpr={[1, 1.5]}`, `powerPreference: 'high-performance'`, full shadow maps disabled, and `ContactShadows` cached with `frames={1}`. Avoid re-enabling always-on shadow maps without profiling because the app should feel like a responsive configurator/game, not a heavy renderer.
 
 ---
 
 ## Feature Backlog
 
 Priority order as agreed. Build these in sequence. Each entry has enough detail to implement without re-reading the codebase.
+
+---
+
+### 0. Default Kit Shape Upgrade ✅ SHIPPED
+**What:** Improve first-open comprehension so the model reads as a modular architectural kit, not only colored boxes.
+
+**Decision:** Use better part-level shape language instead of custom rendering. The default kit now communicates through simple low-cost parts: foundation tray, teal base-isolation pads, warm timber posts/beams, blue wall panels, glass/door cassettes, interior pods, visible MEP spine, and split roof cassettes.
+
+**Performance rule:** Keep the default first-open kit to existing cheap `Part.jsx` shapes. Make details into actual lightweight kit parts with `pos`/`size`/`sequence`/`connections`, not procedural child meshes. This preserves explode, sequencing, game mode, overlays, floor plan, metrics, and selection compatibility.
+
+**State:** No new `App.jsx` state.
+
+**New default kit:** `public/default-kit.json` now has 22 semantic parts and 3 presets (`Open Kit`, `Frame`, `Interior`). Existing Basic sample button still loads this file.
 
 ---
 
@@ -405,6 +419,8 @@ Modifies: `App.jsx`, `Toolbar.jsx`, `App.css`.
 
 | Feature | Files |
 |---|---|
+| Default Render Performance Tuning | `src/components/Scene.jsx` (caps DPR, requests high-performance WebGL context, disables full shadow maps, removes directional-light shadow casting, and caches contact shadows with `frames={1}`), `AGENTS.md`. Implementation note: browser WebGL already uses GPU where available; this reduces fan/CPU/GPU pressure by lowering the always-on render workload. |
+| Default Kit Shape Upgrade | `public/default-kit.json` (rewritten as a 22-part playable modular house kit with foundation tray, MEP spine, base-isolation pads, timber post/beam frame, wall/glass/door panels, interior pods, and split roof cassettes), `AGENTS.md`. Implementation note: visual comprehension is improved through real lightweight kit parts, not procedural render detail, so simulations and overlays remain compatible. |
 | Earthquake Game Feel | `src/components/EarthquakeEffects.jsx` (new - camera rumble, shockwave rings, fault-line cracks, stress/critical labels), `src/components/EarthquakePanel.jsx` (countdown, presets, indicative PGA, seismic score), `src/components/Part.jsx` (stronger sway with tilt/bounce while retaining seismic-grade/base-isolation scaling), `src/App.jsx` (`earthquakeCountdown` state), `src/components/Scene.jsx`, `src/App.css`. Implementation note: all game-feel cues derive from the existing magnitude, `seismic_grade`, and `base-isolation` logic. |
 | Weather & Hazard Visual Wow | `src/components/FireEffects.jsx` (new - flame columns, smoke plumes, heat rings, embers, point lights, hazard labels), `src/components/WindStreamlines.jsx` (new - animated wind-field ribbons and speed beads), `src/components/RainSimulation.jsx` (storm streaks + splash rings), `src/components/FirePanel.jsx` (editable scenario intensity slider + Ignite Test Part), `src/components/Scene.jsx` (renders visual FX from existing wind/water/fire state), `src/App.jsx` (`fireIntensity` affects spread/failure timing), `src/App.css` (hazard labels + fire controls). Implementation note: this is a presentation layer on top of existing engineering data; fire state, wind speed, and water pressure logic remain the source of truth. |
 | Crane Swing Path Planner + Cab View | `src/components/Crane.jsx` (GSAP jib slew to liftStart/liftEnd angles, sweep arc SectorMesh, lift point spheres), `src/components/CranePanel.jsx` (Plan Lift section, Cab View button), `src/components/SiteGrid.jsx` (liftPlanMode click handler), `src/components/Scene.jsx` (craneCabView→CameraController, lift props to Crane, crane now visible in site mode), `src/App.jsx` (`liftPlanMode`, `liftStart`, `liftEnd`, `craneCabView` state) |
