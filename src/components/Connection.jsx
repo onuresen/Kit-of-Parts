@@ -41,6 +41,7 @@ const TOOLTIP_BASE = {
 export default function Connection({ partA, partB, connection, isExploded }) {
   const [hovered, setHovered] = useState(false)
   const progress   = useRef(isExploded ? 1 : 0)
+  const lastP      = useRef(NaN)
   const dotMeshRef = useRef()
   const ringMeshRef = useRef()
   const lineRef    = useRef()
@@ -78,9 +79,13 @@ export default function Connection({ partA, partB, connection, isExploded }) {
     return () => cancelAnimationFrame(raf)
   }, [isExploded])
 
-  // Drive Three.js objects directly every frame (no React re-render needed)
+  // Drive Three.js objects directly every frame (no React re-render needed).
+  // Skip all work once the explode/assemble tween has settled — otherwise this
+  // runs the hex lerp + geometry rewrite + computeBoundingSphere every frame forever.
   useFrame(() => {
     const p = progress.current
+    if (p === lastP.current) return
+    lastP.current = p
 
     // Move dot + ring
     const dx = lerp(dotXa, dotXe, p), dy = lerp(dotYa, dotYe, p), dz = lerp(dotZa, dotZe, p)
@@ -126,16 +131,20 @@ export default function Connection({ partA, partB, connection, isExploded }) {
         opacity={0.7}
       />
 
-      {/* ── Midpoint type label ── */}
-      <Html position={isExploded ? midE : midA} center distanceFactor={10} style={{ pointerEvents: 'none' }}>
-        <div style={{ ...TOOLTIP_BASE, fontSize: '9px', letterSpacing: '0.06em',
-          borderLeft: `2px solid ${isExploded ? TENSION_COLOR : typeColor}`,
-          color: isExploded ? '#ffaaaa' : '#ccc',
-          paddingLeft: 5,
-        }}>
-          {isExploded ? `${connection.type} ⟵ tension` : connection.type}
-        </div>
-      </Html>
+      {/* ── Midpoint type label (only when exploded or hovered — each <Html>
+          reprojects against the camera every frame, so we don't want one
+          permanently mounted per connection in the assembled view) ── */}
+      {(isExploded || hovered) && (
+        <Html position={isExploded ? midE : midA} center distanceFactor={10} style={{ pointerEvents: 'none' }}>
+          <div style={{ ...TOOLTIP_BASE, fontSize: '9px', letterSpacing: '0.06em',
+            borderLeft: `2px solid ${isExploded ? TENSION_COLOR : typeColor}`,
+            color: isExploded ? '#ffaaaa' : '#ccc',
+            paddingLeft: 5,
+          }}>
+            {isExploded ? `${connection.type} ⟵ tension` : connection.type}
+          </div>
+        </Html>
+      )}
 
       {/* ── Interface dot ── */}
       <mesh

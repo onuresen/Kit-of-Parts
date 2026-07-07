@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useMemo, Suspense } from 'react'
+import { useRef, useEffect, useState, useMemo, memo, Suspense } from 'react'
 import { Edges, Html, TransformControls, useGLTF } from '@react-three/drei'
 import { useKit } from './KitContext'
 import { gsap } from 'gsap'
@@ -43,7 +43,7 @@ function GlbMesh({ url, opacity, transparent, depthWrite, clippingPlanes, isWire
   return <primitive object={cloned} />
 }
 
-export default function Part({
+function Part({
   data,
   isExploded,
   isVisible,
@@ -456,3 +456,5 @@ export default function Part({
 
   return content
 }
+
+export default memo(Part)

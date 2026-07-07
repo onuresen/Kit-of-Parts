@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Scene from './components/Scene'
 import InfoPanel from './components/InfoPanel'
 import Sidebar from './components/Sidebar'
@@ -262,9 +262,9 @@ export default function App() {
     setCameraCmd({ type: 'preset', preset, ts: Date.now() })
   }
 
-  function handleFramePart({ pos, size }) {
+  const handleFramePart = useCallback(({ pos, size }) => {
     setCameraCmd({ type: 'frame', pos, size, ts: Date.now() })
-  }
+  }, [])
 
   function handleDuplicate() {
     if (selected) duplicatePart(selected.id)
@@ -300,7 +300,7 @@ export default function App() {
     setGameElapsed(0)
   }
 
-  function handleGameClick({ id, correct }) {
+  const handleGameClick = useCallback(({ id, correct }) => {
     if (!correct) {
       setGameMistakes(m => m + 1)
       return
@@ -313,7 +313,7 @@ export default function App() {
     } else {
       setGameStep(nextStep)
     }
-  }
+  }, [gameStep, parts])
 
   // ── Earthquake ───────────────────────────────────────────
   function handleShake() {
@@ -372,11 +372,11 @@ export default function App() {
     return () => clearInterval(id)
   }, [fireMode, parts, selectedVariants, fireIntensity])
 
-  function handleIgnite(partId) {
+  const handleIgnite = useCallback((partId) => {
     fireBurnStartRef.current = { [partId]: Date.now() }
     setFireState({ [partId]: 'burning' })
     setFireElapsed(0)
-  }
+  }, [])
 
   function handleIgniteFirst() {
     if (!parts?.length) return

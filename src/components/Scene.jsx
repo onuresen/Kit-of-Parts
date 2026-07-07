@@ -20,6 +20,28 @@ import WindStreamlines from './WindStreamlines'
 import EarthquakeEffects from './EarthquakeEffects'
 import { useKit } from './KitContext'
 
+// ── GSAP → R3F invalidation bridge ─────────────────────────
+// In `frameloop="demand"` mode R3F only renders when a React prop changes or
+// something calls invalidate(). Our animations (explode, sequence, camera,
+// crane, earthquake, cinematic) are driven by GSAP, which mutates three.js
+// objects imperatively and does NOT trigger a render. This pumps a render
+// frame only while at least one GSAP tween is active, so an idle scene truly
+// idles at 0fps while every animation still plays smoothly.
+function GsapBridge() {
+  const invalidate = useThree(s => s.invalidate)
+  useEffect(() => {
+    const tick = () => {
+      const tweens = gsap.globalTimeline.getChildren(true, true, false)
+      for (let i = 0; i < tweens.length; i++) {
+        if (tweens[i].isActive()) { invalidate(); break }
+      }
+    }
+    gsap.ticker.add(tick)
+    return () => gsap.ticker.remove(tick)
+  }, [invalidate])
+  return null
+}
+
 function CameraController({ siteMode, factoryMode, controlsRef, cameraCmd, craneCabView }) {
   const { camera } = useThree()
 
@@ -155,8 +177,16 @@ export default function Scene({
   const controlsRef = useRef()
   const { parts } = useKit()
 
+  // Overlays with a continuous (non-GSAP) useFrame need the render loop running
+  // constantly. GSAP-driven transitions are covered by <GsapBridge>, so when
+  // none of these are active the loop falls back to on-demand and idles at 0fps.
+  const continuousActive =
+    showWaterSim || showThermal || showWindArrows || fireMode ||
+    isShaking || hasShaken || showCrane || cinematicMode
+
   return (
     <Canvas
+      frameloop={continuousActive ? 'always' : 'demand'}
       dpr={[1, 1.5]}
       shadows={false}
       style={{ position: 'absolute', inset: 0, background: siteMode || factoryMode ? '#eef2f7' : '#f4f4f4' }}
@@ -171,6 +201,7 @@ export default function Scene({
     >
       <PerspectiveCamera makeDefault position={[8, 8, 8]} fov={45} />
       <OrbitControls ref={controlsRef} makeDefault enableDamping />
+      <GsapBridge />
       <CameraController siteMode={siteMode} factoryMode={factoryMode} controlsRef={controlsRef} cameraCmd={cameraCmd} craneCabView={craneCabView} />
 
       <ambientLight intensity={!siteMode && !factoryMode && envSettings && (envSettings.time < 6 || envSettings.time > 18) ? 0.2 : 0.8} />

@@ -254,6 +254,9 @@ Bundled kits in `/public/` and copied to `/dist/`: `default-kit.json` (basic), `
 - Clipping planes GPU-side
 - Suspense boundaries for GLB async loading
 - `preserveDrawingBuffer: true` on Canvas — needed for screenshots, slight GPU memory cost
+- **Render loop is on-demand.** `Scene.jsx` sets `frameloop={continuousActive ? 'always' : 'demand'}` so an idle scene renders at 0fps instead of a constant 60. React prop changes (hover, selection, material colors) auto-invalidate; **GSAP-driven** animations (explode, sequence, camera, crane, earthquake, cinematic) do not, so `<GsapBridge>` pumps a render frame while any GSAP tween is active. **If you add a component with a continuous (non-GSAP) `useFrame`, you MUST add its enabling flag to the `continuousActive` gate in `Scene.jsx`** or its animation will freeze when the loop idles. Current gate: `showWaterSim, showThermal, showWindArrows, fireMode, isShaking, hasShaken, showCrane, cinematicMode`.
+- `Connection.jsx` `useFrame` early-outs once its explode/assemble tween settles (`lastP` ref); its midpoint `<Html>` label only mounts when exploded or hovered. `<Html>` reprojects every frame — keep it conditional, never one-per-item always-on.
+- `Part` is wrapped in `React.memo`; handlers passed to it from `App.jsx` (`handleFramePart`, `handleGameClick`, `handleIgnite`) are `useCallback`-stable so timer-driven App re-renders (game/fire elapsed) don't reconcile every part. Keep new per-Part handler props memoized.
 
 ---
 
