@@ -25,6 +25,8 @@ Kit-of-Parts is a client-side React SPA that lets architects and engineers assem
 
 It does **not** replace a BIM tool. It sits alongside one — as a lightweight, shareable decision layer for early-stage design and prefab planning.
 
+The first-open experience uses a **playable modular house kit**: lightweight semantic parts form a recognizable building immediately, so assembly, analysis, and simulation workflows can be explored before importing custom data.
+
 ---
 
 ## Features
@@ -96,7 +98,7 @@ Four bundled kits ship in `/public/`:
 
 | Kit | Description |
 |---|---|
-| `default-kit.json` | Basic starter — foundation, columns, beams, walls, roof |
+| `default-kit.json` | Playable modular house — lightweight semantic parts arranged as an immediately usable building |
 | `advanced-kit.json` | 12-part demonstrator with full variant data for all overlays and simulations |
 | `eco-kit.json` | Low-carbon material selections; CASBEE S targets |
 | `premium-kit.json` | High-spec materials with damper and base-isolation connections |
@@ -134,6 +136,10 @@ Kit-of-Parts implements Japanese building compliance data at the variant level:
 | Deploy | GitHub Pages (gh-pages) | — |
 
 No Tailwind — all styling is custom CSS in `src/App.css`. Dark mode via `[data-theme="dark"]` on `#root-container`.
+
+### Rendering Performance
+
+The 3D scene renders on demand while idle and switches to continuous frames only while an animation, simulation, camera transition, or other live effect needs them. This keeps the resting viewer quiet without sacrificing the fluid earthquake, fire, wind, rain, crane, and cinematic workflows.
 
 ---
 
@@ -279,3 +285,5 @@ public/
 ## State Persistence
 
 Kit data auto-saves to `localStorage` key `ic-kit-save` on every change. Dark mode preference persists under `ic-dark`. Export/import full kit state as JSON via the Sidebar file controls.
+
+More public projects: [Onur Esen's builder portfolio](https://onuresen.github.io/).
