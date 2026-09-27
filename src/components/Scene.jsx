@@ -19,6 +19,8 @@ import FireEffects from './FireEffects'
 import WindStreamlines from './WindStreamlines'
 import EarthquakeEffects from './EarthquakeEffects'
 import { useKit } from './KitContext'
+import RenderDiagnostics from './RenderDiagnostics'
+import { getContinuousRenderReasons } from '../utils/renderActivity'
 
 // ── GSAP → R3F invalidation bridge ─────────────────────────
 // In `frameloop="demand"` mode R3F only renders when a React prop changes or
@@ -177,12 +179,22 @@ export default function Scene({
   const controlsRef = useRef()
   const { parts } = useKit()
 
-  // Overlays with a continuous (non-GSAP) useFrame need the render loop running
-  // constantly. GSAP-driven transitions are covered by <GsapBridge>, so when
-  // none of these are active the loop falls back to on-demand and idles at 0fps.
-  const continuousActive =
-    showWaterSim || showThermal || showWindArrows || fireMode ||
-    isShaking || hasShaken || showCrane || cinematicMode
+  // Only effects that visibly change on every frame may select `always`.
+  // Static panels/results and all GSAP transitions stay on demand; GsapBridge
+  // invalidates while their tweens are actually active.
+  const continuousReasons = getContinuousRenderReasons({
+    siteMode,
+    factoryMode,
+    showWaterSim,
+    showThermal,
+    showWindArrows,
+    fireState,
+    isShaking,
+    envSettings,
+  })
+  const continuousActive = continuousReasons.length > 0
+  const diagnosticsEnabled = typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).has('perf')
 
   return (
     <Canvas
@@ -202,19 +214,16 @@ export default function Scene({
       <PerspectiveCamera makeDefault position={[8, 8, 8]} fov={45} />
       <OrbitControls ref={controlsRef} makeDefault enableDamping />
       <GsapBridge />
+      {diagnosticsEnabled && <RenderDiagnostics continuousReasons={continuousReasons} />}
       <CameraController siteMode={siteMode} factoryMode={factoryMode} controlsRef={controlsRef} cameraCmd={cameraCmd} craneCabView={craneCabView} />
 
       <ambientLight intensity={!siteMode && !factoryMode && envSettings && (envSettings.time < 6 || envSettings.time > 18) ? 0.2 : 0.8} />
       
       {/* ── Dynamic Sky and Sun ─────────────────────────── */}
+      <Environment preset="city" />
       {(() => {
         if (siteMode || factoryMode || !envSettings) {
-          return (
-            <>
-              <directionalLight position={[5, 10, 5]} intensity={1} />
-              <Environment preset="city" />
-            </>
-          )
+          return <directionalLight position={[5, 10, 5]} intensity={1} />
         }
         
         const time = envSettings.time;
@@ -227,7 +236,6 @@ export default function Scene({
         
         return (
           <>
-            <Environment preset="city" />
             <Sky sunPosition={sunPos} turbidity={0.6} rayleigh={0.8} />
             {isDaytime && <directionalLight position={sunPos} intensity={Math.max(0, Math.sin(theta))} />}
             
@@ -419,7 +427,7 @@ export default function Scene({
       <ContactShadows
         position={[0, -0.26, 0]}
         opacity={0.28}
-        scale={siteMode || factoryMode ? 40 : 12}
+        scale={40}
         blur={1.5}
         resolution={512}
         frames={1}

@@ -141,6 +141,11 @@ No Tailwind — all styling is custom CSS in `src/App.css`. Dark mode via `[data
 
 The 3D scene renders on demand while idle and switches to continuous frames only while an animation, simulation, camera transition, or other live effect needs them. This keeps the resting viewer quiet without sacrificing the fluid earthquake, fire, wind, rain, crane, and cinematic workflows.
 
+For measurable verification, append `?perf=1` and inspect
+`window.__KOP_PERF__.read()` in the browser console. The general-view acceptance
+procedure is documented in
+[`docs/performance/GENERAL_VIEW_GATE.md`](docs/performance/GENERAL_VIEW_GATE.md).
+
 ---
 
 ## Getting Started

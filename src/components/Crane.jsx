@@ -142,8 +142,8 @@ export default function Crane({
     const loadPct = weight > 0 ? weight / capacity : 0
     const zoneColor = loadPct >= 0.9 ? C_RED : loadPct >= 0.7 ? C_AMBER : C_GREEN
 
-    if (cableMatRef.current) cableMatRef.current.color.lerp(weight > 0 ? zoneColor : C_CABLE_D, 0.08)
-    if (hookMatRef.current)  hookMatRef.current.color.lerp(weight > 0 ? zoneColor : C_HOOK_D, 0.08)
+    if (cableMatRef.current) cableMatRef.current.color.copy(weight > 0 ? zoneColor : C_CABLE_D)
+    if (hookMatRef.current)  hookMatRef.current.color.copy(weight > 0 ? zoneColor : C_HOOK_D)
     if (liveRingRef.current) {
       const r = Math.max(0.3, currentRadius)
       liveRingRef.current.scale.set(r, 1, r)

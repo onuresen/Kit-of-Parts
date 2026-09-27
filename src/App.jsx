@@ -340,7 +340,9 @@ export default function App() {
 
   // ── Fire propagation ─────────────────────────────────────
   useEffect(() => {
-    if (!fireMode || !parts) return
+    const hasBurningPart = Object.values(fireState).some(status => status === 'burning')
+    if (!fireMode || !parts || !hasBurningPart || siteMode || factoryMode) return
+
     const id = setInterval(() => {
       setFireElapsed(e => e + 1)
       const now = Date.now()
@@ -370,7 +372,7 @@ export default function App() {
       })
     }, 1000)
     return () => clearInterval(id)
-  }, [fireMode, parts, selectedVariants, fireIntensity])
+  }, [fireMode, fireState, parts, selectedVariants, fireIntensity, siteMode, factoryMode])
 
   const handleIgnite = useCallback((partId) => {
     fireBurnStartRef.current = { [partId]: Date.now() }
@@ -712,6 +714,7 @@ Built in React + Three.js with real-time cost, carbon & IFC export.
           showRadius={showCraneRadius}
           onToggleRadius={() => setShowCraneRadius(v => !v)}
           onWindChange={setWindSpeed}
+          liveWind={showWindArrows}
           showSecondCrane={showSecondCrane}
           onToggleSecondCrane={() => setShowSecondCrane(v => !v)}
           secondCraneX={secondCraneX}

@@ -26,7 +26,7 @@ const SPECS = [
   ['Rated moment',   '60 t·m'],
 ]
 
-export default function CranePanel({ sequenceMode, sequenceStep, currentPartWeight, showRadius, onToggleRadius, onWindChange, showSecondCrane, onToggleSecondCrane, secondCraneX, onSecondCraneX, siteMode, liftPlanMode, liftStart, liftEnd, onToggleLiftPlan, craneCabView, onToggleCabView }) {
+export default function CranePanel({ sequenceMode, sequenceStep, currentPartWeight, showRadius, onToggleRadius, onWindChange, liveWind, showSecondCrane, onToggleSecondCrane, secondCraneX, onSecondCraneX, siteMode, liftPlanMode, liftStart, liftEnd, onToggleLiftPlan, craneCabView, onToggleCabView }) {
   const { parts } = useKit()
 
   // ── Wind simulation ─────────────────────────────────────
@@ -37,10 +37,10 @@ export default function CranePanel({ sequenceMode, sequenceStep, currentPartWeig
       windRef.current = Math.max(0, Math.min(25, windRef.current + (Math.random() - 0.5) * 0.6))
       const ws = +(windRef.current.toFixed(1))
       setWindSpeed(ws)
-      onWindChange?.(ws)
+      if (liveWind) onWindChange?.(ws)
     }, 2000)
     return () => clearInterval(id)
-  }, [])
+  }, [liveWind, onWindChange])
 
   // ── Active lift data ────────────────────────────────────
   const { activeRadius, partName } = useMemo(() => {

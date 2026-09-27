@@ -183,6 +183,7 @@ Bundled kits in `/public/` and copied to `/dist/`: `default-kit.json` (playable 
 | `src/components/FireEffects.jsx` | Visual fire layer for burning/failed parts: flame columns, smoke plumes, heat rings, point lights, embers, and hazard labels driven by `fireState` plus user-controlled `fireIntensity`. |
 | `src/components/EarthquakeEffects.jsx` | Earthquake game-feel layer: camera rumble, shockwave rings, fault-line cracks, and stress/critical labels driven by seismic grade, magnitude, and base-isolation status. |
 | `src/components/ThermalOverlay.jsx` | Thermal bridge visualizer. Renders pulsing spheres/rings at visible connection midpoints; color derives from active variant thermal conductivity. |
+| `src/components/RenderDiagnostics.jsx` | Opt-in `?perf=1` instrumentation. Exposes `window.__KOP_PERF__` without polling or invalidating an idle scene. |
 
 ### UI Panels
 | File | Role |
@@ -254,7 +255,10 @@ Bundled kits in `/public/` and copied to `/dist/`: `default-kit.json` (playable 
 - Clipping planes GPU-side
 - Suspense boundaries for GLB async loading
 - `preserveDrawingBuffer: true` on Canvas — needed for screenshots, slight GPU memory cost
-- Default Canvas performance budget: `dpr={[1, 1.5]}`, `powerPreference: 'high-performance'`, full shadow maps disabled, and `ContactShadows` cached with `frames={1}`. Avoid re-enabling always-on shadow maps without profiling because the app should feel like a responsive configurator/game, not a heavy renderer.
+- Default Canvas performance budget: `dpr={[1, 1.5]}`, `powerPreference: 'high-performance'`, full shadow maps disabled, and `ContactShadows` cached with `frames={1}` and a fixed `scale={40}`. The fixed footprint prevents Drei from allocating two new render-target textures on every regular/site/factory mode switch. Avoid re-enabling always-on shadow maps without profiling because the app should feel like a responsive configurator/game, not a heavy renderer.
+- Continuous rendering is selected only through `getContinuousRenderReasons()` in `src/utils/renderActivity.js`. Static panels, crane visibility, completed earthquake results, and GSAP-owned transitions must remain demand-rendered.
+- `?perf=1` exposes the renderer gate described in `docs/performance/GENERAL_VIEW_GATE.md`. Keep diagnostics read-only and free of timers/polling that could disturb idle measurements.
+- Crane-panel wind fluctuation stays local while the wind overlay is off; do not lift periodic UI-only values into `App`/`Scene` unless the 3D view consumes them.
 
 ---
 
